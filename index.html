@@ -610,9 +610,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <script>window.FB_CONFIG={apiKey:"AIzaSyCLkk2TqOXENF7Yi3NlG6EXvHT3tqup6IU",authDomain:"project-village-73e89.firebaseapp.com",databaseURL:"https://project-village-73e89-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"project-village-73e89",storageBucket:"project-village-73e89.firebasestorage.app",messagingSenderId:"807631207425",appId:"1:807631207425:web:3a5cabd442c6698d105400"};
 </script>
 <script>(()=>{const CFG=window.FB_CONFIG;let _ready;const readyP=new Promise(r=>_ready=r);let uid=null,fs=null,rtdb=null,myConn=null,off=0;
-function boot(){try{firebase.initializeApp(CFG);fs=firebase.firestore();try{fs.settings({ignoreUndefinedProperties:true,experimentalAutoDetectLongPolling:true,merge:true});}catch(e){}
-  rtdb=firebase.database();rtdb.ref('.info/serverTimeOffset').on('value',s=>{off=s.val()||0;});
-  const auth=firebase.auth();let done=false;const TU=new URLSearchParams(location.search).get('tu');if(TU){auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(()=>{});}auth.onAuthStateChanged(u=>{if(u&&!done){done=true;uid=u.uid;_ready(true);}else if(!u){auth.signInAnonymously().catch(e=>{console.error('auth',e);if(!done){done=true;_ready(false);}});}});
+function boot(){try{const TU=new URLSearchParams(location.search).get('tu');const APP=TU?firebase.initializeApp(CFG,'tu'+TU):firebase.initializeApp(CFG);fs=APP.firestore();try{fs.settings({ignoreUndefinedProperties:true,experimentalAutoDetectLongPolling:true,merge:true});}catch(e){}
+  rtdb=APP.database();rtdb.ref('.info/serverTimeOffset').on('value',s=>{off=s.val()||0;});
+  const auth=APP.auth();let done=false;auth.onAuthStateChanged(u=>{if(u&&!done){done=true;uid=u.uid;_ready(true);}else if(!u){auth.signInAnonymously().catch(e=>{console.error('auth',e);if(!done){done=true;_ready(false);}});}});
   setTimeout(()=>{if(!done){done=true;_ready(false);}},12000);}catch(e){console.error('fb boot',e);_ready(false);}}
 const now=()=>Date.now()+off;
 // ---------- db (Firestore; body stored as JSON string to dodge type limits) ----------
