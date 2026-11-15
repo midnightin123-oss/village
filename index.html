@@ -1232,9 +1232,9 @@ function openBoardUI(){const old=app.querySelector('.bdv');if(old)old.remove();
   const close=()=>{v.remove();S._boardRender=null;};
   v.appendChild(h('div',{class:'bd-head'},h('button',{class:'pill bd-back',onclick:close,text:'← 닫기'}),h('div',{class:'bd-title'},h('small',{text:'PROJECT VILLAGE'}),h('b',{text:'📌 빌리지 게시판'})),h('div',{style:{width:'64px'}})));
   v.appendChild(h('div',{class:'bd-frame'},area));
-  v.appendChild(h('button',{class:'btn-g bd-add',onclick:()=>writeNote(render),text:'✏️ 메모 붙이기'}));
+  v.appendChild(todayKey()<'1119'?h('button',{class:'btn-c bd-add',disabled:true,text:'🔒 11.19 미션 시작부터 메모를 붙일 수 있어'}):h('button',{class:'btn-g bd-add',onclick:()=>writeNote(render),text:'✏️ 메모 붙이기'}));
   app.appendChild(v);render();S._boardRender=render;}
-function writeNote(after){let c='y';const day=todayKey();const tag=day==='1119'?'🎉 입소 자축':'';
+function writeNote(after){if(todayKey()<'1119'){toast('🔒 게시판은 11.19부터 쓸 수 있어');return;}let c='y';const day=todayKey();const tag=day==='1119'?'🎉 입소 자축':'';
   const ta=h('textarea',{class:'txt',rows:'3',maxlength:'40',placeholder:day==='1119'?'입주 소감 한마디! (예: 드디어 입주 🏠)':'자유롭게 한 장 ✏️',style:{resize:'none',fontSize:'15px'}});
   const pv=h('div',{class:'bd-note c-y bd-pv'},h('p',{text:'미리보기'}));ta.oninput=()=>{pv.querySelector('p').textContent=ta.value||'미리보기';};
   const sw=h('div',{class:'bd-sw'},NOTE_C.map(k=>h('button',{class:'bd-swb c-'+k+(k===c?' on':''),'aria-label':'색 '+k,onclick:e=>{c=k;pv.className='bd-note c-'+k+' bd-pv';sw.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===e.currentTarget));}})));
