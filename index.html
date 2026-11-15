@@ -959,7 +959,7 @@ function smooth(pts){const out=[];let cur=[P.x,P.y];let i=0;while(i<pts.length){
 function sceneId(){return S.scene==='room'?'room:'+S.arg:S.scene;}
 function sendPresence(){if(!S.room)return;S.room.presence({scene:sceneId(),x:Math.round(P.x),y:Math.round(P.y),uid:S.uid||null,nm:(S.me&&S.me.name)||null,av:(S.me&&S.me.av)||null,seat:S.seat||null,pose:S.pose||null,work:!!(S.wseat!=null&&S.me&&S.me.desk&&S.me.desk.work),drink:S.drink||null,lvl:Math.round((S.lvl||0)*100)/100}).catch(()=>{});}
 function peerUid(p){return p.by||(p.presence&&p.presence.uid)||null;}
-function peerOk(p){if(!window.__pvLogout||new URLSearchParams(location.search).get('tu'))return true;const pr=S.profiles[peerUid(p)];const nm=(pr&&pr.name)||(p.presence&&p.presence.nm);return PV_NAMES.includes(nm);}
+function peerOk(p){if(!window.__pvLogout||new URLSearchParams(location.search).get('tu'))return true;const pr=S.profiles[peerUid(p)];return !!(pr&&PV_NAMES.includes(pr.name));}
 function peersInScene(sid){const seen=new Set();return (S.peers||[]).filter(p=>!p.isMe&&p.kind==='viewer'&&p.presence&&p.presence.scene===sid&&peerOk(p)).reverse().filter(p=>{const u=peerUid(p)||p.peer;if(seen.has(u))return false;seen.add(u);return true;}).reverse();}
 function syncPeers(){if(!SC)return;const want=new Set();
   for(const p of peersInScene(sceneId())){const id=p.peer;want.add(id);let e=peerEls[id];const prof=S.profiles[peerUid(p)]||(p.presence&&p.presence.nm?{name:p.presence.nm,av:p.presence.av}:null);
