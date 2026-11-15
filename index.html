@@ -642,6 +642,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 @keyframes jbbob{50%{transform:translateY(-6px)}}
 @keyframes jbring{50%{transform:scale(1.3);opacity:.6}}
 @keyframes jbbeam{50%{opacity:.5}}
+.hud small,.hud .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw;display:block}
 </style>
 </head>
 <body>
@@ -837,7 +838,7 @@ function wday(k){return '일월화수목금토'[keyDate(k).getUTCDay()];}
 function isOpen(k){return k<=todayKey();}
 function season(){const k=todayKey();return k>='1219'?'party':(k>='1129'?'winter':'autumn');}
 const CHEERS=['오늘도 화이팅 💪','오늘도 무사히 🍀','소녀가 먼저야','물 한 잔 마시고 하자 💧','잘하고 있어, 진짜로','퇴근까지 조금만 더!','오늘 하루도 고생 많았어','소녀들 사랑해 💛','내일 일은 내일의 나에게…','밥은 꼭 챙겨 먹어 🍚','오늘도 반짝반짝 ✨','이번 주도 버텨보자!','12.19 파티까지 화이팅 🎄'];
-const DAYLINE={"1115": "일요일 입주 완료, 짐은 천천히 📦", "1116": "월요병엔 펍 가오픈이 약 🍻", "1117": "화요일은 화이팅의 화 🔥", "1118": "수요일, 내일부터 진짜야 💓", "1119": "입소 첫날! 메모 붙이자 📌", "1120": "불금엔 방 꾸미기지 🛋️", "1121": "주말 아침은 카페에서 ☕", "1122": "일요일엔 친구네 놀러가기 🏠", "1123": "밥은 먹고 다니냐? 🍚", "1124": "화요일 밤, 짠 한 번? 🥂", "1125": "회의는 짧게, 수다는 길게 🗣️", "1126": "목요일엔 트램 타고 한 바퀴 🚋", "1127": "불금엔 꽃 한 다발 💐", "1128": "쉿, 마니또는 토요일에도 일해 🤫", "1129": "일요일엔 손편지 감성 ✉️", "1130": "11월 마지막 날, 도장 쾅 👊", "1201": "12월이다! 캐롤 허용 🎶", "1202": "오늘은 수다 대환영 💬", "1203": "선물 포장은 몰래몰래 🎁", "1204": "노트북아 미안해 (안 미안) 💥", "1205": "토요일 밤의 무대, 폰은 넣어둬 📵", "1206": "일요일엔 한 잔 하고 푹 쉬기 🍺", "1207": "월요일 증상: 소녀들 보고싶음 🩺", "1208": "캐스팅 당할 얼굴 준비 📸", "1209": "흑역사도 레전드야 🖼️", "1210": "트리 세우는 날, 반짝반짝 🎄", "1211": "용의자 전원 소환 🚨", "1212": "함박눈 오는 토요일 ☃️", "1213": "연습복 꺼내 입어 🕺", "1214": "마니또 눈치 싸움 시작 👀", "1215": "회전목마 타고 소원 하나 🎠", "1216": "거울 앞 집합, 리허설 👗", "1217": "수상 소감 준비해 🏆", "1218": "전야제! 내일이면 진짜 만나 ✨", "1219": "메리 크리스마스 파티 데이 🎉"};function seasonLabel(){const k=todayKey();if(DAYLINE[k])return DAYLINE[k];const i=Math.max(0,DAY_KEYS.indexOf(k));return CHEERS[i%CHEERS.length];}
+const DAYLINE={"1115": "입주 첫날, 짐은 천천히 📦", "1116": "월요병엔 펍이 약 🍻", "1117": "화요일은 화이팅의 화 🔥", "1118": "내일부터 진짜야 두근 💓", "1119": "입소 첫날! 메모 쾅 📌", "1120": "불금엔 방 꾸미기지 🛋️", "1121": "주말 아침은 카페에서 ☕", "1122": "친구네 놀러가는 날 🏠", "1123": "밥은 먹고 다니냐? 🍚", "1124": "화요일 밤, 짠 한 번? 🥂", "1125": "회의는 짧게 수다는 길게", "1126": "트램 타고 한 바퀴 🚋", "1127": "불금엔 꽃 한 다발 💐", "1128": "쉿, 마니또 출동 🤫", "1129": "일요일엔 손편지 감성 ✉️", "1130": "11월 마지막 날! 👊", "1201": "12월이다! 캐롤 허용 🎶", "1202": "오늘은 수다 대환영 💬", "1203": "선물 포장은 몰래몰래 🎁", "1204": "노트북아 미안 (안 미안) 💥", "1205": "무대 시작, 폰은 넣어둬 📵", "1206": "한 잔 하고 푹 쉬기 🍺", "1207": "증상: 소녀들 보고싶음 🩺", "1208": "캐스팅 당할 얼굴 준비 📸", "1209": "흑역사도 레전드야 🖼️", "1210": "트리 단장, 반짝반짝 🎄", "1211": "용의자 전원 소환 🚨", "1212": "함박눈 오는 토요일 ☃️", "1213": "연습복 꺼내 입어 🕺", "1214": "마니또 눈치 싸움 시작 👀", "1215": "회전목마 타고 소원 🎠", "1216": "거울 앞 집합! 👗", "1217": "수상 소감 준비해 🏆", "1218": "전야제! 내일 만나 ✨", "1219": "오늘은 파티 데이 🎉"};function seasonLabel(){const k=todayKey();if(DAYLINE[k])return DAYLINE[k];const i=Math.max(0,DAY_KEYS.indexOf(k));return CHEERS[i%CHEERS.length];}
 function seasonLabelOld(){const s=season();return s==='party'?'파티 당일 · 첫눈':(s==='winter'?(todayKey()>='1209'?'크리스마스 전야':'초겨울 · 서리'):'늦가을 · 낙엽');}
 
 // ================= AVATAR (pre-rendered sprite sheets, 4x4) =================
@@ -901,7 +902,7 @@ function isTest(){return !!S.testDay;}
 
 function confirmTwice(b){if(b._arm)return true;b._arm=1;const t=b.textContent;b.textContent='한 번 더 누르면 로그아웃돼';setTimeout(()=>{b._arm=0;b.textContent=t;},2500);return false;}
 function openedKey(){return isTest()?'pv6_opened_t':'pv6_opened';}
-function setMode(day){S.testDay=day||null;lsSet('pv6_test',S.testDay||'real');composeMe(S.real);if(S.me)S.profiles[S.uid||'local']=S.me;if(isTest())testSent();else{for(const u of Object.keys(S.profiles))if(String(u).startsWith('tf'))delete S.profiles[u];}S._preShown=0;closeModal();enterVillage();toast(day?'🛠️ 테스트 모드 · '+fmt(day)+' (저장 안 됨)':'🎮 내 플레이 모드 · 실제 날짜 '+fmt(realKey()));}
+function setMode(day){S.job=null;S.testDay=day||null;lsSet('pv6_test',S.testDay||'real');composeMe(S.real);if(S.me)S.profiles[S.uid||'local']=S.me;if(isTest())testSent();else{for(const u of Object.keys(S.profiles))if(String(u).startsWith('tf'))delete S.profiles[u];}S._preShown=0;closeModal();enterVillage();toast(day?'🛠️ 테스트 모드 · '+fmt(day)+' (저장 안 됨)':'🎮 내 플레이 모드 · 실제 날짜 '+fmt(realKey()));}
 function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
   for(const [d] of [['1115'],['1116'],['1117'],['1118']].concat(PLAN,[['1219']]))sel.appendChild(h('option',{value:d,text:fmt(d)+(d==='1219'?' 파티':DAYS[d]?' · '+DAYS[d].title:' · 입주 준비'),selected:(S.testDay||realKey())===d}));
   modal([h('h2',{style:{textAlign:'center'},text:'🛠️ 관리자 메뉴'}),h('p',{class:'small',style:{textAlign:'center'},text:'이 메뉴는 너한테만 보여'}),
@@ -2271,10 +2272,10 @@ function openJob(){const k=todayKey();const J=JOBS[jobOf(k)];
     h('button',{class:'btn-g',style:{width:'100%',height:'50px',marginTop:'8px',fontSize:'16px'},onclick:()=>{closeModal();startJob();},text:'알바 시작! 💪'})]);}
 function startJob(){const k=todayKey();const cand=B.filter(b=>b.id&&!['board','tram'].includes(b.id)&&b.cx);let seed=hashN(k+(S.uid||''));const pick=[];
   while(pick.length<3&&cand.length){const i=seed%cand.length;pick.push(cand.splice(i,1)[0]);seed=hashN(String(seed)+'x');}
-  S.job={got:0,items:pick.map((b,i)=>({x:b.cx+((i%2)?-50:50),y:b.base+78,e:null,ok:false}))};drawJobItems();jobBtn();toast('🔎 마을 곳곳을 돌아다니며 찾아봐! 가까이 가면 반짝반짝 빛나 ✨');}
-function drawJobItems(){if(!S.job||S.scene!=='village'||!SC||!SC.world)return;const J=JOBS[jobOf(todayKey())];
+  S.job={day:todayKey(),got:0,items:pick.map((b,i)=>({x:b.cx+((i%2)?-50:50),y:b.base+78,e:null,ok:false}))};drawJobItems();jobBtn();toast('🔎 마을 곳곳을 돌아다니며 찾아봐! 가까이 가면 반짝반짝 빛나 ✨');}
+function drawJobItems(){if(!S.job||S.scene!=='village'||!SC||!SC.world||S.job.day!==todayKey())return;const J=JOBS[jobOf(todayKey())];
   S.job.items.forEach((it,i)=>{if(it.ok)return;if(it.e&&it.e.isConnected)return;it.e=h('button',{class:'jobitem',style:{left:it.x+'px',top:it.y+'px',zIndex:String(Math.round(it.y))},'aria-label':'알바 아이템',onclick:ev=>{ev.stopPropagation();goTo(it.x,it.y);}},h('span',{class:'jb-ring'}),h('span',{class:'jb-ic',text:J.it[i%J.it.length]}));SC.world.appendChild(it.e);});}
-async function jobTick(){if(!S.job||S.scene!=='village')return;for(const it of S.job.items){if(it.ok)continue;if(it.e){const dd=Math.hypot(P.x-it.x,P.y-it.y);it.e.classList.toggle('near',dd<320);it.e.classList.toggle('close',dd<150);}if(Math.hypot(P.x-it.x,P.y-it.y)<46){it.ok=true;S.job.got++;sfx('pop');if(it.e){it.e.classList.add('got');setTimeout(()=>it.e&&it.e.remove(),500);}floatAt&&floatAt(it.x,it.y-30,'+1');jobBtn();
+async function jobTick(){if(!S.job||S.scene!=='village')return;if(todayKey()<'1116'||S.job.day!==todayKey()){S.job=null;document.querySelectorAll('.jobitem').forEach(e=>e.remove());jobBtn();return;}for(const it of S.job.items){if(it.ok)continue;if(it.e){const dd=Math.hypot(P.x-it.x,P.y-it.y);it.e.classList.toggle('near',dd<320);it.e.classList.toggle('close',dd<150);}if(Math.hypot(P.x-it.x,P.y-it.y)<46){it.ok=true;S.job.got++;sfx('pop');if(it.e){it.e.classList.add('got');setTimeout(()=>it.e&&it.e.remove(),500);}floatAt&&floatAt(it.x,it.y-30,'+1');jobBtn();
     if(S.job.got>=3){const J=JOBS[jobOf(todayKey())];S.job=null;await saveMe({job:todayKey(),coins:(S.me.coins||0)+JOB_PAY});refreshCoins&&refreshCoins();jobBtn();sfx('ding');modal([h('div',{class:'cele'},h('h2',{text:'알바 완료! 💼'}),h('p',{style:{textAlign:'center'},text:J.done}),h('div',{class:'reward'},h('img',{src:IMG('u_coin'),alt:''}),'눈송이 +'+JOB_PAY),h('button',{class:'btn-g',style:{width:'100%',height:'50px',fontSize:'16px'},onclick:closeModal,text:'수고했어 나 자신 ✨'}))]);}}}}
 
 // ================= ONLINE BAR + JOIN ALERTS =================
