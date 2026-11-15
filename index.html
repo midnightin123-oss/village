@@ -610,7 +610,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <script>window.FB_CONFIG={apiKey:"AIzaSyCLkk2TqOXENF7Yi3NlG6EXvHT3tqup6IU",authDomain:"project-village-73e89.firebaseapp.com",databaseURL:"https://project-village-73e89-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"project-village-73e89",storageBucket:"project-village-73e89.firebasestorage.app",messagingSenderId:"807631207425",appId:"1:807631207425:web:3a5cabd442c6698d105400"};
 </script>
 <script>(()=>{const CFG=window.FB_CONFIG;let _ready;const readyP=new Promise(r=>_ready=r);let uid=null,fs=null,rtdb=null,myConn=null,off=0;
-function boot(){try{const TU=new URLSearchParams(location.search).get('tu');const APP=TU?firebase.initializeApp(CFG,'tu'+TU):firebase.initializeApp(CFG);fs=APP.firestore();try{fs.settings({ignoreUndefinedProperties:true,experimentalAutoDetectLongPolling:true,merge:true});}catch(e){}
+function boot(){try{const TU=new URLSearchParams(location.search).get('tu');const APP=TU?firebase.initializeApp(CFG,'tu'+TU):firebase.initializeApp(CFG);fs=APP.firestore();try{fs.settings({ignoreUndefinedProperties:true,experimentalForceLongPolling:true,merge:true});}catch(e){}
   rtdb=APP.database();rtdb.ref('.info/serverTimeOffset').on('value',s=>{off=s.val()||0;});
   const auth=APP.auth();let done=false;const fin=u=>{if(done)return;done=true;uid=u.uid;const ov=document.getElementById('pvlogin');if(ov)ov.remove();_ready(true);};
   auth.onAuthStateChanged(u=>{if(u&&(!u.isAnonymous||TU)){fin(u);return;}if(u&&u.isAnonymous&&!TU){auth.signOut();return;}if(done)return;if(TU){auth.signInAnonymously().catch(e=>console.error('auth',e));return;}showLogin(auth,fin);});}catch(e){console.error('fb boot',e);_ready(false);}}
@@ -641,7 +641,7 @@ function docRef(path){const r=fs.doc(path);return {id:r.id,path,
 function query(q,path){return {
   where:(f,op,v)=>query(q.where(f,op,v),path),orderBy:(f,d)=>query(q.orderBy(f,d||'asc'),path),limit:n=>query(q.limit(n),path),
   get:async()=>wrapQS(await q.get()),
-  onSnapshot:(n,e)=>{let live=false;return q.onSnapshot({includeMetadataChanges:true},s=>{if(s.metadata&&s.metadata.fromCache&&!live)return;live=true;if(s.metadata&&s.metadata.hasPendingWrites===false||true)n(wrapQS(s));},err=>{console.warn('qsnap',path,err);e&&e({code:'unavailable',message:String(err)});});}};}
+  onSnapshot:(n,e)=>{let live=false,last=null;const tm=setTimeout(()=>{if(!live&&last){live=true;n(wrapQS(last));}},5000);return q.onSnapshot({includeMetadataChanges:true},s=>{if(s.metadata&&s.metadata.fromCache&&!live){last=s;return;}live=true;clearTimeout(tm);if(s.metadata&&s.metadata.hasPendingWrites===false||true)n(wrapQS(s));},err=>{console.warn('qsnap',path,err);e&&e({code:'unavailable',message:String(err)});});}};}
 function collRef(path){const c=fs.collection(path);return Object.assign(query(c,path),{path,doc:id=>docRef(id?path+'/'+id:c.doc().path),add:async d=>{const r=await c.add(pack(d));return docRef(r.path);}});}
 const DB=Object.freeze({doc:docRef,collection:collRef});
 // ---------- room (Realtime Database) ----------
@@ -947,11 +947,11 @@ function smooth(pts){const out=[];let cur=[P.x,P.y];let i=0;while(i<pts.length){
 
 // ================= PRESENCE =================
 function sceneId(){return S.scene==='room'?'room:'+S.arg:S.scene;}
-function sendPresence(){if(!S.room)return;S.room.presence({scene:sceneId(),x:Math.round(P.x),y:Math.round(P.y),uid:S.uid||null,seat:S.seat||null,pose:S.pose||null,work:!!(S.wseat!=null&&S.me&&S.me.desk&&S.me.desk.work),drink:S.drink||null,lvl:Math.round((S.lvl||0)*100)/100}).catch(()=>{});}
+function sendPresence(){if(!S.room)return;S.room.presence({scene:sceneId(),x:Math.round(P.x),y:Math.round(P.y),uid:S.uid||null,nm:(S.me&&S.me.name)||null,av:(S.me&&S.me.av)||null,seat:S.seat||null,pose:S.pose||null,work:!!(S.wseat!=null&&S.me&&S.me.desk&&S.me.desk.work),drink:S.drink||null,lvl:Math.round((S.lvl||0)*100)/100}).catch(()=>{});}
 function peerUid(p){return p.by||(p.presence&&p.presence.uid)||null;}
 function peersInScene(sid){return (S.peers||[]).filter(p=>!p.isMe&&p.kind==='viewer'&&p.presence&&p.presence.scene===sid);}
 function syncPeers(){if(!SC)return;const want=new Set();
-  for(const p of peersInScene(sceneId())){const id=p.peer;want.add(id);let e=peerEls[id];const prof=S.profiles[peerUid(p)];
+  for(const p of peersInScene(sceneId())){const id=p.peer;want.add(id);let e=peerEls[id];const prof=S.profiles[peerUid(p)]||(p.presence&&p.presence.nm?{name:p.presence.nm,av:p.presence.av}:null);
     if(!e){e=makeAva(prof,false,SC.charH);e._x=p.presence.x;e._y=p.presence.y;SC.world.appendChild(e);peerEls[id]=e;}
     let tx=p.presence.x,ty=p.presence.y;if(p.presence.seat&&SC.seatPos){const sp=SC.seatPos(p.presence.seat);if(sp){tx=sp[0];ty=sp[1];}}
     e._tx=tx;e._ty=ty;e._pres=p.presence;if(p.presence.seat&&Math.hypot(tx-e._x,ty-e._y)<2){e.classList.toggle('flip',seatDir(p.presence.seat)<0);e._face='side';e._sit=(p.presence.seat[0]!=='W'&&(p.presence.seat[1]==='3'||p.presence.seat[1]==='4'))?'front':'side';if(e._sit==='front')e.classList.remove('flip');}else if(!p.presence.seat)e._sit=null;}
