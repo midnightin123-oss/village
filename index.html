@@ -601,6 +601,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .mode-card button{height:42px}
 .linkbtn{display:block;margin:10px auto 0;border:0;background:none;color:#8A6A4E;font-size:11px;text-decoration:underline;padding:4px}
 input,textarea{-webkit-user-select:text!important;user-select:text!important}
+.onbar{position:absolute;right:10px;top:62px;z-index:31;display:flex;align-items:center;gap:6px;max-width:58%;padding:4px 10px;border-radius:999px;border:2px solid #5A3A22;background:rgba(255,248,230,.92);font-size:11px;font-weight:700;color:#5A3A22;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.onbar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.onbar .dot{width:8px;height:8px;border-radius:50%;background:#B9AFA0;flex:none}
+.onbar.on .dot{background:#3FCB5A;box-shadow:0 0 0 3px rgba(63,203,90,.25);animation:twk 1.6s infinite}
+.on-face{width:48px;height:56px;position:relative;flex:none;overflow:hidden}
+.on-face .ava{position:absolute!important;left:50%!important;top:52px!important;transform:none!important}
+.on-face .ava .tag,.on-face .ava .name{display:none}
+.joinstack{position:absolute;left:0;right:0;top:96px;z-index:60;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}.joinalert{pointer-events:auto;display:flex;align-items:center;gap:8px;background:#FFF8E6;border:3px solid #5A3A22;border-radius:14px;padding:8px 10px 8px 14px;font-size:13px;font-weight:700;box-shadow:0 5px 0 rgba(0,0,0,.25);animation:popIn .4s cubic-bezier(.3,1.6,.5,1) both;white-space:nowrap;transition:opacity .5s,transform .5s}
+.joinalert.wave{background:#FFF0D0;padding:10px 16px}
+.joinalert.out{opacity:0;transform:translateY(-14px)}
+
+.on-face .nametag,.on-face .shadow{display:none!important}
+.mb-it .chip{font-size:11px;padding:4px 8px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -989,7 +1002,7 @@ function hud(back,title,sub){const k=todayKey();const coins=(S.me&&S.me.coins)||
   app.appendChild(h('div',{class:'hud'},left,mid,h('div',{style:{display:'flex',gap:'6px',alignItems:'center'}},h('button',{class:'pill bgmbtn','aria-label':'배경음악 켜기/끄기',onclick:e=>{e.stopPropagation();bgmToggle();},text:BGM.on?'🔊':'🔇'}),h('div',{class:'pill coins'},h('img',{src:IMG('u_coin'),alt:'눈송이'}),String(coins)))));
   app.classList.toggle('testmode',!!(S.testDay&&isAdmin()));
   if(S.testDay&&isAdmin()&&!back)app.appendChild(h('button',{class:'testbar tm',onclick:adminMenu,text:'🛠️ 테스트 모드 · '+fmt(S.testDay)+' · 저장 안 됨 · 탭해서 전환'}));
-  else if(isAdmin()&&!S.solo&&!back)app.appendChild(h('button',{class:'adminfab',onclick:adminMenu,'aria-label':'관리자 메뉴',text:'🛠️'}));}
+  else if(isAdmin()&&!S.solo&&!back)app.appendChild(h('button',{class:'adminfab',onclick:adminMenu,'aria-label':'관리자 메뉴',text:'🛠️'}));setTimeout(drawOnline,0);}
 function tray(){const b=(img,l,fn)=>h('button',{onclick:fn},h('img',{src:IMG(img),alt:''}),l);
   app.appendChild(h('div',{class:'tray panel'},b('u_i_hand','인사',()=>emitEmote('wave')),b('u_i_heart','하트',()=>emitEmote('heart')),b('u_i_chat','말하기',openSay),b('po_bag','주머니',openPocket),b('u_i_note','캘린더',openAdvent)));}
 function openSay(){const inp=h('input',{class:'txt',maxlength:'40',placeholder:'한마디'});const send=()=>{const t=inp.value.trim();if(!t)return;closeModal();if(S.room)S.room.emit('say',{t,scene:sceneId()}).catch(()=>{});showSay(null,t);
@@ -2199,6 +2212,28 @@ function rerender(){if(S.scene==='writers')return enterWriters();if(S.scene==='v
 
 
 ;(function(){const no=e=>e.preventDefault();['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,no,{passive:false}));document.addEventListener('focusout',e=>{if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))setTimeout(()=>window.scrollTo(0,0),60);});document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});})();
+
+// ================= ONLINE BAR + JOIN ALERTS =================
+const SCENE_NM={village:'🏘️ 마을',pub:'🍻 펍',writers:'✍️ 회의실',cafe:'☕ 카페',diner:'🍲 식당',flower:'💐 꽃집',post:'📮 우체국',gift:'🎁 선물가게',books:'📚 서점',clinic:'🏥 병원',townhall:'🏛️ 시청',theater:'🎤 공연장',studio:'🕺 연습실',police:'🚨 경찰서',gallery:'🖼️ 미술관',create:'🎨 캐릭터 꾸미는 중',opening:'💌 초대장 읽는 중'};
+function sceneLabel(sc){if(!sc)return '어딘가';if(sc.startsWith('room:')){const o=sc.slice(5);return o===myId()?'🏠 우리 집':'🏠 '+pname(o)+'네 집';}return SCENE_NM[sc]||'🏘️ 마을';}
+function onlineList(){const seen=new Map();(S.peers||[]).forEach(p=>{if(p.isMe||p.kind!=='viewer'||!p.presence||p.presence.scene==='_admin')return;const u=peerUid(p);if(!u||u===myId())return;const pr=S.profiles[u];if(!pr||!pr.name)return;if(window.__pvLogout&&!new URLSearchParams(location.search).get('tu')&&!PV_NAMES.includes(pr.name))return;seen.set(u,{u,name:pr.name,av:pr.av,pres:p.presence});});return [...seen.values()];}
+function drawOnline(){const old=app.querySelector('.onbar');if(old)old.remove();if(!S.me||!S.me.name||!app.querySelector('.hud'))return;const L=onlineList();
+  const bar=h('button',{class:'onbar'+(L.length?' on':''),onclick:openOnline,'aria-label':'지금 접속 중인 소녀들'},h('i',{class:'dot'}),h('span',{text:L.length?L.slice(0,3).map(x=>x.name).join(' · ')+(L.length>3?' 외 '+(L.length-3):''):'나 혼자 있어'}));app.appendChild(bar);}
+function openOnline(){const L=onlineList();
+  modal([h('h2',{style:{textAlign:'center'},text:'🟢 지금 빌리지에 있는 소녀들'}),L.length?h('div',{class:'mb-list'},L.map(x=>h('div',{class:'mb-it'},h('div',{class:'on-face'},makeAva(x,false,44)),h('div',{style:{flex:'1'}},h('b',{text:x.name}),h('p',{text:sceneLabel(x.pres.scene)})),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:'4px'}},h('button',{class:'chip on',onclick:()=>{closeModal();goMeet(x);},text:'만나러 가기'}),h('button',{class:'chip',onclick:()=>{sendWave(x.u,x.name);},text:'👋 손 흔들기'}))))):h('p',{class:'small',style:{textAlign:'center',padding:'14px 0'},text:'지금은 나 혼자 있어 🌙\n친구가 들어오면 알려줄게!'})]);}
+function goMeet(x){const sc=x.pres.scene||'village';
+  if(sc==='village'){if(S.scene!=='village')enterVillage({x:x.pres.x,y:x.pres.y+30});else goTo(x.pres.x,x.pres.y+30);return;}
+  if(sc==='pub'){if(todayKey()>='1116')return enterPub();toast('🍻 펍은 11.16에 열려');return;}
+  if(sc==='writers'){if(todayKey()>='1117')return enterWriters();toast('✍️ 회의실은 11.17에 열려');return;}
+  if(sc.startsWith('room:'))return enterRoom(sc.slice(5));
+  const map={cafe:'cafe',diner:'diner',flower:'flower',post:'post',gift:'gift',books:'books',clinic:'clinic',townhall:'townhall',theater:'theater',studio:'gym',police:'police',gallery:'museum'};
+  const id=map[sc];if(id){const go=()=>walkToPlace(id);if(S.scene!=='village')enterVillage(null,go);else go();toast(x.name+'은(는) '+sceneLabel(sc)+'에 있어!');}else toast(x.name+'은(는) 지금 '+sceneLabel(sc));}
+function sendWave(u,name){if(!S.room)return;S.room.emit('wave',{to:u,from:(S.me&&S.me.name)||'누군가'}).catch(()=>{});sfx('pop');toast('👋 '+name+'한테 손 흔들었어!');}
+function joinAlert(x){const e=h('div',{class:'joinalert',role:'status'},h('span',{text:'🔔 '+x.name+'이(가) 빌리지에 들어왔어!'}),h('button',{class:'chip on',onclick:ev=>{ev.stopPropagation();sendWave(x.u,x.name);e.remove();},text:'👋 반겨주기'}));joinStack().appendChild(e);sfx('ding');setTimeout(()=>e.classList.add('out'),5200);setTimeout(()=>e.remove(),5800);}
+function joinStack(){let st=app.querySelector('.joinstack');if(!st){st=h('div',{class:'joinstack'});app.appendChild(st);}return st;}
+function updateOnline(){const L=onlineList();const ids=new Set(L.map(x=>x.u));if(S._onSet&&Date.now()-(S._bootT||0)>5000){L.forEach(x=>{if(!S._onSet.has(x.u))joinAlert(x);});}S._onSet=ids;drawOnline();}
+
 // ================= BOOT =================
 function migrate(m){if(!m)return m;m.orns=(m.orns||[]).filter(o=>o&&typeof o==='object'&&o.d);m.tree=(m.tree||[]).filter(o=>o&&o.d);if(!m.done)m.done={};if(!m.room)m.room={items:[]};return m;}
 async function boot(){app.innerHTML='';app.appendChild(h('div',{style:{position:'absolute',inset:'0',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'10px',background:'var(--bg)'}},h('img',{src:IMG('u_coin'),alt:'',style:{width:'60px'}}),h('b',{text:'빌리지 여는 중…'})));
@@ -2212,7 +2247,8 @@ async function boot(){app.innerHTML='';app.appendChild(h('div',{style:{position:
   db.collection(NS+'profiles').onSnapshot(snap=>{const next={};snap.docs.forEach(d=>{if(d.exists)next[d.id]=d.data();});S.profiles=next;if(next[S.uid])composeMe(migrate(JSON.parse(JSON.stringify(next[S.uid]))));if(isTest()&&S.me)next[S.uid]=S.me;if(S._boardRender)try{S._boardRender();}catch(e){}if(!first&&SC&&SC.onProfiles)SC.onProfiles();
     if(first&&(!snap.metadata.fromCache||S.me)){first=false;clearTimeout(timer);(S.me&&S.me.name)?enterVillage():showOpening();return;}if(!first)syncPeers();},
     err=>{clearTimeout(timer);S.solo=true;composeMe(migrate(lsGet('pv6_me')));if(first){first=false;(S.me&&S.me.name)?enterVillage():showOpening();}});
-  if(room){room.onPeers(ch=>{S.peers=ch.peers;syncPeers();},()=>{});
+  S._bootT=Date.now();if(room){room.onPeers(ch=>{S.peers=ch.peers;syncPeers();updateOnline();},()=>{});
+    room.on('wave',m=>{const d=m.data||{};if(d.to&&d.to===myId()){sfx('ding');const e=h('div',{class:'joinalert wave',role:'status'},h('span',{text:'👋 '+(d.from||'누군가')+'이(가) 손 흔들었어!'}));joinStack().appendChild(e);if(P.el)playAct(P.el,'wave',1200);setTimeout(()=>e.classList.add('out'),4200);setTimeout(()=>e.remove(),4800);}},()=>{});
     room.on('emote',m=>{if(m.isMe&&m.sameTab)return;if(m.data&&m.data.scene===sceneId())showEmote(m.peer,m.data.k);},()=>{});
     room.on('say',m=>{if(m.isMe&&m.sameTab)return;if(m.data&&m.data.scene===sceneId()&&typeof m.data.t==='string')showSay(m.peer,m.data.t);},()=>{});
     room.on('pour',m=>{if(m.isMe&&m.sameTab)return;const d=m.data||{};if(S.scene!=='pub')return;pourAnim2(m.peer,d.seat||(avaPos(d.to)||{}).seat,d.d==='soju'?'soju':'beer');
@@ -2224,7 +2260,7 @@ async function boot(){app.innerHTML='';app.appendChild(h('div',{style:{position:
     room.on('act',m=>{if(m.isMe&&m.sameTab)return;const d=m.data||{};if(!d||d.scene!==sceneId())return;
       if(d.k==='drink')drinkAnim(m.peer,d.d);else if(d.k==='eat'&&ANJU[d.d])eatAnim(m.peer,d.d);else if(d.k==='pour'&&d.d&&d.d.seat)pourAnim2(m.peer,d.d.seat,d.d.d==='soju'?'soju':'beer');else if(ACT_FX[d.k])ACT_FX[d.k](m.peer,d.d);},()=>{});
     room.on('bell',m=>{if(m.isMe&&m.sameTab)return;bellBanner(m.data&&m.data.name);},()=>{});}}
-if(location.protocol==='file:'||location.hostname==='localhost')window.__pv={S,P,adminMenu,setMode,bqEl,manittoOf:(u)=>manittoOf(u),saveMe:(x)=>saveMe(x),sendThing:(a,b,c)=>sendThing(a,b,c),mailCount:()=>mailCount(),myId:()=>myId(),pocketDetail,photoPick,openPocket2:()=>openPocket(),buildSnowman,openSay,syncPeers,peersInScene,sceneId,eveWait,letterFlow,wallPut,placeAtDoor,maniPost,viewThing,thSit,thSeats,thCamStart,thStageUp,thPerform,openPocket,bouquetFlow,certFlow,invAdd,enterRoom:(u)=>enterRoom(u),wTake,sitDown,lightCheer,toss,enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),goTo:(x,y)=>goTo(x,y),enterGallery,enterPolice,enterStudio,rankFlow,caseFlow,runwayFlow,partyFlow,enterFlower,enterPost,enterGift,enterBooks,enterClinic,enterTownhall,openMailbox,quizWrite,quizShelf,giftFlow,clinicFlow,callTram,rideTram,treeLighting,enterTheater,enterCarousel,enterCafe,enterDiner,openBoardUI,openVote,enterVillage,openCafeMenu,openDinerMenu,buyDrink,orderFood,crackCookie,showOpening,showInvite,showCreate,showTicket,showGuide,playCut,arrive,get SC(){return SC},sitDown,leaveSeat,wTake,startHang,hangTap,completeDay};
+if(location.protocol==='file:'||location.hostname==='localhost')window.__pv={S,P,updateOnline:()=>updateOnline(),adminMenu,setMode,bqEl,manittoOf:(u)=>manittoOf(u),saveMe:(x)=>saveMe(x),sendThing:(a,b,c)=>sendThing(a,b,c),mailCount:()=>mailCount(),myId:()=>myId(),pocketDetail,photoPick,openPocket2:()=>openPocket(),buildSnowman,openSay,syncPeers,peersInScene,sceneId,eveWait,letterFlow,wallPut,placeAtDoor,maniPost,viewThing,thSit,thSeats,thCamStart,thStageUp,thPerform,openPocket,bouquetFlow,certFlow,invAdd,enterRoom:(u)=>enterRoom(u),wTake,sitDown,lightCheer,toss,enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),goTo:(x,y)=>goTo(x,y),enterGallery,enterPolice,enterStudio,rankFlow,caseFlow,runwayFlow,partyFlow,enterFlower,enterPost,enterGift,enterBooks,enterClinic,enterTownhall,openMailbox,quizWrite,quizShelf,giftFlow,clinicFlow,callTram,rideTram,treeLighting,enterTheater,enterCarousel,enterCafe,enterDiner,openBoardUI,openVote,enterVillage,openCafeMenu,openDinerMenu,buyDrink,orderFood,crackCookie,showOpening,showInvite,showCreate,showTicket,showGuide,playCut,arrive,get SC(){return SC},sitDown,leaveSeat,wTake,startHang,hangTap,completeDay};
 boot();
 })();
 
