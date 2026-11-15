@@ -599,6 +599,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .mode-card.on{border-color:#5AA03C;background:#F1FBE8}.mode-card.test.on{border-color:#E0483A;background:#FFF0EE}
 .mode-card b{font-size:15px}.mode-card small{font-size:11px;color:#7A5A3A;line-height:1.5}
 .mode-card button{height:42px}
+.linkbtn{display:block;margin:10px auto 0;border:0;background:none;color:#8A6A4E;font-size:11px;text-decoration:underline;padding:4px}
 </style>
 </head>
 <body>
@@ -658,7 +659,7 @@ const ROOM=Object.freeze({
   onPeers:(f)=>{peerSubs.push(f);if(peers.length)f({peers});return ()=>{};},
   emit:(topic,data)=>{const r=rtdb.ref('room/e/'+topic).push();const p=r.set({by:uid,peer:myConn,data:JSON.parse(JSON.stringify(data===undefined?null:data)),t:firebase.database.ServerValue.TIMESTAMP});setTimeout(()=>r.remove().catch(()=>{}),15000);return p;},
   on:(topic,f)=>{if(!topicSubs[topic]){topicSubs[topic]=[];rtdb.ref('room/e/'+topic).orderByChild('t').startAt(now()-3000).on('child_added',s=>{const v=s.val();if(!v||(v.t&&v.t<joinT-3000))return;const m={peer:v.peer,by:v.by,data:v.data,isMe:v.by===uid,sameTab:v.peer===myConn};topicSubs[topic].forEach(fn=>{try{fn(m)}catch(e){console.error(e)}});});}topicSubs[topic].push(f);return ()=>{};}});
-const USER=Object.freeze({id:async()=>uid});
+const USER=Object.freeze({id:async()=>uid});window.__pvLogout=async()=>{try{localStorage.removeItem('pv6_login');localStorage.removeItem('pv6_me');}catch(e){}try{const TU=new URLSearchParams(location.search).get('tu');await (TU?firebase.app('tu'+TU):firebase.app()).auth().signOut();}catch(e){}location.reload();};
 window.claude=Object.freeze({use:async k=>{const ok=await readyP;if(!ok)return null;if(k==='user')return USER;if(k==='db')return DB;if(k==='room'){if(!myConn)startRoom();return ROOM;}return null;}});
 boot();})();
 </script>
@@ -850,6 +851,7 @@ function typing(){const a=document.activeElement;return a&&a.matches&&a.matches(
 const REAL_KEYS=['name','av','intro','joined'];
 function isTest(){return !!S.testDay;}
 
+function confirmTwice(b){if(b._arm)return true;b._arm=1;const t=b.textContent;b.textContent='한 번 더 누르면 로그아웃돼';setTimeout(()=>{b._arm=0;b.textContent=t;},2500);return false;}
 function setMode(day){S.testDay=day||null;lsSet('pv6_test',S.testDay||'real');composeMe(S.real);if(S.me)S.profiles[S.uid||'local']=S.me;if(isTest())testSent();else{for(const u of Object.keys(S.profiles))if(String(u).startsWith('tf'))delete S.profiles[u];}S._preShown=0;closeModal();enterVillage();toast(day?'🛠️ 테스트 모드 · '+fmt(day)+' (저장 안 됨)':'🎮 내 플레이 모드 · 실제 날짜 '+fmt(realKey()));}
 function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
   for(const [d] of [['1115'],['1116'],['1117'],['1118']].concat(PLAN,[['1219']]))sel.appendChild(h('option',{value:d,text:fmt(d)+(d==='1219'?' 파티':DAYS[d]?' · '+DAYS[d].title:' · 입주 준비'),selected:(S.testDay||realKey())===d}));
@@ -858,7 +860,8 @@ function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
       test?h('button',{class:'btn-g',onclick:()=>setMode(null),text:'플레이 모드로 돌아가기'}):h('span',{class:'small',text:'✓ 지금 이 모드야'})),
     h('div',{class:'mode-card test'+(test?' on':'')},h('b',{text:'🛠️ 테스트 모드'}),h('small',{text:'날짜 골라서 미리 해보기 · 이 기기에만 임시 저장 · 내 진짜 기록이랑 안 섞이고 친구들한테도 안 보여 · 테스트 친구 5명 등장'}),
       sel,h('button',{class:test?'btn-c':'btn-g',onclick:()=>setMode(sel.value),text:test?'이 날짜로 바꾸기':'테스트 모드 들어가기'}),
-      test?h('button',{class:'btn-c',onclick:()=>{lsSet(sbKey(),{});setMode(S.testDay);toast('🧹 테스트 기록 초기화!');},text:'🧹 테스트 기록 싹 지우기'}):null)]);}
+      test?h('button',{class:'btn-c',onclick:()=>{lsSet(sbKey(),{});setMode(S.testDay);toast('🧹 테스트 기록 싹 지우기!');},text:'🧹 테스트 기록 싹 지우기'}):null),
+    window.__pvLogout?h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>window.__pvLogout(),text:'🔑 로그아웃 (다른 이름으로 들어가기)'}):null]);}
 function sbKey(){return 'pv6_sb_'+(S.uid||'local');}
 function composeMe(real){S.real=real||null;if(!real){S.me=null;return;}S.me=isTest()?migrate(Object.assign(JSON.parse(JSON.stringify(real)),{done:{},orns:[],tree:[],coins:30,room:{items:[],wall:'stripe',floor:'wood'},posts:[],sent:{},desk:{},snowman:null,cast:[],carouselSeen:0,wish:null,smashN:0,inv:[],wall:[],certs:[],workC:null,caseOk:0,culprit:null,solved:{},vase:[],picked:{},eveW:0,photo:null,quiz:[],votes:{},mani:null},lsGet(sbKey())||{})):real;}
 async function saveMe(patch){const key=S.uid||'local';
@@ -1075,6 +1078,7 @@ function openAdvent(){
       h('button',{class:'btn-c',style:{flex:'1',padding:'9px 4px',fontSize:'12px'},onclick:goHang,text:'🎄 트리'}),
       h('button',{class:'btn-c',style:{flex:'1',padding:'9px 4px',fontSize:'12px'},onclick:()=>{closeModal();enterWriters();},text:'✍️ 회의실'}),
       h('button',{class:'btn-c',style:{flex:'1',padding:'9px 4px',fontSize:'12px'},onclick:()=>{closeModal();showCreate();},text:'단장하기'})),
+    window.__pvLogout?h('button',{class:'linkbtn',onclick:()=>{if(confirmTwice(event.currentTarget))window.__pvLogout();},text:'🔑 로그아웃 · 다른 이름으로 들어가기'}):null,
     isAdmin()?h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',padding:'8px',fontSize:'12px'},onclick:()=>{closeModal();adminMenu();},text:S.testDay?'🛠️ 테스트 모드 ('+fmt(S.testDay)+') · 모드 바꾸기':'🛠️ 관리자 메뉴 (테스트 모드)'}):null,
     h('div',{class:'small',style:{marginTop:'8px',textAlign:'center'},text:'화면을 끌면 조이스틱, 톡 누르면 그 자리로 걸어가요'})]);}
 
