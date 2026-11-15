@@ -627,7 +627,7 @@ function docRef(path){const r=fs.doc(path);return {id:r.id,path,
 function query(q,path){return {
   where:(f,op,v)=>query(q.where(f,op,v),path),orderBy:(f,d)=>query(q.orderBy(f,d||'asc'),path),limit:n=>query(q.limit(n),path),
   get:async()=>wrapQS(await q.get()),
-  onSnapshot:(n,e)=>q.onSnapshot(s=>n(wrapQS(s)),err=>{console.warn('qsnap',path,err);e&&e({code:'unavailable',message:String(err)});})};}
+  onSnapshot:(n,e)=>{let live=false;return q.onSnapshot({includeMetadataChanges:true},s=>{if(s.metadata&&s.metadata.fromCache&&!live)return;live=true;if(s.metadata&&s.metadata.hasPendingWrites===false||true)n(wrapQS(s));},err=>{console.warn('qsnap',path,err);e&&e({code:'unavailable',message:String(err)});});}};}
 function collRef(path){const c=fs.collection(path);return Object.assign(query(c,path),{path,doc:id=>docRef(id?path+'/'+id:c.doc().path),add:async d=>{const r=await c.add(pack(d));return docRef(r.path);}});}
 const DB=Object.freeze({doc:docRef,collection:collRef});
 // ---------- room (Realtime Database) ----------
@@ -1161,8 +1161,8 @@ function enterVillage(spawn,after){if(TR.mode==='ride'){TR.mode='loop';TR.hold=f
   SC={kind:'village',stage,world,w:WW,h:WH,zoom:1,cell:20,speed:190,charH:62,camLift:30,padTop:0,padBottom:110,walkable:villageWalkable,doors,
     hitTest:(x,y)=>{for(const b of B){const hgt=b.w*b.ar;if(!b.noDoor&&!b.hidden&&x>b.cx-b.w/2&&x<b.cx+b.w/2&&y>b.base-hgt&&y<b.base)return {x:b.cx,y:b.base+24};}
       for(const hh of HOUSES){if(x>hh.cx-HOUSE_W/2&&x<hh.cx+HOUSE_W/2&&y>hh.base-HOUSE_W*HOUSE_AR&&y<hh.base)return {x:hh.cx,y:hh.base+24};}
-      if(x>TREE.x-TREE.w/2&&x<TREE.x+TREE.w/2&&y>TREE.base-TREE.w*1.5&&y<TREE.base)return {x:TREE.x,y:TREE.base+40,then:startHang};return null;},onProfiles:drawTreeOrns,
-    onTick:dt=>tramTick(tram,dt)};
+      if(x>TREE.x-TREE.w/2&&x<TREE.x+TREE.w/2&&y>TREE.base-TREE.w*1.5&&y<TREE.base)return {x:TREE.x,y:TREE.base+40,then:startHang};return null;},onProfiles:()=>{drawTreeOrns();const sig=residents().map(r=>r[0]+':'+(r[1].name||'')).join('|');if(SC&&SC._resSig!==undefined&&SC._resSig!==sig&&!modalOpen()&&!app.querySelector('.op,.guide')&&!S.hang){SC._resSig=sig;enterVillage({x:P.x,y:P.y});return;}if(SC)SC._resSig=sig;},
+    onTick:dt=>tramTick(tram,dt)};SC._resSig=residents().map(r=>r[0]+':'+(r[1].name||'')).join('|');
   hud();tray();bindInput(stage);promptKey='';startLoop();syncPeers();sendPresence();{const nk=todayKey();const NL=nk>='1218'?.85:nk>='1217'?.65:nk>='1215'?.42:0;if(NL){const ov=h('div',{class:'nightov',style:{opacity:String(NL),width:WW+'px',height:WH+'px'}});world.appendChild(ov);LAMPS.forEach(l=>world.appendChild(h('div',{class:'lampglow',style:{left:l[0]+'px',top:(l[1]-52)+'px',opacity:String(Math.min(1,NL*1.3))}})));
     const C=['#FFE58A','#FF8A8A','#8AD8FF','#B6FF9A','#FFFFFF'];for(let i=0;i<70;i++){const x=Math.random()*WW,y=380+Math.random()*(WH-420);world.appendChild(h('div',{class:'twinkle',style:{left:x+'px',top:y+'px',background:C[i%5],boxShadow:'0 0 8px 2px '+C[i%5],animationDelay:(Math.random()*1.4)+'s',opacity:String(NL)}}));}
     const sky=h('div',{class:'nightsky',style:{opacity:String(Math.min(1,NL+.15))}});for(let i=0;i<26;i++)sky.appendChild(h('i',{class:i%6===0?'big':'',style:{left:(Math.random()*100)+'%',top:(Math.random()*70)+'%',animationDelay:(Math.random()*1.8)+'s'}}));app.appendChild(sky);}}{const L=snowLevel();if(todayKey()>='1129'||L>0){const sn=snowLayer(Math.round(18+L*40+(todayKey()==='1212'?40:0)));sn.style.zIndex='20';app.appendChild(sn);}}villageExtras();if(after)setTimeout(after,50);}
