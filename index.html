@@ -872,6 +872,7 @@ const REAL_KEYS=['name','av','intro','joined'];
 function isTest(){return !!S.testDay;}
 
 function confirmTwice(b){if(b._arm)return true;b._arm=1;const t=b.textContent;b.textContent='한 번 더 누르면 로그아웃돼';setTimeout(()=>{b._arm=0;b.textContent=t;},2500);return false;}
+function openedKey(){return isTest()?'pv6_opened_t':'pv6_opened';}
 function setMode(day){S.testDay=day||null;lsSet('pv6_test',S.testDay||'real');composeMe(S.real);if(S.me)S.profiles[S.uid||'local']=S.me;if(isTest())testSent();else{for(const u of Object.keys(S.profiles))if(String(u).startsWith('tf'))delete S.profiles[u];}S._preShown=0;closeModal();enterVillage();toast(day?'🛠️ 테스트 모드 · '+fmt(day)+' (저장 안 됨)':'🎮 내 플레이 모드 · 실제 날짜 '+fmt(realKey()));}
 function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
   for(const [d] of [['1115'],['1116'],['1117'],['1118']].concat(PLAN,[['1219']]))sel.appendChild(h('option',{value:d,text:fmt(d)+(d==='1219'?' 파티':DAYS[d]?' · '+DAYS[d].title:' · 입주 준비'),selected:(S.testDay||realKey())===d}));
@@ -880,7 +881,7 @@ function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
       test?h('button',{class:'btn-g',onclick:()=>setMode(null),text:'플레이 모드로 돌아가기'}):h('span',{class:'small',text:'✓ 지금 이 모드야'})),
     h('div',{class:'mode-card test'+(test?' on':'')},h('b',{text:'🛠️ 테스트 모드'}),h('small',{text:'날짜 골라서 미리 해보기 · 이 기기에만 임시 저장 · 내 진짜 기록이랑 안 섞이고 친구들한테도 안 보여 · 테스트 친구 5명 등장'}),
       sel,h('button',{class:test?'btn-c':'btn-g',onclick:()=>setMode(sel.value),text:test?'이 날짜로 바꾸기':'테스트 모드 들어가기'}),
-      test?h('button',{class:'btn-c',onclick:()=>{lsSet(sbKey(),{});setMode(S.testDay);toast('🧹 테스트 기록 싹 지우기!');},text:'🧹 테스트 기록 싹 지우기'}):null),
+      test?h('button',{class:'btn-c',onclick:()=>{lsSet(sbKey(),{});lsSet('pv6_opened_t',[]);setMode(S.testDay);toast('🧹 테스트 기록 싹 지우기!');},text:'🧹 테스트 기록 싹 지우기'}):null),
     window.__pvLogout?h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>window.__pvLogout(),text:'🔑 로그아웃 (다른 이름으로 들어가기)'}):null]);}
 function sbKey(){return 'pv6_sb_'+(S.uid||'local');}
 function composeMe(real){S.real=real||null;if(!real){S.me=null;return;}S.me=isTest()?migrate(Object.assign(JSON.parse(JSON.stringify(real)),{done:{},orns:[],tree:[],coins:30,room:{items:[],wall:'stripe',floor:'wood'},posts:[],sent:{},desk:{},snowman:null,cast:[],carouselSeen:0,wish:null,smashN:0,inv:[],wall:[],certs:[],workC:null,caseOk:0,culprit:null,solved:{},vase:[],picked:{},eveW:0,photo:null,quiz:[],votes:{},mani:null},lsGet(sbKey())||{})):real;}
@@ -1018,7 +1019,7 @@ const noticeQ=[];let noticeBusy=false;
 function notice(t,icon){noticeQ.push([t,icon]);if(!noticeBusy)nextNotice();}
 function nextNotice(){const n=noticeQ.shift();if(!n){noticeBusy=false;return;}noticeBusy=true;const e=h('div',{class:'notice',role:'status'},n[1]?h('img',{src:IMG(n[1]),alt:''}):null,n[0]);app.appendChild(e);setTimeout(()=>{e.remove();nextNotice();},3200);}
 function broadcast(t,icon){if(S.room)S.room.emit('notice',{t,icon}).catch(()=>{});}
-function celebrate(d,o){if(d==='1218'){modal([h('div',{class:'cele'},h('h2',{text:'🎄 점등 완료!'}),h('p',{style:{textAlign:'center',whiteSpace:'pre-line',fontSize:'13px',lineHeight:'1.7'},text:'30일 동안 같이 놀아줘서 고마워 💛\n이제 진짜로 만나자.\n12.19에 봐!'}),h('button',{class:'btn-g',style:{width:'100%',height:'50px',fontSize:'16px'},onclick:closeModal,text:'내일 봐 ✨'}))]);return;}if(!o){modal([h('div',{class:'cele'},h('h2',{text:'미션 성공! 🎉'}),h('div',{class:'reward'},h('img',{src:IMG('u_coin'),alt:''}),'눈송이 +10'),h('button',{class:'btn-g',style:{width:'100%',height:'50px',fontSize:'16px'},onclick:closeModal,text:'좋아 ✨'}))]);return;}const idx=PLAN.findIndex(p=>p[0]===d);const opened=new Set(lsGet('pv6_opened')||[]);opened.add(d);lsSet('pv6_opened',[...opened]);
+function celebrate(d,o){if(d==='1218'){modal([h('div',{class:'cele'},h('h2',{text:'🎄 점등 완료!'}),h('p',{style:{textAlign:'center',whiteSpace:'pre-line',fontSize:'13px',lineHeight:'1.7'},text:'30일 동안 같이 놀아줘서 고마워 💛\n이제 진짜로 만나자.\n12.19에 봐!'}),h('button',{class:'btn-g',style:{width:'100%',height:'50px',fontSize:'16px'},onclick:closeModal,text:'내일 봐 ✨'}))]);return;}if(!o){modal([h('div',{class:'cele'},h('h2',{text:'미션 성공! 🎉'}),h('div',{class:'reward'},h('img',{src:IMG('u_coin'),alt:''}),'눈송이 +10'),h('button',{class:'btn-g',style:{width:'100%',height:'50px',fontSize:'16px'},onclick:closeModal,text:'좋아 ✨'}))]);return;}const idx=PLAN.findIndex(p=>p[0]===d);const opened=new Set(lsGet(openedKey())||[]);opened.add(d);lsSet(openedKey(),[...opened]);
   const door=h('div',{class:'cdoor'},h('div',{class:'cin'},h('img',{class:'corn',src:IMG('o_'+o),alt:ORN_NAME[o]})),h('div',{class:'clid'},String(idx+1),h('small',{text:fmt(d)})));
   for(let i=0;i<12;i++){const a=i/12*Math.PI*2;door.appendChild(h('i',{class:'spark',style:{left:'70px',top:'70px','--dx':(Math.cos(a)*95)+'px','--dy':(Math.sin(a)*95)+'px',animationDelay:(1.2+(i%3)*.08)+'s'}}));}
   modal([h('div',{class:'cele'},h('div',{class:'small',text:'어드벤트 캘린더 · '+(idx+1)+'일차'}),door,h('h2',{text:'미션 성공! 🎉'}),h('div',{style:{fontSize:'14px'}},h('b',{text:ORN_NAME[o]}),' 오너먼트를 획득했어요!'),
@@ -1060,7 +1061,7 @@ function stampFx(d,t){const idx=PLAN.findIndex(p=>p[0]===d);const e=h('div',{cla
 
 // ================= ADVENT CALENDAR =================
 function openAdvent(){
-  const opened=new Set(lsGet('pv6_opened')||[]);const k=todayKey();const grid=h('div',{class:'grid'});const detail=h('div',{class:'adv-detail'});
+  const opened=new Set(lsGet(openedKey())||[]);const k=todayKey();const grid=h('div',{class:'grid'});const detail=h('div',{class:'adv-detail'});
   const WIDE=new Set([0,7,11,16,21,27]);
   function goPlace(kind,id){closeModal();const run=()=>{if(kind==='space')walkToPlace(id);else missionGo(id);};if(S.scene!=='village')enterVillage(null,run);else run();}
   function showDetail(d,kind,id,name){detail.innerHTML='';const st=dayState(d);const b=kind==='space'?B.find(x=>x.id===id):null;
@@ -1074,7 +1075,7 @@ function openAdvent(){
       st==='done'?h('button',{class:'btn-g',style:{width:'100%',marginTop:'8px',padding:'9px',fontSize:'13px'},onclick:goHang,text:'🎄 트리에 달러 가기'}):
       h('button',{class:st==='stamped'?'btn-c':'btn-g',style:{width:'100%',marginTop:'8px',padding:'9px',fontSize:'13px'},onclick:()=>goPlace(kind,id),text:kind==='space'?'📍 '+name+'(으)로 가기':'📍 미션 하러 가기'})));}
   let nOpen=0,nStamp=0,nPend=0;
-  PLAN.forEach(([d,kind,id,name],i)=>{const open=isOpen(d);const st=dayState(d);const was=opened.has(d)||st==='done'||st==='stamped';const b=kind==='space'?B.find(x=>x.id===id):null;
+  PLAN.forEach(([d,kind,id,name],i)=>{const open=isOpen(d);const st=dayState(d);const was=open&&(opened.has(d)||st==='done'||st==='stamped');const b=kind==='space'?B.find(x=>x.id===id):null;
     if(open)nOpen++;if(st==='stamped')nStamp++;if(st==='done')nPend++;
     const icon=IMG(DAYS[d].icon);const myOrn=((S.me&&S.me.orns)||[]).find(o=>oD(o)===d);
     const door=h('button',{class:'door'+(WIDE.has(i)?' w2':'')+(was?' opened':'')+(open&&!was?' ready':'')+(!open?' locked':'')+(d===k?' today':''),'aria-label':(i+1)+'일차 '+fmt(d)+(open?' '+name:' 잠김')+(st==='stamped'?' 완료':st==='done'?' 오너먼트 달기 전':'')},
@@ -1083,7 +1084,7 @@ function openAdvent(){
         st==='done'&&myOrn?h('img',{class:'pend',src:IMG('o_'+oT(myOrn)),alt:''}):null,
         st==='stamped'?h('div',{class:'stamp',text:'완료'}):null),
       h('div',{class:'lid c'+((i*3+Math.floor(i/6))%5)},!open?h('i',{class:'lock',text:'🔒'}):null,h('span',{text:String(i+1)}),h('small',{text:fmt(d)})));
-    door.addEventListener('click',()=>{if(!open){toast(fmt(d)+'에 열려요 🔒');return;}if(!opened.has(d)){opened.add(d);lsSet('pv6_opened',[...opened]);door.classList.add('opened');door.classList.remove('ready');}showDetail(d,kind,id,name);});
+    door.addEventListener('click',()=>{if(!open){toast(fmt(d)+'에 열려요 🔒');return;}if(!opened.has(d)){opened.add(d);lsSet(openedKey(),[...opened]);door.classList.add('opened');door.classList.remove('ready');}showDetail(d,kind,id,name);});
     grid.appendChild(door);});
   {const td=PLAN.find(p=>p[0]===k);if(td)showDetail(td[0],td[1],td[2],td[3]);}
   const party=isOpen('1219');
@@ -1813,7 +1814,7 @@ function seatDir(id){if(id[0]==='W'){const w=WSPOTS[parseInt(id.slice(1))];retur
 const ACT_FX={};
 const ANJU={chicken:'치킨',fries:'감자튀김',golbaengi:'골뱅이무침',nogari:'노가리',odeng:'오뎅탕',fruit:'과일'};
 let pubUnsubs=[];
-function enterPub(){stopLoop();clearPeers();leaveSeat(true);S.scene='pub';S.arg=null;
+function enterPub(){if(todayKey()<'1116'){toast('🍻 펍은 11.16 자정에 가오픈해!');return;}stopLoop();clearPeers();leaveSeat(true);S.scene='pub';S.arg=null;
   // real-ish sizes (px ≈ 47/m): bar 3.6m, keg 0.6m tall, jukebox 1.5m, heater 1.8m, dart board 0.45m, neon 0.6m
   const items=[{spr:'pb_bar',x:130,y:222,w:180,depth:34},{spr:'pb_keg',x:250,y:206,w:22,depth:12},{spr:'pb_keg',x:272,y:212,w:22,depth:12},{spr:'pb_jukebox',x:500,y:198,w:46,depth:20},{spr:'pb_heater',x:510,y:420,w:28,depth:10},
     {spr:'pb_liquor',x:300,y:118,w:80,type:'wall'},{spr:'pb_neon',x:400,y:92,w:34,type:'wall'},{spr:'pb_dart',x:462,y:96,w:24,type:'wall'},{spr:'pb_lights',x:170,y:34,w:200,type:'wall'},{spr:'pb_lights',x:400,y:34,w:200,type:'wall'}];
@@ -2006,7 +2007,7 @@ function wRoom(){const {sideL,sideR,floorW,wallH,floorH}=WR;const W=sideL+floorW
   WCLUTTER.forEach(c=>{const d=WDESKS[c[4]];world.appendChild(h('img',{class:'spr',src:IMG(c[0]),alt:'',style:{left:WX(c[1])+'px',top:(WY(c[2])-deskH(c[4])+4)+'px',width:Math.round(c[3]*2.1)+'px',zIndex:String(deskZ(d)+3)}}));});
   const walk=(x,y)=>{if(x<sideL+10||x>sideL+floorW-10||y<wallH+14||y>wallH+floorH-4)return false;for(const r of rects)if(x>r[0]-7&&x<r[0]+r[2]+7&&y>r[1]-2&&y<r[1]+r[3]+3)return false;return true;};
   return {stage,world,W,H,walk,rects,exit:ex};}
-function enterWriters(){stopLoop();clearPeers();leaveSeat(true);S.scene='writers';S.arg=null;S.wseat=null;S.pose=null;
+function enterWriters(){if(todayKey()<'1117'){toast('✍️ 회의실은 11.17 자정에 열려!');return;}stopLoop();clearPeers();leaveSeat(true);S.scene='writers';S.arg=null;S.wseat=null;S.pose=null;
   const R=wRoom();const {stage,world}=R;wLayer=h('div',{style:{position:'absolute',inset:'0',pointerEvents:'none'}});world.appendChild(wLayer);
   P.x=R.exit.x;P.y=R.exit.y-20;P.path=null;P.el=makeAva(S.me,true,74);world.appendChild(P.el);
   const out=()=>{wStand(true);enterVillage({x:450,y:520});};
