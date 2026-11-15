@@ -614,6 +614,22 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 
 .on-face .nametag,.on-face .shadow{display:none!important}
 .mb-it .chip{font-size:11px;padding:4px 8px;white-space:nowrap}
+.chat-head{display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:6px}
+.chat-head b{font-size:15px}
+.sheetlog{height:min(46vh,360px);overflow-y:auto;background:#FFFDF6;border:2px solid #E3D0A8;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.sheetlog .msg{align-self:flex-start;max-width:82%;background:#fff;border:2px solid #E3D0A8;border-radius:12px 12px 12px 4px;padding:5px 9px;font-size:13px;line-height:1.45;word-break:break-all}
+.sheetlog .msg b{display:block;font-size:10px;color:#8A6A4E;margin-bottom:1px}
+.sheetlog .msg.me{align-self:flex-end;background:#FFE58A;border-color:#E3B83A;border-radius:12px 12px 4px 12px}
+.sheetlog .msg.me b{display:none}
+.sheetlog .msg.sys{align-self:center;background:none;border:0;font-size:11px;color:#8A6A4E}
+.chat-in{display:flex;gap:6px;margin-top:8px}.chat-in .txt{flex:1;margin:0}.chat-in .btn-g{padding:0 14px;height:46px;font-size:14px}
+.jobbtn{position:absolute;left:10px;top:62px;z-index:31;padding:5px 11px;border-radius:999px;border:2px solid #5A3A22;background:#FFD45E;font-size:12px;font-weight:700;color:#5A3A22;box-shadow:0 2px 0 rgba(0,0,0,.25);animation:bob 1.6s ease-in-out infinite}
+.jobbtn.done{background:#E8DCC4;animation:none;opacity:.85}
+.adminfab{top:100px!important}
+.jobitem{position:absolute;transform:translate(-50%,-80%);border:0;background:none;font-size:26px;line-height:1;padding:4px;filter:drop-shadow(0 0 6px #FFF3A0) drop-shadow(0 2px 0 rgba(0,0,0,.35));animation:jobglow 1.1s ease-in-out infinite;cursor:pointer}
+.jobitem.got{animation:jobgot .5s forwards}
+@keyframes jobglow{50%{transform:translate(-50%,-92%) scale(1.12)}}
+@keyframes jobgot{to{transform:translate(-50%,-200%) scale(1.6);opacity:0}}
 </style>
 </head>
 <body>
@@ -808,8 +824,8 @@ function fmt(k){return parseInt(k.slice(0,2))+'.'+parseInt(k.slice(2));}
 function wday(k){return '일월화수목금토'[keyDate(k).getUTCDay()];}
 function isOpen(k){return k<=todayKey();}
 function season(){const k=todayKey();return k>='1219'?'party':(k>='1129'?'winter':'autumn');}
-const CHEERS=['오늘도 화이팅 💪','오늘도 무사히 🍀','마감보다 소녀가 먼저야','물 한 잔 마시고 하자 💧','잘하고 있어, 진짜로','퇴근까지 조금만 더!','오늘 하루도 고생 많았어','소녀들 사랑해 💛','원고는 내일의 나에게…','밥은 꼭 챙겨 먹어 🍚','오늘도 반짝반짝 ✨','이번 주도 버텨보자!','12.19 파티까지 화이팅 🎄'];
-function seasonLabel(){const i=Math.max(0,DAY_KEYS.indexOf(todayKey()));return CHEERS[i%CHEERS.length];}
+const CHEERS=['오늘도 화이팅 💪','오늘도 무사히 🍀','소녀가 먼저야','물 한 잔 마시고 하자 💧','잘하고 있어, 진짜로','퇴근까지 조금만 더!','오늘 하루도 고생 많았어','소녀들 사랑해 💛','내일 일은 내일의 나에게…','밥은 꼭 챙겨 먹어 🍚','오늘도 반짝반짝 ✨','이번 주도 버텨보자!','12.19 파티까지 화이팅 🎄'];
+const DAYLINE={"1115": "일요일 입주 완료, 짐은 천천히 📦", "1116": "월요병엔 펍 가오픈이 약 🍻", "1117": "화요일은 화이팅의 화 🔥", "1118": "수요일, 내일부터 진짜야 💓", "1119": "입소 첫날! 메모 붙이자 📌", "1120": "불금엔 방 꾸미기지 🛋️", "1121": "주말 아침은 카페에서 ☕", "1122": "일요일엔 친구네 놀러가기 🏠", "1123": "밥은 먹고 다니냐? 🍚", "1124": "화요일 밤, 짠 한 번? 🥂", "1125": "회의는 짧게, 수다는 길게 🗣️", "1126": "목요일엔 트램 타고 한 바퀴 🚋", "1127": "불금엔 꽃 한 다발 💐", "1128": "쉿, 마니또는 토요일에도 일해 🤫", "1129": "일요일엔 손편지 감성 ✉️", "1130": "11월 마지막 날, 도장 쾅 👊", "1201": "12월이다! 캐롤 허용 🎶", "1202": "오늘은 수다 대환영 💬", "1203": "선물 포장은 몰래몰래 🎁", "1204": "노트북아 미안해 (안 미안) 💥", "1205": "토요일 밤의 무대, 폰은 넣어둬 📵", "1206": "일요일엔 한 잔 하고 푹 쉬기 🍺", "1207": "월요일 증상: 소녀들 보고싶음 🩺", "1208": "캐스팅 당할 얼굴 준비 📸", "1209": "흑역사도 레전드야 🖼️", "1210": "트리 세우는 날, 반짝반짝 🎄", "1211": "용의자 전원 소환 🚨", "1212": "함박눈 오는 토요일 ☃️", "1213": "연습복 꺼내 입어 🕺", "1214": "마니또 눈치 싸움 시작 👀", "1215": "회전목마 타고 소원 하나 🎠", "1216": "거울 앞 집합, 리허설 👗", "1217": "수상 소감 준비해 🏆", "1218": "전야제! 내일이면 진짜 만나 ✨", "1219": "메리 크리스마스 파티 데이 🎉"};function seasonLabel(){const k=todayKey();if(DAYLINE[k])return DAYLINE[k];const i=Math.max(0,DAY_KEYS.indexOf(k));return CHEERS[i%CHEERS.length];}
 function seasonLabelOld(){const s=season();return s==='party'?'파티 당일 · 첫눈':(s==='winter'?(todayKey()>='1209'?'크리스마스 전야':'초겨울 · 서리'):'늦가을 · 낙엽');}
 
 // ================= AVATAR (pre-rendered sprite sheets, 4x4) =================
@@ -893,8 +909,8 @@ async function writeReal(obj){if(S.solo||!S.db){lsSet('pv6_me',obj);return true;
   try{await S.db.doc(NS+'profiles/'+S.uid).set(obj);return true;}
   catch(e){if(e&&e.code==='invalid_argument'){toast('저장 권한이 없어요 · 이 기기에만 저장');S.solo=true;lsSet('pv6_me',obj);return true;}toast('저장 실패 · 다시 시도해줘');return false;}}
 const TEST_FRIENDS=[['tf1','테스트 지은',{h:1,o:2,a:1}],['tf2','테스트 수아',{h:3,o:3,a:0}],['tf3','테스트 민지',{h:0,o:4,a:3}],['tf4','테스트 하늘',{h:5,o:1,a:4}],['tf5','테스트 유나',{h:2,o:0,a:2,r:'A'}]];
-const PV_NAMES=['수딘','현디','여딘','밍디','응비','채채'];function residents(){const r=Object.entries(S.profiles).filter(([u,p])=>p&&p.name&&!String(u).startsWith('tf')&&(!window.__pvLogout||new URLSearchParams(location.search).get('tu')||PV_NAMES.includes(p.name))).sort((a,b)=>(a[1].joined||0)-(b[1].joined||0));if(isTest()&&isAdmin()){const need=!S.profiles.tf1;TEST_FRIENDS.forEach(([u,n,av],i)=>{if(!S.profiles[u])S.profiles[u]={name:n,av,joined:9e12+i,test:1,smashN:i,votes:{dress:i%5,food:i%4,gift:(i+1)%4,after:i%4},quiz:i<2?[{t:['회의실 미스터리','마감의 기억'][i],q:['노트북을 제일 많이 부순 사람은?','첫 회의 날 야식 메뉴는?'][i],c:[['지은','수아','민지'],['떡볶이','치킨','피자']][i],a:1}]:[],snowman:i<3?{n:['녹지마','마감이','눈덩이'][i]}:null,stage:i<2?['경연 1라운드 단체곡','파이널 무대'][i]:null,wish:i<2?['다들 건강하자','내년에도 같이 일하자'][i]:null};r.push([u,S.profiles[u]]);});if(need)testSent();}return r;}
-function testSent(){const me=myId();const D=i=>({bouquet:{f:['sun','rose'],m:'너는 해바라기 같아 🌻'},card:{m:'올해 정말 고마웠어! 12.19에 보자 💛',c:i+1},award:{t:['마감 요정상','야식 대장상','웃음 지킴이상'][i],m:'항상 고마워서'},rx:{m:'따뜻한 국밥 1그릇, 8시간 수면'},manimemo:{m:'오늘도 화이팅 🤫'},hint:{m:'나는 회의실 창가 자리야'},gift:{g:'clover'}});
+const PV_NAMES=['수딘','현디','여딘','밍디','응비','채채'];function residents(){const r=Object.entries(S.profiles).filter(([u,p])=>p&&p.name&&!String(u).startsWith('tf')&&(!window.__pvLogout||new URLSearchParams(location.search).get('tu')||PV_NAMES.includes(p.name))).sort((a,b)=>(a[1].joined||0)-(b[1].joined||0));if(isTest()&&isAdmin()){const need=!S.profiles.tf1;TEST_FRIENDS.forEach(([u,n,av],i)=>{if(!S.profiles[u])S.profiles[u]={name:n,av,joined:9e12+i,test:1,smashN:i,votes:{dress:i%5,food:i%4,gift:(i+1)%4,after:i%4},quiz:i<2?[{t:['회의실 미스터리','퇴근길의 기억'][i],q:['노트북을 제일 많이 부순 사람은?','첫 회의 날 야식 메뉴는?'][i],c:[['지은','수아','민지'],['떡볶이','치킨','피자']][i],a:1}]:[],snowman:i<3?{n:['녹지마','눈뭉치','눈덩이'][i]}:null,stage:i<2?['경연 1라운드 단체곡','파이널 무대'][i]:null,wish:i<2?['다들 건강하자','내년에도 같이 일하자'][i]:null};r.push([u,S.profiles[u]]);});if(need)testSent();}return r;}
+function testSent(){const me=myId();const D=i=>({bouquet:{f:['sun','rose'],m:'너는 해바라기 같아 🌻'},card:{m:'올해 정말 고마웠어! 12.19에 보자 💛',c:i+1},award:{t:['웃음 요정상','야식 대장상','웃음 지킴이상'][i],m:'항상 고마워서'},rx:{m:'따뜻한 국밥 1그릇, 8시간 수면'},manimemo:{m:'오늘도 화이팅 🤫'},hint:{m:'나는 회의실 창가 자리야'},gift:{g:'clover'}});
   TEST_FRIENDS.slice(0,3).forEach(([u],i)=>{const p=S.profiles[u];if(!p)return;p.sent={};const d=D(i);for(const k of Object.keys(d)){p.sent[k]={[me]:Object.assign({ts:Date.now()-i*1000},d[k])};}});}
 function houseOf(uid){const r=residents();const i=r.findIndex(e=>e[0]===uid);return i>=0&&i<6?i:-1;}
 function refreshCoins(){const c=app.querySelector('.coins');if(c)c.lastChild.textContent=String((S.me&&S.me.coins)||0);}
@@ -1006,9 +1022,10 @@ function hud(back,title,sub){const k=todayKey();const coins=(S.me&&S.me.coins)||
   else if(isAdmin()&&!S.solo&&!back)app.appendChild(h('button',{class:'adminfab',onclick:adminMenu,'aria-label':'관리자 메뉴',text:'🛠️'}));setTimeout(drawOnline,0);}
 function tray(){const b=(img,l,fn)=>h('button',{onclick:fn},h('img',{src:IMG(img),alt:''}),l);
   app.appendChild(h('div',{class:'tray panel'},b('u_i_hand','인사',()=>emitEmote('wave')),b('u_i_heart','하트',()=>emitEmote('heart')),b('u_i_chat','말하기',openSay),b('po_bag','주머니',openPocket),b('u_i_note','캘린더',openAdvent)));}
-function openSay(){const inp=h('input',{class:'txt',maxlength:'40',placeholder:'한마디'});const send=()=>{const t=inp.value.trim();if(!t)return;closeModal();if(S.room)S.room.emit('say',{t,scene:sceneId()}).catch(()=>{});showSay(null,t);
-    if(S.scene==='village'){const p={sayN:(S.me.sayN||0)+1};if(todayKey()==='1202')p.sayN5=(S.me.sayN5||0)+1;saveMe(p);missionEvent('say');}};
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter')send();});modal([h('h2',{text:'말하기'}),inp,h('button',{class:'btn-g',style:{width:'100%',height:'46px',marginTop:'10px',fontSize:'15px'},onclick:send,text:'말풍선 띄우기'})]);setTimeout(()=>inp.focus(),50);}
+function openSay(){const log=h('div',{class:'chatlog sheetlog'});const inp=h('input',{class:'txt',maxlength:'80',placeholder:'다 같이 보는 수다방 · 한마디!',enterkeyhint:'send'});
+  const send=()=>{const t=inp.value.trim();if(!t)return;inp.value='';sendChat(t);if(S.scene==='village'&&S.me){const p={sayN:(S.me.sayN||0)+1};if(todayKey()==='1202')p.sayN5=(S.me.sayN5||0)+1;saveMe(p);missionEvent('say');}inp.focus();};
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
+  modal([h('div',{class:'chat-head'},h('b',{text:'💬 소녀들 수다방'}),h('span',{class:'small',text:'광장·펍 어디서든 같이 보여 · 매일 자정 리셋'})),log,h('div',{class:'chat-in'},inp,h('button',{class:'btn-g',onclick:send,text:'보내기'}))]);renderChat();setTimeout(()=>{log.scrollTop=log.scrollHeight;},30);}
 function bellBanner(name){const o=app.querySelector('.banner-bell');if(o)o.remove();
   const b=h('div',{class:'banner-bell panel'},h('img',{src:IMG('d_beer'),alt:'',style:{width:'34px'}}),h('div',{style:{flex:'1',fontSize:'12px',fontWeight:'700'}},(name||'누군가')+'님이 펍에서 한잔하재요! 🍻'),
     S.scene!=='pub'?h('button',{class:'btn-g',style:{padding:'6px 12px',fontSize:'12px'},onclick:()=>{b.remove();enterPub();},text:'펍 가기'}):null,h('button',{class:'btn-c',style:{padding:'4px 8px',fontSize:'11px'},onclick:()=>b.remove(),text:'닫기'}));
@@ -1202,7 +1219,7 @@ function enterVillage(spawn,after){if(TR.mode==='ride'){TR.mode='loop';TR.hold=f
     hitTest:(x,y)=>{for(const b of B){const hgt=b.w*b.ar;if(!b.noDoor&&!b.hidden&&x>b.cx-b.w/2&&x<b.cx+b.w/2&&y>b.base-hgt&&y<b.base)return {x:b.cx,y:b.base+24};}
       for(const hh of HOUSES){if(x>hh.cx-HOUSE_W/2&&x<hh.cx+HOUSE_W/2&&y>hh.base-HOUSE_W*HOUSE_AR&&y<hh.base)return {x:hh.cx,y:hh.base+24};}
       if(x>TREE.x-TREE.w/2&&x<TREE.x+TREE.w/2&&y>TREE.base-TREE.w*1.5&&y<TREE.base)return {x:TREE.x,y:TREE.base+40,then:startHang};return null;},onProfiles:()=>{drawTreeOrns();const sig=residents().map(r=>r[0]+':'+(r[1].name||'')).join('|');if(SC&&SC._resSig!==undefined&&SC._resSig!==sig&&!modalOpen()&&!app.querySelector('.op,.guide')&&!S.hang){SC._resSig=sig;enterVillage({x:P.x,y:P.y});return;}if(SC)SC._resSig=sig;},
-    onTick:dt=>tramTick(tram,dt)};SC._resSig=residents().map(r=>r[0]+':'+(r[1].name||'')).join('|');
+    onTick:dt=>tramTick(tram,dt)};SC._resSig=residents().map(r=>r[0]+':'+(r[1].name||'')).join('|');{const _ot=SC.onTick;SC.onTick=dt=>{_ot&&_ot(dt);jobTick();};}setTimeout(()=>{jobBtn();drawJobItems();checkAttendance();},400);
   hud();tray();bindInput(stage);promptKey='';startLoop();syncPeers();sendPresence();{const nk=todayKey();const NL=nk>='1218'?.85:nk>='1217'?.65:nk>='1215'?.42:0;if(NL){const ov=h('div',{class:'nightov',style:{opacity:String(NL),width:WW+'px',height:WH+'px'}});world.appendChild(ov);LAMPS.forEach(l=>world.appendChild(h('div',{class:'lampglow',style:{left:l[0]+'px',top:(l[1]-52)+'px',opacity:String(Math.min(1,NL*1.3))}})));
     const C=['#FFE58A','#FF8A8A','#8AD8FF','#B6FF9A','#FFFFFF'];for(let i=0;i<70;i++){const x=Math.random()*WW,y=380+Math.random()*(WH-420);world.appendChild(h('div',{class:'twinkle',style:{left:x+'px',top:y+'px',background:C[i%5],boxShadow:'0 0 8px 2px '+C[i%5],animationDelay:(Math.random()*1.4)+'s',opacity:String(NL)}}));}
     const sky=h('div',{class:'nightsky',style:{opacity:String(Math.min(1,NL+.15))}});for(let i=0;i<26;i++)sky.appendChild(h('i',{class:i%6===0?'big':'',style:{left:(Math.random()*100)+'%',top:(Math.random()*70)+'%',animationDelay:(Math.random()*1.8)+'s'}}));app.appendChild(sky);}}{const L=snowLevel();if(todayKey()>='1129'||L>0){const sn=snowLayer(Math.round(18+L*40+(todayKey()==='1212'?40:0)));sn.style.zIndex='20';app.appendChild(sn);}}villageExtras();if(after)setTimeout(after,50);}
@@ -1259,7 +1276,7 @@ function writeNote(after){if(todayKey()<'1119'){toast('🔒 게시판은 11.19�
 
 // ================= CAFE =================
 const DRINKS=[['ame','아이스 아메리카노','dk_iced',3],['hot','따뜻한 아메리카노','dk_mug',3],['latte','카페라떼','dk_latte',4],['matcha','말차라떼','dk_matcha',4],['straw','딸기라떼','dk_straw',5],['shot','에스프레소','dk_shot',2],['frap','카라멜 프라푸치노','dk_frap',6]];
-const FORTUNES=['오늘 쓴 원고, 생각보다 훨씬 좋아. 진짜로.','마감은 끝나고, 우리는 남는다 🎄','네가 웃으면 회의실 와이파이도 빨라져','오늘의 운세: 수정 요청 0건','조금 쉬어도 돼. 세상 안 무너져','네 아이디어가 이번 회의의 정답이었어','12월 19일, 좋은 일 생김 (확정)','커피는 리필, 행운은 무한','소녀는 이미 충분히 잘하고 있어','오늘 퇴근길 플레이리스트가 딱 맞을 거야','밤샘보다 오늘 밤 숙면이 이득','언젠가 네 이름이 엔딩 크레딧 맨 위에','갑자기 칭찬받을 운세','오늘 하루 컨펌 운 대길','네가 쓴 한 줄이 누군가의 하루를 살렸어','지금 생각난 그 아이템, 된다','따뜻한 거 마시고 어깨 펴기 ☕','보고 싶은 사람한테 먼저 연락해봐','올해도 버틴 소녀, 박수 👏','행운의 숫자: 7'];
+const FORTUNES=['오늘 네가 한 말, 누군가한텐 하루치 힘이었어.','방송은 끝나도, 우리는 남는다 🎄','네가 웃으면 회의실 와이파이도 빨라져','오늘의 운세: 수정 요청 0건','조금 쉬어도 돼. 세상 안 무너져','네 아이디어가 이번 회의의 정답이었어','12월 19일, 좋은 일 생김 (확정)','커피는 리필, 행운은 무한','소녀는 이미 충분히 잘하고 있어','오늘 퇴근길 플레이리스트가 딱 맞을 거야','밤샘보다 오늘 밤 숙면이 이득','언젠가 네 이름이 엔딩 크레딧 맨 위에','갑자기 칭찬받을 운세','오늘 하루 컨펌 운 대길','네가 쓴 한 줄이 누군가의 하루를 살렸어','지금 생각난 그 아이템, 된다','따뜻한 거 마시고 어깨 펴기 ☕','보고 싶은 사람한테 먼저 연락해봐','올해도 버틴 소녀, 박수 👏','행운의 숫자: 7'];
 function enterCafe(){stopLoop();clearPeers();S.scene='cafe';S.arg=null;
   const R=tileRoom({cols:10,rows:6,wallH:140,floor:'wood',wall:'stripe',floorTile:96,wallTile:90,items:[
     {spr:'cf_counter',x:300,y:212,w:230,depth:34},{spr:'cf_shelf',x:72,y:200,w:86,depth:20},{spr:'cf_chalk',x:470,y:214,w:52,depth:14},
@@ -1531,7 +1548,7 @@ function giftCard(g){modal([h('div',{class:'gift-card'},h('img',{src:IMG(g[2]),a
 function enterBooks(){simpleRoom({kind:'books',bid:'books',title:'서점',sub:'출제자는 우리 📚',sign:'📚 BOOKS',floor:'wood',wall:'stripe',day:'1201',cta:'📚 책장 보러 가기',
   items:[{spr:'bk_shelf',x:90,y:212,w:100,depth:24},{spr:'bk_shelf',x:200,y:212,w:100,depth:24},{spr:'bk_display',x:330,y:214,w:110,depth:28},{spr:'bk_counter',x:455,y:214,w:110,depth:26},{spr:'bk_chair',x:120,y:420,w:84,depth:26},{spr:'bk_ladder',x:470,y:420,w:70,depth:20}],
   spots:[{x:150,y:252,label:'📚 퀴즈 책장 보기',act:quizShelf,hit:[40,110,250,240]},{x:330,y:252,label:'✍️ 퀴즈 책 쓰기',act:quizWrite,hit:[280,120,385,240]}]});}
-const SYSQ=[{t:'프로젝트7 기본기',q:'🎵 프로젝트7 주제곡은?',c:['달려 (Up To You)','마감 (Up To Me)','Breaking News','퇴근하자 (Up To 6)'],a:0},{t:'방송 연대기',q:'📺 프로젝트7 첫 방송 날짜는?',c:['2024년 10월 18일','2024년 12월 19일 (파티 날 아님)','2024년 4월 1일','기억 안 남… 마감 중이었음'],a:0},{t:'MC를 찾아라',q:'🎤 프로젝트7 MC는 누구?',c:['이수혁','회의실 노트북','우리 중 한 명','눈사람'],a:0}];
+const SYSQ=[{t:'프로젝트7 기본기',q:'🎵 프로젝트7 주제곡은?',c:['달려 (Up To You)','야근 (Up To Me)','Breaking News','퇴근하자 (Up To 6)'],a:0},{t:'방송 연대기',q:'📺 프로젝트7 첫 방송 날짜는?',c:['2024년 10월 18일','2024년 12월 19일 (파티 날 아님)','2024년 4월 1일','기억 안 남… 편집실에 있었음'],a:0},{t:'MC를 찾아라',q:'🎤 프로젝트7 MC는 누구?',c:['이수혁','회의실 노트북','우리 중 한 명','눈사람'],a:0}];
 function allQuiz(){const out=SYSQ.map((q,i)=>({u:'_sys',i,name:'빌리지 서점',q}));for(const [u,p] of residents())(p.quiz||[]).forEach((q,i)=>{if(q&&q.q)out.push({u,i,name:p.name,q});});return out;}
 function quizShelf(){const qs=allQuiz();const COL=['#C0392B','#2E6FA8','#2E7D4F','#8E44AD','#D68910','#5D6D7E'];
   modal([h('h2',{style:{textAlign:'center'},text:'📚 프로젝트7 비하인드 퀴즈'}),qs.length?h('div',{class:'shelf'},qs.map((x,k)=>h('button',{class:'spine',style:{background:COL[hashN(x.u+x.i)%COL.length],height:(120+hashN(x.q.t||'')%30)+'px'},onclick:()=>quizOpen(x)},h('b',{text:x.q.t||'무제'}),h('small',{text:x.name})))):h('p',{style:{textAlign:'center',fontSize:'12px'},text:'아직 꽂힌 책이 없어. 첫 출제자가 되어줘!'}),
@@ -1563,8 +1580,8 @@ function enterTownhall(){simpleRoom({kind:'townhall',bid:'townhall',title:'시�
   spots:[{x:140,y:368,label:'🏆 상 주기',act:awardFlow,hit:[100,280,180,340]},{x:440,y:368,label:'📜 받은 상장 보기',act:certFlow,hit:[390,280,490,340]}]});}
 function certFlow(){const list=inbox('award');if(!list.length){modal([h('h2',{style:{textAlign:'center'},text:'📜 받은 상장'}),h('p',{style:{textAlign:'center',fontSize:'12px'},text:'아직 받은 상장이 없어 · 친구들이 상을 주면 여기 도착해 🏆'})]);return;}
   modal([h('h2',{style:{textAlign:'center'},text:'📜 받은 상장 '+list.length+'장'}),h('div',{class:'cert-list'},list.map(x=>{const c={k:'cert',from:x.from,t:x.d.t,m:x.d.m,name:x.name};const got=pickedHas('cert',x.from);return h('div',null,certEl(c),h('button',{class:got?'btn-c':'btn-g',disabled:got,style:{width:'100%',marginTop:'6px',padding:'8px'},onclick:async()=>{await saveMe({picked:pickedSet('cert',x.from),inv:(S.me.inv||[]).concat([Object.assign({id:Date.now().toString(36)},c)])});sfx('ding');toast('주머니에 넣었어 📜 방 벽에 걸어봐');certFlow();},text:got?'주머니에 넣음 ✓':'👜 주머니에 넣기'}));}))]);}
-function awardFlow(){pickFriend('누구에게 상을 줄까?','예: 올해의 야식왕, 마감 요정…',(u,p)=>{const n=h('input',{class:'txt',maxlength:'16',placeholder:'상 이름 (예: 마감 요정상)'});
-  composeText('🏆 '+p.name+'에게 주는 상','수상 이유 (예: 위 사람은 마감 3분 전에도 웃음을 잃지 않았기에…)',80,async m=>{const t=n.value.trim()||'우리들의 소녀상';const ok=await sendThing('award',u,{t,m});if(ok){closeModal();sfx('ding');toast('🏆 시청에 제출 완료!');missionEvent('award');}},n);},u=>sentTo('award',u));}
+function awardFlow(){pickFriend('누구에게 상을 줄까?','예: 올해의 야식왕, 웃음 요정…',(u,p)=>{const n=h('input',{class:'txt',maxlength:'16',placeholder:'상 이름 (예: 웃음 요정상)'});
+  composeText('🏆 '+p.name+'에게 주는 상','수상 이유 (예: 위 사람은 녹화 3분 전에도 웃음을 잃지 않았기에…)',80,async m=>{const t=n.value.trim()||'우리들의 소녀상';const ok=await sendThing('award',u,{t,m});if(ok){closeModal();sfx('ding');toast('🏆 시청에 제출 완료!');missionEvent('award');}},n);},u=>sentTo('award',u));}
 
 // ================= MAILBOX (my room) =================
 function mailCount(){const rl=S.me.readL||0;return inbox('bouquet').filter(x=>!pickedHas('bouquet',x.from)).length+inbox('gift').filter(x=>!pickedHas('gift',x.from)).length+letterInbox().filter(x=>(x.d.ts||0)>rl).length;}
@@ -1615,7 +1632,7 @@ function buildSnowman(){if(!SC||SC.kind!=='village')return;const bx=P.x+46,by=P.
       if(deco.size===3){step++;setTimeout(finish,800);}else ui();}}));});}}
   function finish(){bar.innerHTML='';sfx('ding');playAct(P.el,'jump',900);const sp=h('img',{class:'spr',src:IMG('p_snowman'),alt:'눈사람',style:{left:bx+'px',top:(by+4)+'px',width:'54px',zIndex:String(Math.round(by)+5),opacity:'0'}});W.appendChild(sp);
     sp.animate([{opacity:0,transform:'translate(-50%,-100%) scale(.6)'},{opacity:1,transform:'translate(-50%,-100%) scale(1.15)',offset:.6},{opacity:1,transform:'translate(-50%,-100%) scale(1)'}],{duration:700,fill:'forwards'});
-    setTimeout(()=>{[bot,head,...W.querySelectorAll('.sm-deco')].forEach(e=>e&&e.remove());const n=h('input',{class:'txt',maxlength:'10',placeholder:'눈사람 이름 (예: 마감이)'});
+    setTimeout(()=>{[bot,head,...W.querySelectorAll('.sm-deco')].forEach(e=>e&&e.remove());const n=h('input',{class:'txt',maxlength:'10',placeholder:'눈사람 이름 (예: 눈뭉치)'});
       modal([h('h2',{style:{textAlign:'center'},text:'⛄ 완성! 이름을 지어줘'}),n,h('button',{class:'btn-g',style:{width:'100%',height:'48px',marginTop:'10px'},text:'집 앞에 세우기',onclick:async()=>{const v=n.value.trim()||'눈사람';const ok=await saveMe({snowman:{n:v}});if(ok){closeModal();bar.remove();P.lock=false;if(tr)tr.style.display='';missionEvent('snowman');enterVillage({x:P.x,y:P.y});}}})]);setTimeout(()=>n.focus(),60);},900);}
   ui();}
 
@@ -1630,7 +1647,7 @@ function galleryFlow(){const ps=residents().map(([u,p])=>[u,u===myId()?S.me:p]).
     h('button',{class:'btn-g',style:{width:'100%',height:'48px',marginTop:'10px'},text:'📸 내 레전드 사진 기증하기',onclick:donatePhoto})]);}
 function donatePhoto(){const fi=h('input',{type:'file',accept:'image/*',style:{display:'none'}});let src=null;const pv=h('div',{class:'gal-pv',text:'사진을 골라줘'});
   fi.onchange=()=>{const f=fi.files&&fi.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,420/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);src=c.toDataURL('image/jpeg',.72);pv.innerHTML='';pv.appendChild(h('img',{src,alt:''}));};im.src=r.result;};r.readAsDataURL(f);};
-  const t=h('input',{class:'txt',maxlength:'20',placeholder:'작품명 (예: 마감 5분 전)'});const d=h('textarea',{class:'txt',rows:'2',maxlength:'60',placeholder:'작품 설명',style:{resize:'none'}});
+  const t=h('input',{class:'txt',maxlength:'20',placeholder:'작품명 (예: 녹화 5분 전)'});const d=h('textarea',{class:'txt',rows:'2',maxlength:'60',placeholder:'작품 설명',style:{resize:'none'}});
   modal([h('h2',{style:{textAlign:'center'},text:'📸 사진 기증'}),fi,h('button',{class:'btn-c',style:{width:'100%',padding:'10px'},onclick:()=>fi.click(),text:'🖼️ 사진 고르기'}),pv,t,d,
     h('button',{class:'btn-g',style:{width:'100%',height:'48px',marginTop:'8px'},text:'벽에 걸기',onclick:async()=>{if(!src){toast('사진부터 골라줘!');return;}const ok=await saveMe({photo:{src,t:t.value.trim()||'무제',d:d.value.trim()}});if(ok){closeModal();sfx('ding');missionEvent('photo');enterGallery();}}})]);}
 
@@ -1719,7 +1736,7 @@ async function saveBoard(){BOARD.ts=Date.now();try{if(S.db&&!S.solo&&!isTest())a
 function voteItems(){return VOTES.map(([k,l,ops])=>[k,l,(BOARD.ops&&BOARD.ops[k])||ops]).concat((BOARD.extra||[]).map(x=>[x.id,x.label,x.ops||[]]));}
 function drawBoards(){const el=app.querySelector('.wbtxt.vote');if(el&&todayKey()<'1125'){el.innerHTML='';}else if(el){const t=voteTally();el.innerHTML='';el.appendChild(h('b',{text:'🗳️ 12.19 파티 회의'}));voteItems().slice(0,6).forEach(([k,l,ops])=>{let bi=-1,bn=0;(t[k]||[]).forEach((a,i)=>{if(a.length>bn){bn=a.length;bi=i;}});el.appendChild(h('span',{text:l.replace(/^\S+\s/,'')+': '+(bi>=0?ops[bi]+' ('+bn+')':'?')}));});}
   const nt=app.querySelector('.wbtxt.notes');if(nt&&!nt.childNodes.length){nt.appendChild(h('b',{text:'PROJECT 7 회의 📌'}));P7NOTES.slice(0,6).forEach(x=>nt.appendChild(h('span',{text:x})));}}
-const P7NOTES=['✔ 1차 경연 구성안 최종','- 오프닝 VCR 나레이션 수정','- 데뷔조 발표 동선 체크','- 비하인드 자컨 촬영 일정','- 팬투표 집계 → 금요일','❗ 대본 마감 금 18:00','- 엔딩 멘트 3안 준비','- 소녀들 야식 투표 🍗'];
+const P7NOTES=['✔ 1차 경연 구성안 최종','- 오프닝 VCR 나레이션 수정','- 데뷔조 발표 동선 체크','- 비하인드 자컨 촬영 일정','- 팬투표 집계 → 금요일','❗ 대본 최종 금 18:00','- 엔딩 멘트 3안 준비','- 소녀들 야식 투표 🍗'];
 function openNotes(){modal([h('div',{class:'wb-head'},h('small',{text:'회의실 왼쪽 화이트보드'}),h('h2',{text:'📌 PROJECT 7 회의록'})),h('div',{class:'notes-board'},P7NOTES.map(x=>h('p',{text:x}))),h('div',{class:'small',style:{textAlign:'center',marginTop:'8px'},text:'투표는 오른쪽 화이트보드에서 🗳️'})]);}
 function voteTally(){const t={};voteItems().forEach(([k,,ops])=>{t[k]=ops.map(()=>[]);});for(const [u,p] of residents()){const v=(u===(S.uid||'local')?S.me.votes:p.votes)||{};voteItems().forEach(([k,,ops])=>{const i=v[k];if(i>=0&&i<ops.length)t[k][i].push(p.name||'주민');});}return t;}
 function voteWinner(k){const t=voteTally()[k];if(!t)return null;let bi=-1,bn=0;t.forEach((a,i)=>{if(a.length>bn){bn=a.length;bi=i;}});return bi>=0?voteItems().find(v=>v[0]===k)[2][bi]:null;}
@@ -1831,7 +1848,7 @@ function enterPub(){if(todayKey()<'1116'){toast('🍻 펍은 11.16 자정에 가
     onPeers:drawTables};
   hud(out,'🍻 펍','한잔해');
   // chat box
-  const chat=h('div',{class:'chatbox panel'});const msgs=h('div',{class:'msgs'});const inp=h('input',{class:'txt',maxlength:'80',placeholder:'메시지 보내기'});
+  const chat=h('div',{class:'chatbox panel'});const msgs=h('div',{class:'msgs chatlog'});const inp=h('input',{class:'txt',maxlength:'80',placeholder:'메시지 보내기'});
   const send=()=>{const t=inp.value.trim();if(!t)return;inp.value='';sendChat(t);};inp.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
   chat.appendChild(h('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px'}},h('b',{style:{fontSize:'12px'},text:'펍 채팅'}),h('button',{class:'btn-c',style:{marginLeft:'auto',padding:'2px 8px',fontSize:'10px'},onclick:()=>chat.classList.toggle('min'),text:'접기/펴기'})));
   chat.appendChild(msgs);chat.appendChild(h('div',{class:'chatin'},inp,h('button',{class:'btn-g',style:{padding:'4px 12px',fontSize:'13px'},onclick:send,text:'전송'})));app.appendChild(chat);
@@ -1840,14 +1857,17 @@ function enterPub(){if(todayKey()<'1116'){toast('🍻 펍은 11.16 자정에 가
   subscribePub();
   S._tableLayer=tableLayer;drawTables();
   if(!lsGet('pv_pubtip')){lsSet('pv_pubtip',1);setTimeout(()=>toast('테이블 옆에 가서 자리 잡으면 술을 따를 수 있어요 🍺'),500);}}
-function subscribePub(){pubUnsubs.forEach(u=>{try{u();}catch(e){}});pubUnsubs=[];if(!S.db||S.solo)return;
-  try{pubUnsubs.push(S.db.collection(NS+'pubchat').orderBy('ts','desc').limit(40).onSnapshot(snap=>{S.chat=snap.docs.map(d=>d.data()).filter(Boolean).reverse();renderChat();},()=>{}));}catch(e){}
+let chatUnsub=null;function subscribeChat(){if(chatUnsub||!S.db||S.solo)return;try{chatUnsub=S.db.collection(NS+'pubchat').orderBy('ts','desc').limit(60).onSnapshot(snap=>{S.chat=snap.docs.map(d=>d.data()).filter(Boolean).reverse();renderChat();},()=>{});}catch(e){}}
+function subscribePub(){subscribeChat();pubUnsubs.forEach(u=>{try{u();}catch(e){}});pubUnsubs=[];if(!S.db||S.solo)return;
   try{pubUnsubs.push(S.db.collection(NS+'pub').onSnapshot(snap=>{const t={};snap.docs.forEach(d=>{if(d.exists)t[d.id]=d.data();});S.pubTables=t;drawTables();},()=>{}));}catch(e){}}
-function renderChat(){const m=S._msgs;if(!m||!document.body.contains(m))return;m.innerHTML='';const me=S.uid||'local';const dk=todayKey();const list=(S.chat||[]).filter(c=>c.day===dk);
-  m.appendChild(h('div',{class:'msg sys',text:'🕛 펍 수다는 매일 밤 12시에 새로 시작돼'}));if(!list.length)m.appendChild(h('div',{class:'msg sys',text:'아직 조용하네… 오늘 첫 마디를 던져봐!'}));
+function renderChat(){document.querySelectorAll('.chatlog').forEach(renderChatInto);}
+function renderChatInto(m){m.innerHTML='';const me=S.uid||'local';const dk=todayKey();const list=(S.chat||[]).filter(c=>c.day===dk);
+  m.appendChild(h('div',{class:'msg sys',text:'🕛 수다방은 매일 밤 12시에 새로 시작돼'}));if(!list.length)m.appendChild(h('div',{class:'msg sys',text:'아직 조용하네… 오늘 첫 마디를 던져봐!'}));
   list.forEach(c=>m.appendChild(h('div',{class:'msg'+(c.uid===me?' me':'')+(c.sys?' sys':'')},c.sys?null:h('b',{text:c.name||'주민'}),String(c.t||'').slice(0,120))));m.scrollTop=m.scrollHeight;}
-async function sendChat(t,sys){const msg={uid:S.uid||'local',name:(S.me&&S.me.name)||'주민',t:String(t).slice(0,120),ts:Date.now(),sys:!!sys,day:todayKey()};
-  if(!sys)showSay(null,t);if(S.room&&!sys)S.room.emit('say',{t,scene:'pub'}).catch(()=>{});
+function topNote(t){const e=h('div',{class:'joinalert',role:'status'},h('span',{text:t}));joinStack().appendChild(e);setTimeout(()=>e.classList.add('out'),3800);setTimeout(()=>e.remove(),4400);}
+function pubNotice(t){topNote(t);if(S.room)S.room.emit('notice',{t,scene:sceneId(),pn:1}).catch(()=>{});}
+async function sendChat(t,sys){if(sys){pubNotice(t);return;}const msg={uid:S.uid||'local',name:(S.me&&S.me.name)||'주민',t:String(t).slice(0,120),ts:Date.now(),sys:false,day:todayKey(),sc:sceneId()};
+  showSay(null,t);if(S.room)S.room.emit('say',{t,scene:sceneId()}).catch(()=>{});
   if(S.db&&!S.solo){try{await S.db.collection(NS+'pubchat').add(msg);}catch(e){S.chat.push(msg);renderChat();}}else{S.chat.push(msg);S.chat=S.chat.slice(-40);renderChat();}}
 function seatTaken(id){if(S.seat===id)return true;return peersInScene('pub').some(p=>p.presence.seat===id);}
 function tableOf(seat){return seat?seat[0]:null;}
@@ -2214,6 +2234,38 @@ function rerender(){if(S.scene==='writers')return enterWriters();if(S.scene==='v
 
 ;(function(){const no=e=>e.preventDefault();['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,no,{passive:false}));document.addEventListener('focusout',e=>{if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))setTimeout(()=>window.scrollTo(0,0),60);});document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});})();
 
+
+// ================= ATTENDANCE + 알바 =================
+function prevDay(k){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2)-1);return String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
+async function checkAttendance(){const k=todayKey();if(!S.me||!S.me.name||k<'1116'||S._attK===k)return;S._attK=k;const a=S.me.att||{};if(a.last===k)return;
+  const streak=a.last===prevDay(k)?(a.n||0)+1:1;const bonus=streak%3===0?5:0;await saveMe({att:{last:k,n:streak},coins:(S.me.coins||0)+5+bonus});refreshCoins&&refreshCoins();
+  topNote('📅 출석 도장 쾅! 눈송이 +5'+(bonus?' · '+streak+'일 연속 보너스 +5 🔥':(streak>1?' · '+streak+'일 연속':'')));sfx('ding');}
+const JOBS={trash:{t:'🧹 마을 청소',d:'마을 곳곳에 떨어진 쓰레기 3개를 주워줘!',it:['🥤','🧻','🍌'],done:'마을이 반짝반짝해졌어 ✨'},
+  leaves:{t:'🍂 낙엽 쓸기',d:'길에 쌓인 낙엽 더미 3개를 쓸어줘!',it:['🍂','🍁','🍂'],done:'길이 깨끗해졌어 🍂'},
+  cat:{t:'🐈 길냥이 밥 주기',d:'배고픈 길고양이 3마리에게 밥을 줘!',it:['🐈','🐈‍⬛','🐈'],done:'냥이들이 배불러서 골골송 😽'},
+  mail:{t:'✉️ 우편물 줍기',d:'바람에 날아간 우편물 3통을 주워줘!',it:['✉️','📦','💌'],done:'우체국장님이 고맙대 📮'},
+  bulb:{t:'💡 가로등 점검',d:'깜빡이는 전구 3개를 갈아줘!',it:['💡','💡','💡'],done:'마을 밤길이 환해졌어 💡'},
+  orn:{t:'⭐ 장식 줍기',d:'트리에서 떨어진 장식 3개를 찾아줘!',it:['⭐','🔔','🎀'],done:'트리가 다시 완벽해졌어 🎄'},
+  snow:{t:'☃️ 눈 치우기',d:'길을 막은 눈더미 3개를 치워줘!',it:['❄️','⛄','❄️'],done:'길이 뻥 뚫렸어 ❄️'}};
+function jobOf(k){if(k==='1116')return 'trash';const order=k>='1201'?['snow','orn','cat','mail','bulb','trash','snow','leaves']:['leaves','cat','mail','bulb','trash','orn'];const i=Math.max(0,DAY_KEYS.indexOf(k)+((+k.slice(2))%3));return order[i%order.length];}
+const JOB_PAY=10;
+function jobDone(){return S.me&&S.me.job===todayKey();}
+function jobBtn(){const o=app.querySelector('.jobbtn');if(o)o.remove();if(S.scene!=='village'||!S.me||!S.me.name||todayKey()<'1116')return;
+  app.appendChild(h('button',{class:'jobbtn'+(jobDone()?' done':''),onclick:openJob,text:jobDone()?'✔ 알바 끝':(S.job?'💼 알바 중 '+S.job.got+'/3':'💼 오늘의 알바')}));}
+function openJob(){const k=todayKey();const J=JOBS[jobOf(k)];
+  if(jobDone()){modal([h('h2',{style:{textAlign:'center'},text:'💼 오늘 알바 끝!'}),h('p',{class:'small',style:{textAlign:'center'},text:'알바는 하루에 한 번만 할 수 있어\n내일 새 알바가 기다리고 있어 ✨'})]);return;}
+  if(S.job){const nx=S.job.items.find(it=>!it.ok);if(nx){if(S.scene!=='village')enterVillage(null,()=>{drawJobItems();goTo(nx.x,nx.y);});else{drawJobItems();goTo(nx.x,nx.y);}toast('다음 '+J.it[S.job.got%J.it.length]+' 쪽으로 가는 중! ('+S.job.got+'/3)');}return;}
+  modal([h('div',{style:{textAlign:'center'}},h('small',{class:'small',text:'오늘의 알바 · '+fmt(k)}),h('h2',{text:J.t}),h('div',{style:{fontSize:'40px',margin:'6px 0'},text:J.it.join(' ')}),h('p',{class:'small',text:J.d}),h('p',{style:{fontWeight:'700',color:'#B7322B',fontSize:'13px'},text:'💰 알바비 눈송이 +'+JOB_PAY+' · 하루 한 번'})),
+    h('button',{class:'btn-g',style:{width:'100%',height:'50px',marginTop:'8px',fontSize:'16px'},onclick:()=>{closeModal();startJob();},text:'알바 시작! 💪'})]);}
+function startJob(){const k=todayKey();const cand=B.filter(b=>b.id&&!['board','tram'].includes(b.id)&&b.cx);let seed=hashN(k+(S.uid||''));const pick=[];
+  while(pick.length<3&&cand.length){const i=seed%cand.length;pick.push(cand.splice(i,1)[0]);seed=hashN(String(seed)+'x');}
+  S.job={got:0,items:pick.map((b,i)=>({x:b.cx+((i%2)?-22:22),y:b.base+40,e:null,ok:false}))};drawJobItems();jobBtn();toast('반짝이는 걸 찾아가자! 「💼 알바 중」을 누르면 다음 위치로 안내해줘 💨');
+  const it=S.job.items[0];if(it)goTo(it.x,it.y);}
+function drawJobItems(){if(!S.job||S.scene!=='village'||!SC||!SC.world)return;const J=JOBS[jobOf(todayKey())];
+  S.job.items.forEach((it,i)=>{if(it.ok)return;if(it.e&&it.e.isConnected)return;it.e=h('button',{class:'jobitem',style:{left:it.x+'px',top:it.y+'px',zIndex:String(Math.round(it.y))},'aria-label':'알바 아이템',onclick:ev=>{ev.stopPropagation();goTo(it.x,it.y);},text:J.it[i%J.it.length]});SC.world.appendChild(it.e);});}
+async function jobTick(){if(!S.job||S.scene!=='village')return;for(const it of S.job.items){if(it.ok)continue;if(Math.hypot(P.x-it.x,P.y-it.y)<46){it.ok=true;S.job.got++;sfx('pop');if(it.e){it.e.classList.add('got');setTimeout(()=>it.e&&it.e.remove(),500);}floatAt&&floatAt(it.x,it.y-30,'+1');jobBtn();
+    if(S.job.got>=3){const J=JOBS[jobOf(todayKey())];S.job=null;await saveMe({job:todayKey(),coins:(S.me.coins||0)+JOB_PAY});refreshCoins&&refreshCoins();jobBtn();sfx('ding');modal([h('div',{class:'cele'},h('h2',{text:'알바 완료! 💼'}),h('p',{style:{textAlign:'center'},text:J.done}),h('div',{class:'reward'},h('img',{src:IMG('u_coin'),alt:''}),'눈송이 +'+JOB_PAY),h('button',{class:'btn-g',style:{width:'100%',height:'50px',fontSize:'16px'},onclick:closeModal,text:'수고했어 나 자신 ✨'}))]);}}}}
+
 // ================= ONLINE BAR + JOIN ALERTS =================
 const SCENE_NM={village:'🏘️ 마을',pub:'🍻 펍',writers:'✍️ 회의실',cafe:'☕ 카페',diner:'🍲 식당',flower:'💐 꽃집',post:'📮 우체국',gift:'🎁 선물가게',books:'📚 서점',clinic:'🏥 병원',townhall:'🏛️ 시청',theater:'🎤 공연장',studio:'🕺 연습실',police:'🚨 경찰서',gallery:'🖼️ 미술관',create:'🎨 캐릭터 꾸미는 중',opening:'💌 초대장 읽는 중'};
 function sceneLabel(sc){if(!sc)return '어딘가';if(sc.startsWith('room:')){const o=sc.slice(5);return o===myId()?'🏠 우리 집':'🏠 '+pname(o)+'네 집';}return SCENE_NM[sc]||'🏘️ 마을';}
@@ -2240,7 +2292,7 @@ function migrate(m){if(!m)return m;m.orns=(m.orns||[]).filter(o=>o&&typeof o==='
 async function boot(){app.innerHTML='';app.appendChild(h('div',{style:{position:'absolute',inset:'0',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'10px',background:'var(--bg)'}},h('img',{src:IMG('u_coin'),alt:'',style:{width:'60px'}}),h('b',{text:'빌리지 여는 중…'})));
   const t=lsGet('pv6_test');S.testDay=t==='real'?null:(t||null);
   let user=null,db=null,room=null;try{[user,db,room]=await Promise.all([window.claude?claude.use('user'):null,window.claude?claude.use('db'):null,window.claude?claude.use('room'):null]);}catch(e){}
-  S.db=db;S.room=room;if(user){try{S.uid=await user.id();}catch(e){}}
+  S.db=db;setTimeout(()=>subscribeChat(),1500);S.room=room;if(user){try{S.uid=await user.id();}catch(e){}}
   if(S.uid&&!isAdmin())S.testDay=null;
   if(room){try{const R0=room;S.room={emit:(tp,d)=>adminHidden()?Promise.resolve():R0.emit(tp,d),presence:d=>R0.presence(adminHidden()?{scene:'_admin',uid:null}:d),on:(...a)=>R0.on(...a),onPeers:(...a)=>R0.onPeers(...a)};}catch(e){S.room=room;}}
   if(!db||!S.uid){S.solo=true;S.uid=null;composeMe(migrate(lsGet('pv6_me')));if(S.me)S.profiles.local=S.me;(S.me&&S.me.name)?enterVillage():showOpening();return;}
@@ -2257,11 +2309,11 @@ async function boot(){app.innerHTML='';app.appendChild(h('div',{style:{position:
     room.on('cheers',m=>{if(m.isMe&&m.sameTab)return;if(S.scene!=='pub')return;const d=m.data||{};const myP=myPeerId();
       if(d.req){if(S.seat&&S.seat[0]===d.t&&S.drink)askCheers(m.peer,d.t,d.name);else raiseGlass(m.peer);}
       else if(d.ack){doCheers(d.t,[m.peer,d.to===myP?null:d.to]);if(d.to===myP)toast('짠 성공! 🥂');}},()=>{});
-    room.on('notice',m=>{if(m.isMe&&m.sameTab)return;const d=m.data||{};if(typeof d.t==='string')notice(d.t.slice(0,60),typeof d.icon==='string'&&/^[a-z_0-9]+$/.test(d.icon)?d.icon:null);},()=>{});
+    room.on('notice',m=>{if(m.isMe&&m.sameTab)return;const d=m.data||{};if(d.pn){if(typeof d.t==='string'&&d.scene===sceneId())topNote(d.t.slice(0,60));return;}if(typeof d.t==='string')notice(d.t.slice(0,60),typeof d.icon==='string'&&/^[a-z_0-9]+$/.test(d.icon)?d.icon:null);},()=>{});
     room.on('act',m=>{if(m.isMe&&m.sameTab)return;const d=m.data||{};if(!d||d.scene!==sceneId())return;
       if(d.k==='drink')drinkAnim(m.peer,d.d);else if(d.k==='eat'&&ANJU[d.d])eatAnim(m.peer,d.d);else if(d.k==='pour'&&d.d&&d.d.seat)pourAnim2(m.peer,d.d.seat,d.d.d==='soju'?'soju':'beer');else if(ACT_FX[d.k])ACT_FX[d.k](m.peer,d.d);},()=>{});
     room.on('bell',m=>{if(m.isMe&&m.sameTab)return;bellBanner(m.data&&m.data.name);},()=>{});}}
-if(location.protocol==='file:'||location.hostname==='localhost')window.__pv={S,P,updateOnline:()=>updateOnline(),adminMenu,setMode,bqEl,manittoOf:(u)=>manittoOf(u),saveMe:(x)=>saveMe(x),sendThing:(a,b,c)=>sendThing(a,b,c),mailCount:()=>mailCount(),myId:()=>myId(),pocketDetail,photoPick,openPocket2:()=>openPocket(),buildSnowman,openSay,syncPeers,peersInScene,sceneId,eveWait,letterFlow,wallPut,placeAtDoor,maniPost,viewThing,thSit,thSeats,thCamStart,thStageUp,thPerform,openPocket,bouquetFlow,certFlow,invAdd,enterRoom:(u)=>enterRoom(u),wTake,sitDown,lightCheer,toss,enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),goTo:(x,y)=>goTo(x,y),enterGallery,enterPolice,enterStudio,rankFlow,caseFlow,runwayFlow,partyFlow,enterFlower,enterPost,enterGift,enterBooks,enterClinic,enterTownhall,openMailbox,quizWrite,quizShelf,giftFlow,clinicFlow,callTram,rideTram,treeLighting,enterTheater,enterCarousel,enterCafe,enterDiner,openBoardUI,openVote,enterVillage,openCafeMenu,openDinerMenu,buyDrink,orderFood,crackCookie,showOpening,showInvite,showCreate,showTicket,showGuide,playCut,arrive,get SC(){return SC},sitDown,leaveSeat,wTake,startHang,hangTap,completeDay};
+if(location.protocol==='file:'||location.hostname==='localhost')window.__pv={S,P,startJob,jobTick,openJob,checkAttendance,blockRects,openSay,updateOnline:()=>updateOnline(),adminMenu,setMode,bqEl,manittoOf:(u)=>manittoOf(u),saveMe:(x)=>saveMe(x),sendThing:(a,b,c)=>sendThing(a,b,c),mailCount:()=>mailCount(),myId:()=>myId(),pocketDetail,photoPick,openPocket2:()=>openPocket(),buildSnowman,openSay,syncPeers,peersInScene,sceneId,eveWait,letterFlow,wallPut,placeAtDoor,maniPost,viewThing,thSit,thSeats,thCamStart,thStageUp,thPerform,openPocket,bouquetFlow,certFlow,invAdd,enterRoom:(u)=>enterRoom(u),wTake,sitDown,lightCheer,toss,enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),goTo:(x,y)=>goTo(x,y),enterGallery,enterPolice,enterStudio,rankFlow,caseFlow,runwayFlow,partyFlow,enterFlower,enterPost,enterGift,enterBooks,enterClinic,enterTownhall,openMailbox,quizWrite,quizShelf,giftFlow,clinicFlow,callTram,rideTram,treeLighting,enterTheater,enterCarousel,enterCafe,enterDiner,openBoardUI,openVote,enterVillage,openCafeMenu,openDinerMenu,buyDrink,orderFood,crackCookie,showOpening,showInvite,showCreate,showTicket,showGuide,playCut,arrive,get SC(){return SC},sitDown,leaveSeat,wTake,startHang,hangTap,completeDay};
 boot();
 })();
 
