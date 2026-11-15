@@ -2232,7 +2232,7 @@ function goMeet(x){const sc=x.pres.scene||'village';
 function sendWave(u,name){if(!S.room)return;S.room.emit('wave',{to:u,from:(S.me&&S.me.name)||'누군가'}).catch(()=>{});sfx('pop');toast('👋 '+name+'한테 손 흔들었어!');}
 function joinAlert(x){const e=h('div',{class:'joinalert',role:'status'},h('span',{text:'🔔 '+x.name+'이(가) 빌리지에 들어왔어!'}),h('button',{class:'chip on',onclick:ev=>{ev.stopPropagation();sendWave(x.u,x.name);e.remove();},text:'👋 반겨주기'}));joinStack().appendChild(e);sfx('ding');setTimeout(()=>e.classList.add('out'),5200);setTimeout(()=>e.remove(),5800);}
 function joinStack(){let st=app.querySelector('.joinstack');if(!st){st=h('div',{class:'joinstack'});app.appendChild(st);}return st;}
-function updateOnline(){const L=onlineList();const ids=new Set(L.map(x=>x.u));if(S._onSet&&Date.now()-(S._bootT||0)>5000){L.forEach(x=>{if(!S._onSet.has(x.u))joinAlert(x);});}S._onSet=ids;drawOnline();}
+function updateOnline(){const L=onlineList();const ids=new Set(L.map(x=>x.u));if(S._onSet&&Date.now()-(S._bootT||0)>5000){S._lastOn=S._lastOn||{};const now=Date.now();L.forEach(x=>{if(!S._onSet.has(x.u)&&now-(S._lastOn[x.u]||0)>180000)joinAlert(x);});}const nw=Date.now();S._lastOn=S._lastOn||{};ids.forEach(u=>S._lastOn[u]=nw);S._onSet=ids;drawOnline();}
 
 // ================= BOOT =================
 function migrate(m){if(!m)return m;m.orns=(m.orns||[]).filter(o=>o&&typeof o==='object'&&o.d);m.tree=(m.tree||[]).filter(o=>o&&o.d);if(!m.done)m.done={};if(!m.room)m.room={items:[]};return m;}
