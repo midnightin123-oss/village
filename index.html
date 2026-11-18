@@ -1252,7 +1252,7 @@ function enterVillage(spawn,after){if(TR.mode==='ride'){TR.mode='loop';TR.hold=f
   treeSign=h('div',{class:'sign pill open',style:{left:TREE.x+'px',top:(TREE.base+18)+'px',zIndex:String(TREE.base+1)}});world.appendChild(treeSign);drawTreeOrns();
   world.appendChild(h('img',{class:'spr',src:IMG('p_gate'),alt:'성문',style:{left:'780px',top:'2436px',width:'340px',zIndex:'2436'}}));
   const tram=h('img',{class:'spr vtram',src:IMG('p_tram'),alt:'트램',style:{left:'780px',top:'1200px',width:'74px'}});world.appendChild(tram);
-  const sp=spawn||{x:780,y:2280};P.x=sp.x;P.y=sp.y;P.path=null;P.el=makeAva(S.me,true,62);world.appendChild(P.el);
+  const sp=spawn||{x:780,y:2280};P.x=sp.x;P.y=sp.y;S._hitCD=Date.now()+8000;{let best=null;for(let k=0;k<=110&&!best;k+=10){for(const dx of [k,-k]){for(const dy of [0,12,-12,24]){const X=sp.x+dx,Y=sp.y+dy;if(villageWalkable(X,Y)&&trackDist(X,Y)>48){best=[X,Y];break;}}if(best)break;}}if(best){P.x=best[0];P.y=best[1];}}P.path=null;P.el=makeAva(S.me,true,62);world.appendChild(P.el);
   const doors=[];
   B.forEach(b=>{if(b.noDoor)return;if(b.hidden&&!placeOpenDay(b.id))return;const od=placeOpenDay(b.id),nx=placeNext(b.id);
     if(b.id==='pub'){const op=todayKey()>='1116';doors.push({x:b.cx,y:b.base+14,r:44,locked:!op,label:op?(todayKey()<'1119'?'🍻 펍 들어가기 (가오픈)':'🍻 펍 들어가기'):'🍻 펍 · 11.16 가오픈 🔒',act:()=>op?enterPub():toast('🍻 펍은 11.16 자정에 가오픈해!')});return;}
@@ -2321,6 +2321,7 @@ async function jobTick(){if(!S.job||S.scene!=='village')return;if(todayKey()<'11
 
 
 // ================= TRAM HIT =================
+function trackDist(x,y){let m=1e9;for(let d=0;d<TRACK.len;d+=12){const q=trackAt(d);const v=Math.hypot(q[0]-x,q[1]-y);if(v<m)m=v;}return m;}
 function tramHitCheck(tram){if(!tram||S.dazed||S.seat||S.hang||S.scene!=='village'||!P.el)return;if(TR.mode!=='loop'&&TR.mode!=='call')return;if(Date.now()<(S._hitCD||0))return;
   const tx=parseFloat(tram.style.left),ty=parseFloat(tram.style.top)-18;if(Math.hypot(P.x-tx,(P.y-ty)*1.3)>30)return;tramHit(tx,ty);}
 function tramHit(tx,ty){S._hitCD=Date.now()+20000;S.dazed=true;P.path=null;sfx('punch');
