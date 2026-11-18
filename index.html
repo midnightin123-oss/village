@@ -1063,8 +1063,7 @@ function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
     h('div',{class:'mode-card test'+(test?' on':'')},h('b',{text:'🛠️ 테스트 모드'}),h('small',{text:'날짜 골라서 미리 해보기 · 이 기기에만 임시 저장 · 내 진짜 기록이랑 안 섞이고 친구들한테도 안 보여 · 테스트 친구 5명 등장'}),
       sel,h('button',{class:test?'btn-c':'btn-g',onclick:()=>setMode(sel.value),text:test?'이 날짜로 바꾸기':'테스트 모드 들어가기'}),
       test?h('button',{class:'btn-c',onclick:()=>{lsSet(sbKey(),{});lsSet('pv6_opened_t',[]);setMode(S.testDay);toast('🧹 테스트 기록 싹 지우기!');},text:'🧹 테스트 기록 싹 지우기'}):null),
-    h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openPaper(realKey(),{preview:true});},text:'📰 오늘 빌리지 데일리 미리보기 · 발행'}),
-    h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openPaper(nextDay(realKey()),{preview:true});},text:'🗞️ 내일 신문 미리 만들기 · 발행 예약'}),
+    h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openPaper(nextDay(realKey()),{preview:true});},text:'🗞️ 발행 예정 신문 미리보기 · 발행 ('+fmt(nextDay(realKey()))+')'}),
     h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openTipBox();},text:'📮 제보함 보기 (나만 보여)'}),
     window.__pvLogout?h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>window.__pvLogout(),text:'🔑 로그아웃 (다른 이름으로 들어가기)'}):null]);}
 function sbKey(){return 'pv6_sb_'+(S.uid||'local');}
@@ -2472,14 +2471,15 @@ async function paperDoc(k){if(!S.db||S.solo)return S._paperLocal&&S._paperLocal[
 async function makePaper(k){const y=prevDay(k);const res=residents();const P_={k,y,no:dailyNo(k)};const name=([u,p])=>p.name||'소녀';
   const L=(p,f)=>(p.log&&p.log[y]&&p.log[y][f])||0;
   const att=res.filter(([u,p])=>L(p,'att')||(p.att&&(p.att.last===y||(p.att.last===k&&p.att.n>=2))));
-  const hits=res.map(r=>[r,L(r[1],'hit')]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const NOSTAR=r=>(r[1]&&r[1].name)==='현디';const star=arr=>{const o=arr.filter(x=>!NOSTAR(Array.isArray(x[0])?x[0]:x));return o.length?o:arr;};
+  const hits=star(res.map(r=>[r,L(r[1],'hit')]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]));
   const jobs=res.filter(([u,p])=>L(p,'job')||p.job===y);
   const rich=res.slice().sort((a,b)=>(b[1].coins||0)-(a[1].coins||0));
-  const deco=res.map(r=>[r,((r[1].room&&r[1].room.items)||[]).length]).sort((a,b)=>b[1]-a[1]);
-  const streak=res.map(r=>[r,(r[1].att&&r[1].att.n)||0]).sort((a,b)=>b[1]-a[1]);
+  const deco=star(res.map(r=>[r,((r[1].room&&r[1].room.items)||[]).length]).sort((a,b)=>b[1]-a[1]));
+  const streak=star(res.map(r=>[r,(r[1].att&&r[1].att.n)||0]).sort((a,b)=>b[1]-a[1]));
   let chat=[];try{if(S.db&&!S.solo){const q=await S.db.collection(NS+'pubchat').orderBy('ts','desc').limit(300).get();chat=q.docs.map(d=>d.data()).filter(m=>m&&m.day===y&&!m.sys&&m.t);}else chat=(S.chat||[]).filter(m=>m.day===y&&!m.sys);}catch(e){}
-  const talk={};chat.forEach(m=>{talk[m.uid]=(talk[m.uid]||0)+1;});const topTalk=Object.entries(talk).sort((a,b)=>b[1]-a[1])[0];
-  const R=seeded(k);const cand=chat.filter(m=>m.t.length>=6);const quote=cand.length?cand[Math.floor(R()*cand.length)]:(chat[0]||null);
+  const talk={};chat.forEach(m=>{talk[m.uid]=(talk[m.uid]||0)+1;});const meU=(res.find(r=>r[1].name==='현디')||[])[0];const topTalk=(Object.entries(talk).filter(e=>e[0]!==meU).sort((a,b)=>b[1]-a[1])[0])||Object.entries(talk).sort((a,b)=>b[1]-a[1])[0];
+  const R=seeded(k);const cand0=chat.filter(m=>m.t.length>=6);const cand=cand0.filter(m=>m.uid!==meU).length?cand0.filter(m=>m.uid!==meU):cand0;const quote=cand.length?cand[Math.floor(R()*cand.length)]:(chat[0]||null);
   const posts=[];res.forEach(([u,p])=>(p.posts||[]).forEach(x=>{if(x.d===y)posts.push([p.name,x.t]);}));
   let tips=[];try{if(S.db&&!S.solo){for(const [u] of res){const s=await S.db.doc(NS+'meta/tip_'+y+'_'+u).get();if(s.exists){const d=s.data();(d.list||[]).forEach(t=>tips.push(t));}}}else tips=(S._tipsLocal&&S._tipsLocal[y])||[];}catch(e){}
   const doc=await paperDoc(k)||{};
@@ -2568,21 +2568,20 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
     const ed=h('div',{class:'np-ed'},h('label',{class:'np-ed-on'},son,document.createTextNode(' 🗞️ 1면을 특종 기사로 쓰기')),ki,bi,picRows.length?h('small',{text:'제보 사진 (최대 2장 · 고른 순서대로 증거 A, B)'}):h('small',{text:'사진 있는 제보가 없어'}),picRows.map(r=>r.el));
     const collect=()=>({head:hi.value.trim()||null,sub:si.value.trim()||null,scoop:{on:son.checked,kicker:ki.value.trim()||'단독',body:bi.value,pics:picRows.filter(r=>r.cb.checked).slice(0,2).map(r=>({ts:r.t.ts,cap:r.ci.value.trim()}))}});
     const future=p.k>realKey();
-    foot.push(h('div',{class:'np-admin'},h('b',{text:'🛠️ 관리자 · '+fmt(p.k)+' 신문 · '+(p.doc.pub?'발행됨 ✅':'아직 미발행')}),hi,si,ed,
+    foot.push(h('div',{class:'np-admin'},h('b',{text:'🛠️ 관리자 · '+fmt(p.k)+' 신문 · '+(p.doc.pub?'발행 확정 ✅':future?'미확정 · 0시에 자동 발행돼':'자동 발행됨 ✅')}),hi,si,ed,
       h('button',{class:'btn-c',style:{height:'42px'},onclick:async()=>{await publishPaper(p.k,Object.assign(collect(),{pub:!!p.doc.pub}));toast('💾 저장했어! 다시 보여줄게');openPaper(p.k,{preview:true});},text:'💾 저장하고 다시 보기 (발행 안 함)'}),
-      h('button',{class:'btn-g',onclick:async()=>{await publishPaper(p.k,Object.assign(collect(),{pub:true}));toast(future?'📰 발행 예약! '+fmt(p.k)+' 0시부터 가판대에 깔려':'📰 발행 완료! 친구들한테 알림이 가');closeModal();},text:future?'📰 '+fmt(p.k)+' 신문으로 발행 예약':(p.doc.pub?'수정해서 다시 발행':'📰 발행하기')})));}
+      h('button',{class:'btn-g',onclick:async()=>{await publishPaper(p.k,Object.assign(collect(),{pub:true}));toast(future?'📰 발행 확정! '+fmt(p.k)+' 0시에 가판대에 깔려':'📰 수정본 발행 완료!');closeModal();},text:future?'📰 '+fmt(p.k)+' 신문 발행 확정':'📰 수정해서 다시 발행'})));}
   const v=modal([h('div',{class:'np'},h('div',{class:'np-top'},h('span',{text:'📰 빌리지 데일리 No.'+p.no+(opt.preview?' · 미리보기':'')}),h('button',{class:'np-x','aria-label':'닫기',onclick:closeModal,text:'✕'})),stage,nav,...foot)]);const pn=v.querySelector('.panel');if(pn)pn.classList.add('np-sheet');v.classList.add('np-veil');upd();
   try{localStorage.setItem('pv6_daily_read',p.k);}catch(e){}}
 async function publishPaper(k,patch){const cur=await paperDoc(k)||{};const d=Object.assign({},cur,patch,{ts:Date.now()});Object.keys(d).forEach(x=>{if(d[x]==null)delete d[x];});
   if(S.db&&!S.solo){await S.db.doc(NS+'meta/daily_'+k).set(d);if(patch.pub&&k<=realKey()&&S.room)S.room.emit('notice',{t:'📰',daily:k,scene:'*'}).catch(()=>{});}else{S._paperLocal=S._paperLocal||{};S._paperLocal[k]=d;}}
-async function openStand(){const k=todayKey();const doc=await paperDoc(k);const pub=doc&&doc.pub;const btn=(t,f,c)=>h('button',{class:c||'btn-c',style:{width:'100%',height:'48px',marginTop:'8px',fontSize:'15px'},onclick:f,text:t});const items=[];
+async function openStand(){const k=todayKey();const pub=k>=DAILY_START&&k<=realKey();const btn=(t,f,c)=>h('button',{class:c||'btn-c',style:{width:'100%',height:'48px',marginTop:'8px',fontSize:'15px'},onclick:f,text:t});const items=[];
   items.push(h('div',{style:{textAlign:'center'}},h('img',{src:IMG('v_newsstand'),alt:'',style:{width:'110px'}}),h('h2',{text:'📰 빌리지 데일리 가판대'}),h('p',{class:'small',text:k<DAILY_START?'창간호는 11.18에 나와요!':pub?'오늘 신문 나왔어요! 따끈따끈 🔥':'오늘 신문은 아직 인쇄 중… 🖨️'})));
   if(pub)items.push(btn('📰 오늘 신문 보기 (No.'+dailyNo(k)+')',()=>openPaper(k),'btn-g'));
-  if(isAdmin()&&k>=DAILY_START)items.push(btn('🛠️ 오늘 신문 미리보기 · 발행',()=>openPaper(k,{preview:true})));if(isAdmin())items.push(btn('📮 제보함 보기 (관리자)',()=>openTipBox()));
   items.push(btn('🗂️ 지난 신문',openArchive));
   items.push(btn('📮 익명 제보하기',openTip));
   modal(items);}
-async function openArchive(){const out=[];for(let k=todayKey();k>=DAILY_START;k=prevDay(k)){if(k===todayKey())continue;const d=await paperDoc(k);if(d&&d.pub)out.push(k);if(out.length>30)break;}
+async function openArchive(){const out=[];for(let k=todayKey();k>=DAILY_START;k=prevDay(k)){if(k===todayKey())continue;out.push(k);if(out.length>30)break;}
   modal([h('h2',{style:{textAlign:'center'},text:'🗂️ 지난 신문'}),out.length?h('div',{class:'mb-list'},out.map(k=>h('button',{class:'mb-it',style:{width:'100%'},onclick:()=>openPaper(k)},h('b',{text:'📰 No.'+dailyNo(k)}),h('span',{text:' '+kDate(k)})))):h('p',{class:'small',style:{textAlign:'center',padding:'14px 0'},text:'아직 지난 신문이 없어요'})]);}
 function openTip(){const fi=h('input',{type:'file',accept:'image/*',style:{display:'none'}});let img=null;const pv=h('div',{class:'tip-pv',text:'📷 사진은 선택이야'});
   fi.onchange=async()=>{const f=fi.files&&fi.files[0];if(!f)return;try{img=await shrinkPhoto(f,360);pv.replaceChildren(h('img',{src:img,alt:''}));}catch(e){toast('사진을 못 읽었어');}};
@@ -2600,7 +2599,7 @@ async function openTipBox(_re){if(!isAdmin())return;if(!_re)modal([h('div',{clas
     out.length?h('div',{class:'tipbox'},out.map(([d,list])=>h('div',{class:'tipbox-day'},h('b',{text:fmt(d)+' 제보 '+list.length+'건 → '+fmt(nextDay(d))+' 신문'+(nextDay(d)===RK?' (오늘 신문)':nextDay(d)>RK?' (내일 신문)':'')}),
       list.map(t=>h('div',{class:'tipbox-it'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:t.t||''}),h('small',{text:hm(t.ts)})))))):h('p',{class:'small',style:{textAlign:'center',padding:'16px 0'},text:'아직 들어온 제보가 없어'})]);
   if(!_re&&out.some(([d,l])=>l.some(t=>t.img&&String(t.img).startsWith('blob:')===false&&String(t.img).length<200)))setTimeout(()=>{if(app.querySelector('.tipbox'))openTipBox(1);},1800);}
-async function dailyCheck(){const k=todayKey();if(k<DAILY_START||!S.me||!S.me.name)return;let read=null;try{read=localStorage.getItem('pv6_daily_read');}catch(e){}if(read===k||S._dailyNoted===k)return;const d=await paperDoc(k);if(!d||!d.pub)return;S._dailyNoted=k;dailyAlert(k);}
+async function dailyCheck(){const k=todayKey();if(k<DAILY_START||!S.me||!S.me.name)return;let read=null;try{read=localStorage.getItem('pv6_daily_read');}catch(e){}if(read===k||S._dailyNoted===k||k>realKey())return;S._dailyNoted=k;dailyAlert(k);}
 function dailyAlert(k){const e=h('div',{class:'joinalert daily',role:'status'},h('span',{text:'📰 빌리지 데일리 No.'+dailyNo(k)+' 발행!'}),h('button',{class:'chip on',onclick:ev=>{ev.stopPropagation();e.remove();const go=()=>{const b=B.find(x=>x.id==='daily');goTo(b.cx,b.base+26,()=>openPaper(k));};if(S.scene!=='village')enterVillage(null,go);else go();},text:'가판대로 가기'}));joinStack().appendChild(e);sfx('ding');setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),600);},15000);}
 
 // ================= ONLINE BAR + JOIN ALERTS =================
