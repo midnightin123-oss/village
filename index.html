@@ -764,6 +764,22 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .tipbox-it img{width:100%;max-height:200px;object-fit:cover;border-radius:6px;display:block;margin-bottom:5px}
 .tipbox-it p{margin:0;font-size:13px;line-height:1.5;word-break:break-all}
 .tipbox-it small{font-size:10px;color:#8A6A4E}
+
+.np-pics{display:grid;gap:6px;margin:2px 0 8px}.np-pics.n2{grid-template-columns:1fr 1fr}
+.np-pics figure{margin:0}
+.np-pics img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;border:1px solid var(--rule);filter:grayscale(1) contrast(1.15) sepia(.2)}
+.np-pics figcaption{font-size:9.5px;line-height:1.35;font-style:italic;color:#3A342A;margin-top:3px}
+.np-pics figcaption b{font-style:normal;color:#8E2A22}
+.np-body b{font-weight:800}
+.np-brief{margin-top:8px;border:1px solid var(--rule);padding:6px 8px;background:rgba(255,255,255,.3)}
+.np-brief b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:9px;letter-spacing:.15em;margin-bottom:2px}
+.np-brief p{margin:0;font-size:11px;line-height:1.55}
+.np-ed{display:flex;flex-direction:column;gap:5px;border-top:1px dashed #8E2A22;padding-top:6px;margin-top:2px}
+.np-ed-on{font-size:13px;font-weight:700}
+.np-ed small{font-size:11px;color:#8A6A4E}
+.np-ed-pic{display:grid;grid-template-columns:64px 1fr;gap:6px;align-items:start;background:#fff;border:1px solid #E3D0A8;border-radius:8px;padding:5px}
+.np-ed-pic img{width:64px;height:64px;object-fit:cover;border-radius:5px}
+.np-ed-pic label{font-size:12px;font-weight:700}.np-ed-pic small{display:block;margin:2px 0 4px}
 </style>
 </head>
 <body>
@@ -1046,6 +1062,7 @@ function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
       sel,h('button',{class:test?'btn-c':'btn-g',onclick:()=>setMode(sel.value),text:test?'이 날짜로 바꾸기':'테스트 모드 들어가기'}),
       test?h('button',{class:'btn-c',onclick:()=>{lsSet(sbKey(),{});lsSet('pv6_opened_t',[]);setMode(S.testDay);toast('🧹 테스트 기록 싹 지우기!');},text:'🧹 테스트 기록 싹 지우기'}):null),
     h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openPaper(realKey(),{preview:true});},text:'📰 오늘 빌리지 데일리 미리보기 · 발행'}),
+    h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openPaper(nextDay(realKey()),{preview:true});},text:'🗞️ 내일 신문 미리 만들기 · 발행 예약'}),
     h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openTipBox();},text:'📮 제보함 보기 (나만 보여)'}),
     window.__pvLogout?h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>window.__pvLogout(),text:'🔑 로그아웃 (다른 이름으로 들어가기)'}):null]);}
 function sbKey(){return 'pv6_sb_'+(S.uid||'local');}
@@ -2494,7 +2511,14 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   const lede=p.k===DAILY_START?'5시의 소녀들이 모여 사는 프로젝트 빌리지가 드디어 문을 열었다. 입주민 '+p.res.length+'명은 각자 집을 받고 마을 구석구석을 둘러보며 첫날을 보냈다. 본지는 앞으로 매일 아침 어제의 빌리지 소식을 전한다. 광장에는 아직 낙엽이 굴러다니고, 전차는 오늘도 제 갈 길을 간다. 입주민들은 "생각보다 마을이 넓다", "우리 집 위치 좋다"며 저마다 감상을 남겼다는 후문. 많은 제보 바란다.':
     fy+' 빌리지에는 '+p.att.length+'명이 다녀갔다. 수다방에는 '+p.chatN+'마디가 오갔고'+(p.hits.length?', 전차 사고도 '+p.hits.reduce((a,b)=>a+b[1],0)+'건 발생했다.':', 다행히 큰 사고는 없었다.')+(p.jobs.length?' 알바에 나선 소녀도 '+p.jobs.length+'명. 마을 경제가 조금씩 돌아가고 있다.':' 오늘은 또 어떤 일이 벌어질지, 본지가 지켜보겠다.')+' 자세한 소식은 안쪽 면에서.';
   const idx=h('div',{class:'np-index'},h('b',{text:'INSIDE'}),SEC.slice(1).map((s,i)=>h('button',{onclick:()=>go(i+1)},h('i',{text:s[0]}),h('span',{text:s[1]}))));
-  pages.push([ears,dl,h('div',{class:'np-kicker',text:p.k===DAILY_START?'★ FIRST EDITION · 창간호 ★':'TOP STORY'}),h('h1',{class:'np-head',text:p.head}),h('div',{class:'np-sub',text:p.sub}),
+  const sc=p.doc.scoop&&p.doc.scoop.on?p.doc.scoop:null;const tipByTs={};p.tips.forEach(t=>{if(t&&t.ts)tipByTs[t.ts]=t;});
+  const rich=t=>{const out=[];String(t).split(/(\*\*[^*]+\*\*)/).forEach(s=>{if(!s)return;if(s.startsWith('**')&&s.endsWith('**'))out.push(h('b',{text:s.slice(2,-2)}));else out.push(document.createTextNode(s));});return out;};
+  if(sc){const pics=(sc.pics||[]).map(x=>[tipByTs[x.ts],x.cap]).filter(x=>x[0]&&x[0].img);const paras=String(sc.body||'').split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
+    const brief=h('div',{class:'np-brief'},h('b',{text:'BRIEFING · 어제의 빌리지'}),h('p',{text:lede}));
+    pages.push([ears,dl,h('div',{class:'np-kicker',text:'★ '+(sc.kicker||'단독')+' ★'}),h('h1',{class:'np-head',text:p.head}),h('div',{class:'np-sub',text:p.sub}),
+      pics.length?h('div',{class:'np-pics n'+Math.min(2,pics.length)},pics.slice(0,2).map(([t,c],n)=>h('figure',{},h('img',{src:t.img,alt:'제보 사진'}),h('figcaption',{},h('b',{text:'[증거 '+'AB'[n]+'] '}),document.createTextNode(c||''))))):paperPhoto(p.att),
+      h('div',{class:'np-cols'},h('div',{class:'np-by',text:'By 빌리지 데일리 사회부'}),paras.map((s,n)=>h('p',{class:'np-body'+(n===0?' dc':'')},rich(s)))),brief,idx]);}
+  else pages.push([ears,dl,h('div',{class:'np-kicker',text:p.k===DAILY_START?'★ FIRST EDITION · 창간호 ★':'TOP STORY'}),h('h1',{class:'np-head',text:p.head}),h('div',{class:'np-sub',text:p.sub}),
     paperPhoto(p.att),h('div',{class:'np-cap',text:'▲ '+fy+' 빌리지를 찾은 소녀들 '+(p.att.length?'('+p.att.map(nm).join(', ')+')':'(자료 사진)')+'  /  PHOTO: VILLAGE DAILY'}),
     h('div',{class:'np-cols'},h('div',{class:'np-by',text:'By 빌리지 데일리 취재팀'}),h('p',{class:'np-body dc',text:lede})),idx]);
   // ── A2 VILLAGE
@@ -2515,7 +2539,7 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   pages.push([run(2),flag('Metro & Business','사건 · 경제'),mk,h('div',{class:'np-cols'},c3)]);
   // ── A4 OPINION & LIFE
   const q=p.quote?h('blockquote',{class:'np-quote'},h('span',{text:'“'+p.quote.t+'”'}),h('small',{text:'— '+(p.quote.name||'익명')+', 수다방에서'})):h('p',{class:'np-body dim',text:'어제 수다방은 조용했다. 오늘의 명대사를 기다린다.'});
-  const tips=p.tips.length?p.tips.slice(0,4).map(t=>h('div',{class:'np-tip'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:'"'+t.t+'"'}),h('small',{text:'— 익명의 제보자'}))):[h('p',{class:'np-body dim',text:'가판대에서 익명 제보를 받고 있다. 사진도 환영. 제보는 다음 날 신문에 실린다.'})];
+  const usedTs=new Set(((sc&&sc.pics)||[]).map(x=>x.ts));const lt=p.tips.filter(t=>!usedTs.has(t.ts));const tips=lt.length?lt.slice(0,4).map(t=>h('div',{class:'np-tip'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:'"'+t.t+'"'}),h('small',{text:'— 익명의 제보자'}))):[h('p',{class:'np-body dim',text:(sc?'오늘의 제보는 1면 특종으로 실렸다. ':'')+'가판대에서 익명 제보를 받고 있다. 사진도 환영. 제보는 다음 날 신문에 실린다.'})];
   const c4=[art(hd('LETTERS · 익명 제보'),...tips),art(hd('HOROSCOPE · 오늘의 운세'),(()=>{const F=FORTUNE.slice().sort(()=>R()-.5);return npList(p.res.map((r,i)=>nm(r)+': '+F[i%F.length]));})()),art(hd('WEATHER · 날씨'),h('p',{class:'np-body',text:wx[0]+' '+(lv>.7?'함박눈. 눈사람 만들기 딱 좋은 날':lv>.3?'눈발 날림. 목도리 필수':lv>0?'첫눈 예감. 하늘 자주 볼 것':'맑고 쌀쌀. 따뜻하게 입자')}))];
   const ad=ADS.slice().sort(()=>R()-.5).slice(0,4);
   pages.push([run(3),flag('Opinion & Life','오피니언 · 생활'),hd('QUOTE OF THE DAY · 어제의 명대사'),q,h('div',{class:'np-cols'},c4),h('div',{class:'np-cls'},h('div',{class:'np-cls-h',text:'CLASSIFIEDS · 광고'}),h('div',{class:'np-ads'},ad.map(a=>h('div',{class:'np-ad'},h('b',{text:a[0]}),h('span',{text:a[1]}))))),h('div',{class:'np-end',text:'— 30 —'})]);
@@ -2535,11 +2559,20 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   const nav=h('div',{class:'np-nav'},pv,h('div',{class:'np-navc'},lab,dots),nx);
   const foot=[];
   if(opt.preview&&isAdmin()){const hi=h('input',{class:'txt',value:p.head,placeholder:'헤드라인 직접 쓰기'});const si=h('input',{class:'txt',value:p.sub,placeholder:'부제'});
-    foot.push(h('div',{class:'np-admin'},h('b',{text:'🛠️ 관리자 · '+(p.doc.pub?'발행됨 ✅':'아직 미발행')}),hi,si,h('button',{class:'btn-g',onclick:async()=>{await publishPaper(p.k,{head:hi.value.trim()||null,sub:si.value.trim()||null,pub:true});toast('📰 발행 완료! 친구들한테 알림이 가');closeModal();},text:p.doc.pub?'수정해서 다시 발행':'📰 발행하기'})));}
+    const s0=p.doc.scoop||{};const son=h('input',{type:'checkbox'});son.checked=!!s0.on;const ki=h('input',{class:'txt',value:s0.kicker||'단독',placeholder:'머리표 (예: 단독)'});
+    const bi=h('textarea',{class:'txt',rows:'7',placeholder:'기사 본문 · 문단 사이는 한 줄 띄우기 · **굵게**',style:{resize:'vertical',fontSize:'14px'}});bi.value=s0.body||'';
+    const pm={};(s0.pics||[]).forEach(x=>pm[x.ts]=x.cap);
+    const ord=(s0.pics||[]).map(x=>x.ts);const rk=t=>{const i=ord.indexOf(t.ts);return i<0?99:i;};const picRows=p.tips.filter(t=>t.img).sort((a,b)=>rk(a)-rk(b)).map(t=>{const cb=h('input',{type:'checkbox'});cb.checked=t.ts in pm;const ci=h('input',{class:'txt',value:pm[t.ts]||'',placeholder:'사진 설명'});return {t,cb,ci,el:h('div',{class:'np-ed-pic'},h('img',{src:t.img,alt:''}),h('div',{},h('label',{},cb,document.createTextNode(' 1면에 싣기')),h('small',{text:(t.t||'').slice(0,40)}),ci))};});
+    const ed=h('div',{class:'np-ed'},h('label',{class:'np-ed-on'},son,document.createTextNode(' 🗞️ 1면을 특종 기사로 쓰기')),ki,bi,picRows.length?h('small',{text:'제보 사진 (최대 2장 · 고른 순서대로 증거 A, B)'}):h('small',{text:'사진 있는 제보가 없어'}),picRows.map(r=>r.el));
+    const collect=()=>({head:hi.value.trim()||null,sub:si.value.trim()||null,scoop:{on:son.checked,kicker:ki.value.trim()||'단독',body:bi.value,pics:picRows.filter(r=>r.cb.checked).slice(0,2).map(r=>({ts:r.t.ts,cap:r.ci.value.trim()}))}});
+    const future=p.k>realKey();
+    foot.push(h('div',{class:'np-admin'},h('b',{text:'🛠️ 관리자 · '+fmt(p.k)+' 신문 · '+(p.doc.pub?'발행됨 ✅':'아직 미발행')}),hi,si,ed,
+      h('button',{class:'btn-c',style:{height:'42px'},onclick:async()=>{await publishPaper(p.k,Object.assign(collect(),{pub:!!p.doc.pub}));toast('💾 저장했어! 다시 보여줄게');openPaper(p.k,{preview:true});},text:'💾 저장하고 다시 보기 (발행 안 함)'}),
+      h('button',{class:'btn-g',onclick:async()=>{await publishPaper(p.k,Object.assign(collect(),{pub:true}));toast(future?'📰 발행 예약! '+fmt(p.k)+' 0시부터 가판대에 깔려':'📰 발행 완료! 친구들한테 알림이 가');closeModal();},text:future?'📰 '+fmt(p.k)+' 신문으로 발행 예약':(p.doc.pub?'수정해서 다시 발행':'📰 발행하기')})));}
   const v=modal([h('div',{class:'np'},h('div',{class:'np-top'},h('span',{text:'📰 빌리지 데일리 No.'+p.no+(opt.preview?' · 미리보기':'')}),h('button',{class:'np-x','aria-label':'닫기',onclick:closeModal,text:'✕'})),stage,nav,...foot)]);const pn=v.querySelector('.panel');if(pn)pn.classList.add('np-sheet');v.classList.add('np-veil');upd();
   try{localStorage.setItem('pv6_daily_read',p.k);}catch(e){}}
 async function publishPaper(k,patch){const cur=await paperDoc(k)||{};const d=Object.assign({},cur,patch,{ts:Date.now()});Object.keys(d).forEach(x=>{if(d[x]==null)delete d[x];});
-  if(S.db&&!S.solo){await S.db.doc(NS+'meta/daily_'+k).set(d);if(S.room)S.room.emit('notice',{t:'📰',daily:k,scene:'*'}).catch(()=>{});}else{S._paperLocal=S._paperLocal||{};S._paperLocal[k]=d;}}
+  if(S.db&&!S.solo){await S.db.doc(NS+'meta/daily_'+k).set(d);if(patch.pub&&k<=realKey()&&S.room)S.room.emit('notice',{t:'📰',daily:k,scene:'*'}).catch(()=>{});}else{S._paperLocal=S._paperLocal||{};S._paperLocal[k]=d;}}
 async function openStand(){const k=todayKey();const doc=await paperDoc(k);const pub=doc&&doc.pub;const btn=(t,f,c)=>h('button',{class:c||'btn-c',style:{width:'100%',height:'48px',marginTop:'8px',fontSize:'15px'},onclick:f,text:t});const items=[];
   items.push(h('div',{style:{textAlign:'center'}},h('img',{src:IMG('v_newsstand'),alt:'',style:{width:'110px'}}),h('h2',{text:'📰 빌리지 데일리 가판대'}),h('p',{class:'small',text:k<DAILY_START?'창간호는 11.18에 나와요!':pub?'오늘 신문 나왔어요! 따끈따끈 🔥':'오늘 신문은 아직 인쇄 중… 🖨️'})));
   if(pub)items.push(btn('📰 오늘 신문 보기 (No.'+dailyNo(k)+')',()=>openPaper(k),'btn-g'));
