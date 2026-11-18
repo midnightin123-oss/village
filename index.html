@@ -2905,5 +2905,8 @@ boot();
 })();
 
 </script>
-</body>
+<script>window.PV_BUILD='1795028821';(function(){var busy=false;function go(b){try{if(sessionStorage.getItem('pv_rl_'+b))return false;sessionStorage.setItem('pv_rl_'+b,'1');}catch(e){}var u=new URL(location.href);u.searchParams.set('_v',b);location.replace(u.toString());return true;}
+function banner(b){if(document.getElementById('pvupd'))return;var d=document.createElement('button');d.id='pvupd';d.textContent='🆕 새 버전이 나왔어! 눌러서 새로고침';d.style.cssText='position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);transform:translateX(-50%);z-index:99999;background:#3E8E41;color:#fff;border:0;border-radius:20px;padding:9px 16px;font-weight:800;font-size:13px;box-shadow:0 3px 0 rgba(0,0,0,.3)';d.onclick=function(){try{sessionStorage.removeItem('pv_rl_'+b);}catch(e){}go(b);};document.body.appendChild(d);}
+function chk(auto){if(busy)return;busy=true;fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(v){busy=false;if(!v||!v.b||v.b===window.PV_BUILD)return;if(auto&&!document.querySelector('.veil')){if(go(v.b))return;}banner(v.b);}).catch(function(){busy=false;});}
+setTimeout(function(){chk(true);},2500);setInterval(function(){chk(false);},180000);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')chk(true);});})();</script></body>
 </html>
