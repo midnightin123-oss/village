@@ -780,6 +780,17 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .np-ed-pic{display:grid;grid-template-columns:64px 1fr;gap:6px;align-items:start;background:#fff;border:1px solid #E3D0A8;border-radius:8px;padding:5px}
 .np-ed-pic img{width:64px;height:64px;object-fit:cover;border-radius:5px}
 .np-ed-pic label{font-size:12px;font-weight:700}.np-ed-pic small{display:block;margin:2px 0 4px}
+
+.np-feat{border-bottom:3px double var(--rule);padding-bottom:6px;margin-bottom:8px}
+.np-feat-k{font-family:'Playfair Display',Georgia,serif;font-size:9px;font-weight:900;letter-spacing:.2em;color:#8E2A22}
+.np-feat-h{font-family:'Nanum Myeongjo',serif;font-size:19px;font-weight:800;line-height:1.25;margin:2px 0 6px;word-break:keep-all}
+.np-photo.sm{height:96px;width:44%;float:right;margin:2px 0 4px 8px}
+.np-photo.sm .np-ava{top:86px!important}
+.np-feat::after{content:'';display:block;clear:both}
+.np-rank{margin:2px 0 4px;padding-left:18px;font-size:11.5px;line-height:1.6}
+.np-rank li{border-bottom:1px dotted rgba(43,38,30,.4)}
+.np-rank li b{font-weight:800}.np-rank li span{float:right;font-variant-numeric:tabular-nums}
+.np-rank li:first-child{font-size:13px}
 </style>
 </head>
 <body>
@@ -1154,7 +1165,7 @@ function smooth(pts){const out=[];let cur=[P.x,P.y];let i=0;while(i<pts.length){
 
 // ================= PRESENCE =================
 function sceneId(){return S.scene==='room'?'room:'+S.arg:S.scene;}
-function sendPresence(){if(!S.room)return;S.room.presence({scene:sceneId(),x:Math.round(P.x),y:Math.round(P.y),uid:S.uid||null,nm:(S.me&&S.me.name)||null,av:(S.me&&S.me.av)||null,seat:S.seat||null,pose:S.pose||null,work:!!(S.wseat!=null&&S.me&&S.me.desk&&S.me.desk.work),drink:S.drink||null,lvl:Math.round((S.lvl||0)*100)/100}).catch(()=>{});}
+function sendPresence(){if(!S.room)return;{const sc=sceneId();if(sc!==S._lastSc){S._lastSc=sc;const kk=sc.startsWith('room:')?(sc.slice(5)===myId()?'home':'visit'):sc;if(kk!=='village')track('v_'+kk);}}S.room.presence({scene:sceneId(),x:Math.round(P.x),y:Math.round(P.y),uid:S.uid||null,nm:(S.me&&S.me.name)||null,av:(S.me&&S.me.av)||null,seat:S.seat||null,pose:S.pose||null,work:!!(S.wseat!=null&&S.me&&S.me.desk&&S.me.desk.work),drink:S.drink||null,lvl:Math.round((S.lvl||0)*100)/100}).catch(()=>{});}
 function peerUid(p){return p.by||(p.presence&&p.presence.uid)||null;}
 function peerOk(p){if(!window.__pvLogout||new URLSearchParams(location.search).get('tu'))return true;const pr=S.profiles[peerUid(p)];return !!(pr&&PV_NAMES.includes(pr.name));}
 function peersInScene(sid){const seen=new Set();return (S.peers||[]).filter(p=>!p.isMe&&p.kind==='viewer'&&p.presence&&p.presence.scene===sid&&peerOk(p)).reverse().filter(p=>{const u=peerUid(p)||p.peer;if(seen.has(u))return false;seen.add(u);return true;}).reverse();}
@@ -1167,7 +1178,7 @@ function syncPeers(){if(!SC)return;const want=new Set();
   const sig=[...want].sort().map(id=>{const pr=peerEls[id]&&peerEls[id]._pres||{};return id+':'+(pr.seat||'')+':'+(pr.wseat||'')+':'+(pr.work?1:0)+':'+(pr.pose||'')+':'+(pr.drink||'')+':'+(pr.lvl||0);}).join('|');
   if(sig!==SC._peerSig){SC._peerSig=sig;if(SC.onPeers)SC.onPeers();if(SC.kind==='village')updatePubSign();}}
 function clearPeers(){for(const id in peerEls){peerEls[id].remove();delete peerEls[id];}}
-function emitEmote(k){if(S.room)S.room.emit('emote',{k,scene:sceneId()}).catch(()=>{});showEmote(null,k);
+function emitEmote(k){if(S.room)S.room.emit('emote',{k,scene:sceneId()}).catch(()=>{});showEmote(null,k);track(k==='wave'||k==='heart'?k:'emo');
   if(k==='heart'&&S.scene==='room'&&S.arg!==(S.uid||'local'))missionEvent('visit');
   if(k==='wave'&&S.scene==='village'){if(peersInScene('village').length>=2&&Math.hypot(P.x-PLAZA.x,P.y-PLAZA.y)<PLAZA.r+60)missionEvent('wave3');if(Math.hypot(P.x-TREE.x,P.y-TREE.base)<180)missionEvent('eve');}}
 function showEmote(peer,k){const el=peer?peerEls[peer]:P.el;if(!el)return;if(k==='wave'){el._face='down';playAct(el,'wave',1500);}else if(k==='heart')playAct(el,'jump',700);const src={wave:'u_i_hand',heart:'u_i_heart'}[k];if(!src)return;const e=h('img',{class:'emo',src:IMG(src),alt:'',style:{bottom:(el._h*1.25)+'px'}});el.appendChild(e);setTimeout(()=>e.remove(),1700);}
@@ -1464,12 +1475,12 @@ function openCafeMenu(){const coins=(S.me&&S.me.coins)||0;
     h('div',{class:'menu-grid'},DRINKS.map(([k,n,img,p])=>h('button',{class:'menu-it'+(coins<p?' poor':''),onclick:()=>buyDrink(k)},h('img',{src:IMG(img),alt:''}),h('b',{text:n}),h('span',{text:'❄ '+p})))),
     todayKey()==='1121'?h('div',{class:'small',style:{textAlign:'center',marginTop:'8px'},text:'🥠 오늘 주문하면 포춘쿠키 증정!'}):null]);}
 async function buyDrink(k){const d=DRINKS.find(x=>x[0]===k);const coins=(S.me.coins||0);if(coins<d[3]){toast('눈송이가 모자라… 미션 깨고 오자 ❄');return;}
-  closeModal();const ok=await saveMe({coins:coins-d[3],drinks:(S.me.drinks||0)+1});if(!ok)return;refreshCoins();sfx('ding');
+  closeModal();const ok=await saveMe({coins:coins-d[3],drinks:(S.me.drinks||0)+1});if(!ok)return;track('drink');refreshCoins();sfx('ding');
   const isDay=(todayKey()==='1121'&&!(S.me.done||{})['1121'])||(todayKey()>'1121'&&Math.random()<.3);const cup=h('img',{class:'dr-cup',src:IMG(d[2]),alt:d[1]});
   const box=[h('div',{class:'dr-stage'},h('div',{class:'dr-steam'}),cup),h('h2',{style:{textAlign:'center',margin:'6px 0 2px'},text:d[1]+' 나왔습니다!'}),h('div',{class:'small',style:{textAlign:'center'},text:'❄ -'+d[3]})];
   const done=h('button',{class:'btn-g',style:{width:'100%',height:'48px',marginTop:'10px',fontSize:'15px'},text:isDay?'🥠 포춘쿠키도 나왔어!':'☕ 호로록',onclick:()=>{if(isDay){closeModal();playCut('cookie','포춘쿠키 하나 서비스 🥠',()=>{rerender();setTimeout(crackCookie,350);},{capDelay:500,max:8});}else{closeModal();playAct(P.el,'drink',1600);P.el._face='side';}}});
   box.push(done);modal(box);}
-function crackCookie(){const msg=rnd(FORTUNES);const ckImg=h('img',{src:IMG('pr_fcookie'),alt:'포춘쿠키'});const ck=h('div',{class:'ck ck2'},h('div',{class:'ck-img'},ckImg),h('div',{class:'ck-slip'},h('small',{text:'FORTUNE'}),h('p',{text:msg})));
+function crackCookie(){track('cookie');const msg=rnd(FORTUNES);const ckImg=h('img',{src:IMG('pr_fcookie'),alt:'포춘쿠키'});const ck=h('div',{class:'ck ck2'},h('div',{class:'ck-img'},ckImg),h('div',{class:'ck-slip'},h('small',{text:'FORTUNE'}),h('p',{text:msg})));
   const btn=h('button',{class:'btn-g',style:{width:'100%',height:'48px',marginTop:'12px',fontSize:'15px'},text:'톡! 깨기',onclick:()=>{if(!ck.classList.contains('open')){ck.classList.add('open');ckImg.src=IMG('pr_fcookie_open');sfx('pop');btn.textContent='👜 쪽지 주머니에 넣기';saveMe({fortune:msg});return;}invAdd({k:'fortune',t:msg}).then(()=>{closeModal();toast('주머니에 쏙 🥠 방 벽이나 게시판에 붙여봐');if(todayKey()==='1121')missionEvent('drink');});}});
   modal([h('h2',{style:{textAlign:'center'},text:'톡 까볼까? 🥠'}),ck,btn]);}
 
@@ -1877,7 +1888,7 @@ function openDinerMenu(){const coins=(S.me&&S.me.coins)||0;
   modal([h('div',{class:'menu-h'},h('small',{text:'오늘의 메뉴'}),h('h2',{text:'뭐 먹을래?'}),h('div',{class:'small',text:'보유 눈송이 ❄ '+coins})),
     h('div',{class:'menu-grid'},FOODS.map(([k,n,img,p])=>h('button',{class:'menu-it'+(coins<p?' poor':''),onclick:()=>orderFood(k)},h('img',{src:IMG(img),alt:''}),h('b',{text:n}),h('span',{text:'❄ '+p}))))]);}
 async function orderFood(k){const f=FOODS.find(x=>x[0]===k);const coins=S.me.coins||0;if(coins<f[3]){toast('눈송이가 모자라… 🥲');return;}closeModal();
-  const ok=await saveMe({coins:coins-f[3]});if(!ok)return;refreshCoins();sfx('ding');let bites=0;
+  const ok=await saveMe({coins:coins-f[3]});if(!ok)return;track('food');refreshCoins();sfx('ding');let bites=0;
   const food=h('img',{class:'fd-food',src:IMG(f[2]),alt:f[1]});const plate=h('img',{class:'fd-plate',src:IMG('dn_plate'),alt:''});const st=h('div',{class:'fd-stage'},plate,food);
   const lbl=h('div',{class:'small',style:{textAlign:'center'},text:'맛있게 먹어 소녀 🥢'});
   const btn=h('button',{class:'btn-g',style:{width:'100%',height:'50px',marginTop:'10px',fontSize:'16px'},text:'🥢 한 입 (0/3)'});
@@ -1984,7 +1995,7 @@ function editPanel(items,redraw,owner){let tab=editPanel.tab||'furn';
   else{const shop=h('div',{class:'shop'});
     const _reg=Object.keys(FURN).filter(k=>!FURN[k][2]);for(const k in FURN){const f=FURN[k];const [n,price,unlock]=f;const preL=!unlock&&todayKey()<'1119'&&_reg.indexOf(k)%2===1;if(preL){shop.appendChild(h('button',{disabled:true},h('span',{class:'badge',text:'11.19 입고'}),h('img',{class:'it xsil',src:IMG('f_'+k),alt:''}),h('span',{text:n}),h('span',{class:'small',style:{fontSize:'9px'},text:'정식 오픈 때 입고'})));continue;}const locked=unlock&&todayKey()<unlock;
       shop.appendChild(h('button',{disabled:locked||(!unlock&&(S.me.coins||0)<price),onclick:()=>{if(items.length>=24){toast('가구는 24개까지!');return;}
-        const wall=f[5]==='wall';items.push({k,x:Math.round(80+Math.random()*360),y:wall?100:Math.round(ROOM.wallH+60+Math.random()*180)});S.sel=items.length-1;
+        const wall=f[5]==='wall';items.push({k,x:Math.round(80+Math.random()*360),y:wall?100:Math.round(ROOM.wallH+60+Math.random()*180)});S.sel=items.length-1;track('furn');
         S.me.room=Object.assign({},S.me.room||{},{items:items.map(x=>Object.assign({},x))});saveMe({room:S.me.room,coins:(S.me.coins||0)-(unlock?0:price)}).then(()=>missionEvent('furn'));redraw();refreshCoins();wrap.replaceWith(editPanel(items,redraw,owner));}},
         unlock?h('span',{class:'badge',text:fmt(unlock)+(locked?' 공개':' 보상')}):null,h('img',{class:'it'+(locked?' xsil':''),src:IMG('f_'+k),alt:''}),h('span',{text:locked?'??? (크리스마스 한정)':n}),
         unlock?h('span',{class:'small',style:{fontSize:'9px'},text:'미션 한정'}):h('span',{style:{display:'flex',alignItems:'center',gap:'2px',fontWeight:'700',fontSize:'11px'}},h('img',{src:IMG('u_coin'),alt:'',style:{width:'14px'}}),String(price))));}
@@ -2005,7 +2016,7 @@ function seatDir(id){if(id[0]==='W'){const w=WSPOTS[parseInt(id.slice(1))];retur
 const ACT_FX={};
 const ANJU={chicken:'치킨',fries:'감자튀김',golbaengi:'골뱅이무침',nogari:'노가리',odeng:'오뎅탕',fruit:'과일'};
 let pubUnsubs=[];
-function enterPub(){if(todayKey()<'1116'){toast('🍻 펍은 11.16 자정에 가오픈해!');return;}stopLoop();clearPeers();leaveSeat(true);S.scene='pub';S.arg=null;
+function enterPub(){if(todayKey()<'1116'){toast('🍻 펍은 11.16 자정에 가오픈해!');return;}track('pub');stopLoop();clearPeers();leaveSeat(true);S.scene='pub';S.arg=null;
   // real-ish sizes (px ≈ 47/m): bar 3.6m, keg 0.6m tall, jukebox 1.5m, heater 1.8m, dart board 0.45m, neon 0.6m
   const items=[{spr:'pb_bar',x:130,y:222,w:180,depth:34},{spr:'pb_keg',x:250,y:206,w:22,depth:12},{spr:'pb_keg',x:272,y:212,w:22,depth:12},{spr:'pb_jukebox',x:500,y:198,w:46,depth:20},{spr:'pb_heater',x:510,y:420,w:28,depth:10},
     {spr:'pb_liquor',x:300,y:118,w:80,type:'wall'},{spr:'pb_neon',x:400,y:92,w:34,type:'wall'},{spr:'pb_dart',x:462,y:96,w:24,type:'wall'},{spr:'pb_lights',x:170,y:34,w:200,type:'wall'},{spr:'pb_lights',x:400,y:34,w:200,type:'wall'}];
@@ -2040,7 +2051,7 @@ function renderChatInto(m){m.innerHTML='';const me=S.uid||'local';const dk=today
   list.forEach(c=>m.appendChild(h('div',{class:'msg'+(c.uid===me?' me':'')+(c.sys?' sys':'')},c.sys?null:h('b',{text:c.name||'주민'}),String(c.t||'').slice(0,120))));m.scrollTop=m.scrollHeight;}
 function topNote(t){const e=h('div',{class:'joinalert',role:'status'},h('span',{text:t}));joinStack().appendChild(e);setTimeout(()=>e.classList.add('out'),3800);setTimeout(()=>e.remove(),4400);}
 function pubNotice(t){topNote(t);if(S.room)S.room.emit('notice',{t,scene:sceneId(),pn:1}).catch(()=>{});}
-async function sendChat(t,sys){if(sys){pubNotice(t);return;}const msg={uid:S.uid||'local',name:(S.me&&S.me.name)||'주민',t:String(t).slice(0,120),ts:Date.now(),sys:false,day:todayKey(),sc:sceneId()};
+async function sendChat(t,sys){if(sys){pubNotice(t);return;}track('say');const msg={uid:S.uid||'local',name:(S.me&&S.me.name)||'주민',t:String(t).slice(0,120),ts:Date.now(),sys:false,day:todayKey(),sc:sceneId()};
   showSay(null,t);if(S.room)S.room.emit('say',{t,scene:sceneId()}).catch(()=>{});
   if(S.db&&!S.solo){try{await S.db.collection(NS+'pubchat').add(msg);}catch(e){S.chat.push(msg);renderChat();}}else{S.chat.push(msg);S.chat=S.chat.slice(-40);renderChat();}}
 function seatTaken(id){if(S.seat===id)return true;return peersInScene('pub').some(p=>p.presence.seat===id);}
@@ -2057,7 +2068,7 @@ function showTablePanel(){const o=app.querySelector('.tablepanel');if(o)o.remove
     mates.length?b('👉 따라주기',()=>openPourTo(mates)):null,b('🔔 한잔할 사람~',ringBell),b('🚶 자리 비우기',()=>{leaveSeat();showTablePanel();}));
   app.appendChild(panel);}
 function pour(toPeer,type){if(!toPeer){S.drink=type;S.lvl=0;pourAnim2(null,S.seat,type==='somaek'?'beer':type);act('pour',{seat:S.seat,d:type});setTimeout(()=>{S.lvl=1;sendPresence();drawTables();},1250);toast({beer:'맥주 콸콸 🍺',soju:'소주 졸졸 🥃',somaek:'소맥 말았다 🍻 황금비율!'}[type]);}
-  else{missionEvent('pour');if(S.room)S.room.emit('pour',{to:toPeer.peer,d:type,name:S.me.name,scene:'pub',seat:toPeer.presence.seat}).catch(()=>{});pourAnim2(null,toPeer.presence.seat,type==='somaek'?'beer':type);
+  else{missionEvent('pour');track('pour');if(S.room)S.room.emit('pour',{to:toPeer.peer,d:type,name:S.me.name,scene:'pub',seat:toPeer.presence.seat}).catch(()=>{});pourAnim2(null,toPeer.presence.seat,type==='somaek'?'beer':type);
     const nm=(S.profiles[peerUid(toPeer)]||{}).name||'친구';sendChat((S.me.name||'나')+' → '+nm+' '+({beer:'맥주',soju:'소주',somaek:'소맥'}[type])+' 따라줌',true);}}
 function openPourTo(mates){modal([h('h2',{text:'누구한테 따라줄까?'}),...mates.map(p=>{const pr=S.profiles[peerUid(p)]||{};return h('div',{style:{display:'flex',alignItems:'center',gap:'8px',margin:'6px 0'}},h('b',{style:{flex:'1'},text:pr.name||'주민'}),
   ...['beer','soju','somaek'].map(t=>h('button',{class:'btn-c',style:{padding:'5px 9px',fontSize:'12px'},onclick:()=>{closeModal();pour(p,t);},text:{beer:'맥주',soju:'소주',somaek:'소맥'}[t]})));})]);}
@@ -2066,7 +2077,7 @@ function eat(){if(P.el)playAct(P.el,'eat',1500);const t=tableOf(S.seat);const a=
   S.pubTables[t]={anju:a,ts:Date.now()};drawTables();eatAnim(null,k,true);act('eat',k);setAnju(t,a);if(!a.length)setTimeout(()=>toast('안주 다 먹었다! 또 시켜 🍽'),900);}
 function cheers(){const t=tableOf(S.seat);if(!S.drink||S.lvl<=0){toast('빈 잔으론 짠 못 해! 먼저 따라줘');return;}
   const mates=tablemates();if(!mates.length){doCheers(t,[null]);toast('혼자 짠… 🥲 친구가 오면 같이 하자');return;}
-  if(S.room)S.room.emit('cheers',{t,req:1,name:S.me.name,scene:'pub'}).catch(()=>{});raiseGlass(null);bubble(null,'짠 할 사람!! 🥂');toast(mates.length+'명한테 짠 신청! 받아주면 같이 짠 🥂');}
+  if(S.room)S.room.emit('cheers',{t,req:1,name:S.me.name,scene:'pub'}).catch(()=>{});track('cheers');raiseGlass(null);bubble(null,'짠 할 사람!! 🥂');toast(mates.length+'명한테 짠 신청! 받아주면 같이 짠 🥂');}
 function raiseGlass(peer){const a=avaPos(peer);if(!a||!a.seat)return;if(a.el){a.el._face='side';playAct(a.el,'clink',1600);}const soju=(peer?((a.el._pres||{}).drink):S.drink)==='soju';const gp=glassPos(a.seat);const hp=handPt(a);hiddenGlass[a.seat]=Date.now()+1600;drawTables();
   const g=aprop(soju?'d_soju':'d_beer',gp[0],gp[1],soju?7:10,5000);g.animate([{transform:tr(0,0)},{transform:tr(hp[0]-gp[0],hp[1]-gp[1]-14,a.dir*10),offset:.3},{transform:tr(hp[0]-gp[0],hp[1]-gp[1]-16,a.dir*-6),offset:.6},{transform:tr(hp[0]-gp[0],hp[1]-gp[1]-14,a.dir*10),offset:.8},{transform:tr(0,0)}],{duration:1500,easing:'ease-in-out'}).onfinish=()=>{g.remove();drawTables();};}
 function askCheers(peer,t,name){const o=app.querySelector('.cheersask');if(o)o.remove();raiseGlass(peer);
@@ -2464,6 +2475,10 @@ const DAILY_START='1118';
 function dailyNo(k){const a=new Date(2026,10,18),b=new Date(2026,+k.slice(0,2)-1,+k.slice(2));return Math.round((b-a)/864e5)+1;}
 function kDate(k){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2));return '2026년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+'일월화수목금토'[d.getDay()]+'요일';}
 function seeded(k){let s=hashN(k)||7;return ()=>((s=(s*16807)%2147483647)/2147483647);}
+function track(f,n){if(isTest()||!S.me||!S.me.name)return;S._trk=S._trk||{};S._trk[f]=(S._trk[f]||0)+(n==null?1:n);clearTimeout(S._trkT);S._trkT=setTimeout(trackFlush,12000);}
+function trackFlush(){const t=S._trk;if(!t||!S.me)return;S._trk=null;clearTimeout(S._trkT);const k=todayKey();const L=Object.assign({},S.me.log||{});const keep=Object.keys(L).sort().slice(-4);const o={};keep.forEach(x=>o[x]=L[x]);o[k]=Object.assign({},o[k]||{});
+  for(const f in t)o[k][f]=(o[k][f]||0)+t[f];const _d=new Date(Date.now()+9*3600e3);const m=_d.getUTCHours()*60+_d.getUTCMinutes();if(o[k].t0==null)o[k].t0=m;o[k].t1=m;saveMe({log:o});}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')trackFlush();});
 function logInc(f,n){const k=todayKey();const L=Object.assign({},S.me&&S.me.log||{});const keep=Object.keys(L).sort().slice(-4);const o={};keep.forEach(x=>o[x]=L[x]);o[k]=Object.assign({},o[k]||{});o[k][f]=(o[k][f]||0)+(n==null?1:n);return {log:o};}
 const FORTUNE=['오늘은 말 한마디로 누군가를 크게 웃길 운','눈송이가 굴러들어오는 날, 알바 꼭 해','전차 조심! 오늘따라 철길이 끌린다','오늘 만나는 첫 사람에게 손 흔들면 행운','카페 음료 한 잔이 하루를 살린다','펍에서 짠 하면 소원 하나 이뤄질 운','마니또의 시선이 느껴지는 하루 👀','오늘의 행운 아이템: 빨간 목도리','갑자기 옛날 사진이 보고 싶어질 운','집 꾸미기 운 최고조, 가구 하나 들여봐','수다방에서 명대사 탄생 예감','오늘은 그냥 누워 있어도 귀여운 날','점심 메뉴 고민하다 반나절 가는 날','칭찬 한마디가 돌아오는 날','오늘 밤 꿈에 소녀들 출연 예정','계획 없이 걷다가 좋은 일 생길 운'];
 const ADS=[['☕ 빌리지 카페','따뜻한 음료 한 잔에 포춘쿠키 덤! (11.21 오픈)'],['🍻 소녀 펍','안주는 가오픈 끝나도 맛있습니다. 술은 늘 무제한'],['🏥 빌리지 병원','전차 사고 환자 예약 받습니다 (12.07 오픈 예정)'],['💐 꽃집','꽃 세 송이로 마음 전하기. 안개꽃은 서비스'],['🚋 빌리지 전차','치이지 마세요. 진짜로.'],['✍️ 회의실','일하면 눈송이 나옵니다. 열일 환영'],['📮 우체국','편지는 마음을 싣고 우체통으로 (11.29 오픈)'],['🛋️ 가구점','방 꾸미기 대축제! 집이 예뻐야 손님이 와요']];
@@ -2492,7 +2507,7 @@ async function makePaper(k){const y=prevDay(k);const res=residents();const P_={k
   else {head='조용했던 빌리지의 하루';sub='다들 어디 갔나… 오늘은 꼭 들르자';}
   if(k===DAILY_START){head='프로젝트 빌리지 개장! 소녀 '+N+'명 입주 완료';sub='창간호 기념 특집 · 내일(11.19)부터 본격 미션 시작';}
   if(doc.head)head=doc.head;if(doc.sub)sub=doc.sub;
-  Object.assign(P_,{head,sub,att,hits,jobs,rich,deco,streak,chatN:chat.length,topTalk,quote,posts,tips,doc,res,R});return P_;}
+  Object.assign(P_,{chat,meU,head,sub,att,hits,jobs,rich,deco,streak,chatN:chat.length,topTalk,quote,posts,tips,doc,res,R});return P_;}
 function paperPhoto(list){const box=h('div',{class:'np-photo'});const L=(list.length?list:residents()).slice(0,6);const n=L.length;L.forEach(([u,p],i)=>{const a=makeAva(p,false,74);a.classList.add('np-ava');a.style.left=(n<2?50:(12+i*(76/(n-1))))+'%';box.appendChild(a);});return box;}
 function npList(arr){return h('ul',{class:'np-ul'},arr.map(t=>h('li',{text:t})));}
 function enDate(k,short){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2));const W=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'],M=['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];return short?(W[d.getDay()].slice(0,3)+', '+M[d.getMonth()].slice(0,3)+' '+d.getDate()+', 2026'):(W[d.getDay()]+', '+M[d.getMonth()]+' '+d.getDate()+', 2026');}
@@ -2523,19 +2538,51 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   else pages.push([ears,dl,h('div',{class:'np-kicker',text:p.k===DAILY_START?'★ FIRST EDITION · 창간호 ★':'TOP STORY'}),h('h1',{class:'np-head',text:p.head}),h('div',{class:'np-sub',text:p.sub}),
     paperPhoto(p.att),h('div',{class:'np-cap',text:'▲ '+fy+' 빌리지를 찾은 소녀들 '+(p.att.length?'('+p.att.map(nm).join(', ')+')':'(자료 사진)')+'  /  PHOTO: VILLAGE DAILY'}),
     h('div',{class:'np-cols'},h('div',{class:'np-by',text:'By 빌리지 데일리 취재팀'}),h('p',{class:'np-body dc',text:lede})),idx]);
-  // ── A2 VILLAGE
-  const nums=h('div',{class:'np-nums'},[[p.att.length+'명','방문'],[p.chatN+'','수다(마디)'],[p.hits.reduce((a,b)=>a+b[1],0)+'건','전차 사고']].map(([a,b])=>h('div',{},h('b',{text:a}),h('span',{text:b}))));
-  const art=(...k)=>h('div',{class:'np-art'},k);const c2=[art(hd('출석부 ROLL CALL'),npList(p.res.map(r=>(p.att.includes(r)?'✔ ':'· ')+nm(r)+(p.att.includes(r)?'':' (결석)'))))];
-  if(p.streak[0]&&p.streak[0][1]>=2)c2.push(art(hd('개근상'),h('p',{class:'np-body',text:'연속 출석 1위는 '+nm(p.streak[0][0])+'('+p.streak[0][1]+'일 연속). 성실 그 자체.'})));
-  c2.push(art(hd('수다왕'),h('p',{class:'np-body',text:p.topTalk?((S.profiles[p.topTalk[0]]||{}).name||'누군가')+' — 하루 '+p.topTalk[1]+'마디. 입이 쉬질 않았다는 후문.':'어제는 수다왕 후보가 없었다. 오늘 왕관의 주인은?'})));
-  c2.push(art(hd('게시판 새 소식'),p.posts.length?npList(p.posts.slice(0,4).map(x=>x[0]+': "'+x[1]+'"')):h('p',{class:'np-body dim',text:'게시판은 11.19부터 열린다. 첫 메모의 주인공은 누구?'})));
-  pages.push([run(1),flag('Village','마을 소식'),nums,h('div',{class:'np-cols'},c2)]);
+  // ── A2 VILLAGE (rotating: 오늘의 소녀 + 가십 TOP5 + 랜덤 코너)
+  const art=(...k)=>h('div',{class:'np-art'},k);const pick=a=>a[Math.floor(R()*a.length)];
+  const jo=(w,a,b)=>{const c=String(w).charCodeAt(String(w).length-1);return w+((c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?a:b);};
+  const LY=r=>(r[1].log&&r[1].log[y])||{};const notMe=r=>r[1].name!=='현디';const others=p.res.filter(notMe);const pool=others.length?others:p.res;
+  const said=r=>p.chat.filter(m=>m.uid===r[0]);const act=r=>{const l=LY(r);return Object.keys(l).some(f=>f!=='att'&&l[f])||said(r).length>0;};
+  const hm=m=>{const H=Math.floor(m/60),M=m%60;return (H<6?'새벽 ':H<12?'오전 ':H<18?'오후 ':'밤 ')+((H%12)||12)+'시'+(M>=30?' 반':'');};
+  const PLN={pub:'펍',writers:'회의실',cafe:'카페',diner:'식당',flower:'꽃집',post:'우체국',gift:'선물가게',books:'서점',clinic:'병원',townhall:'시청',theater:'공연장',studio:'연습실',police:'경찰서',gallery:'미술관',home:'자기 집',visit:'남의 집'};
+  const topPlace=r=>{const l=LY(r);let best=null;for(const f in l)if(f.startsWith('v_')&&PLN[f.slice(2)]&&(!best||l[f]>best[1]))best=[f.slice(2),l[f]];return best;};
+  // 1) 오늘의 소녀 밀착 취재
+  const g=pool[(p.no-1+pool.length*10)%pool.length];let feat=null;
+  if(g){const l=LY(g),G=nm(g),ss=said(g),tp=topPlace(g);const s=[];
+    if(!act(g)&&!(p.att.includes(g))){s.push(pick(['어제 '+G+'의 행방은 묘연했다. 마을 어디에서도 '+jo(G,'을','를')+' 봤다는 목격자는 없었다.','본지 기자가 하루 종일 '+G+'네 집 앞을 지켰지만, 문은 끝내 열리지 않았다.']),pick(['바쁜 하루였을까, 아니면 이불 속이었을까.','혹시 다른 마을에 몰래 다녀온 건 아닌지 본지는 의심하고 있다.']),pick(['오늘은 꼭 얼굴 보여주길.',''+G+', 보고 있다면 연락 바란다.']));}
+    else{if(l.t0!=null)s.push('어제 '+jo(G,'이','가')+' 빌리지에 처음 모습을 드러낸 건 '+hm(l.t0)+'.'+(l.t1!=null&&l.t1-l.t0>=60?' '+hm(l.t1)+'까지 마을을 떠나지 않았다.':''));else s.push('어제 '+G+'의 하루를 본지가 밀착 취재했다.');
+      if(tp)s.push(pick(['가장 자주 들른 곳은 '+PLN[tp[0]]+'('+tp[1]+'회).','발길이 제일 많이 닿은 곳은 '+PLN[tp[0]]+'. 무려 '+tp[1]+'번이다.']));
+      if(l.heart)s.push('하트를 '+l.heart+'번 뿌리며 마을에 사랑을 퍼뜨렸다.');if(l.wave)s.push('손 인사만 '+l.wave+'번. 인사성 하나는 마을 최고다.');
+      if(l.drink||l.food)s.push(pick(['먹고 마신 것만 '+((l.drink||0)+(l.food||0))+'개. 위장이 튼튼하다.','카페와 식당에 눈송이를 아낌없이 썼다.']));
+      if(l.cheers)s.push('펍에서 짠만 '+l.cheers+'번 외쳤다.');if(l.hit)s.push(pick(['전차에 '+l.hit+'번 치이는 수모도 겪었다.','그러나 전차와의 악연('+l.hit+'회)은 피하지 못했다.']));if(l.job)s.push('알바로 눈송이도 알뜰하게 챙겼다.');
+      const q=ss.filter(m=>m.t.length>=4);if(q.length)s.push('이날 남긴 말 중 가장 인상적인 한마디는 "'+pick(q).t+'"');
+      if(s.length<=1)s.push(pick(['조용히 왔다가 조용히 사라졌다. 마을에는 "닌자설"이 돌고 있다.','흔적은 남기지 않았다. 본지는 그의 다음 행보를 주시한다.','말 한마디 없이 마을을 한 바퀴 돌고 사라졌다. 신비주의 전략일까.']));
+      s.push(pick(['본지는 오늘도 그를 지켜본다.','내일의 밀착 대상은 누구일까.','이상 빌리지 데일리 밀착 취재팀이었다.']));}
+    const ph=paperPhoto([g]);ph.classList.add('sm');
+    feat=h('div',{class:'np-feat'},h('div',{class:'np-feat-k',text:'CLOSE-UP · 오늘의 소녀'}),h('h2',{class:'np-feat-h',text:pick(['밀착 취재 | '+G+'의 하루','"'+G+'", 그녀의 24시','본지가 따라가 본 '+G+'의 어제'])}),ph,h('p',{class:'np-body dc',text:s.join(' ')}));}
+  // 2) 가십 TOP 5 — 매일 기준이 돈다
+  const CR=[['say','말풍선 제일 많이 띄운 소녀','마디',['입에 모터 달았다는 소문','수다방 지분 1위']],['heart','하트 제일 많이 뿌린 소녀','번',['사랑이 넘친다','하트 재고 바닥 직전']],['wave','인사왕','번',['손목 괜찮나요?','마을 공식 인사 담당']],['pub','펍 단골 1위','번',['사장님이 자리 맡아준다는 후문','간 건강이 걱정된다']],['cheers','짠 제일 많이 한 소녀','번',['건배사 장인','잔 깨지겠다']],['hit','전차를 가장 사랑한 소녀','회',['전차가 먼저 알아본다','이쯤 되면 운명']],['visit','남의 집 제일 많이 간 소녀','번',['마실 전문가','집주인들 긴장 중']],['home','집순이 1위','번',['우리 집이 최고','이불 밖은 위험해']],['t1','올빼미 1위','',['잠은 언제 자나','밤의 지배자']],['t0','얼리버드 1위','',['부지런함의 끝판왕','새벽 공기 마시는 소녀']],['drink','카페인 충전 1위','잔',['심장 괜찮나','카페 VIP']],['furn','인테리어 큰손','개',['집들이 언제 해?','가구점 사장님 미소']]];
+  const val=(r,c)=>c==='say'?said(r).length:(c==='visit'||c==='home')?(LY(r)['v_'+c]||0):(LY(r)[c]||0);
+  let gos=null;for(let t=0;t<CR.length;t++){const c=CR[(p.no*5+t)%CR.length];const has=x=>c[0]==='t0'||c[0]==='t1'?LY(x)[c[0]]!=null:val(x,c[0])>0;let L2=p.res.filter(has);const L3=L2.filter(notMe);if(L3.length>=2)L2=L3;if(L2.length<2)continue;
+    L2.sort((a,b)=>c[0]==='t0'?LY(a).t0-LY(b).t0:c[0]==='t1'?LY(b).t1-LY(a).t1:val(b,c[0])-val(a,c[0]));
+    gos=art(hd('GOSSIP TOP 5 · '+c[1]),h('ol',{class:'np-rank'},L2.slice(0,5).map((r,i)=>h('li',{},h('b',{text:nm(r)}),h('span',{text:c[0]==='t0'||c[0]==='t1'?hm(LY(r)[c[0]]):val(r,c[0])+c[2]})))),h('p',{class:'np-body dim',text:'1위 '+nm(L2[0])+': '+pick(c[3])}));break;}
+  if(!gos){const rr=pool.slice().sort((a,b)=>(b[1].coins||0)-(a[1].coins||0));gos=art(hd('GOSSIP TOP 5 · 눈송이 부자'),h('ol',{class:'np-rank'},rr.slice(0,5).map(r=>h('li',{},h('b',{text:nm(r)}),h('span',{text:'❄ '+(r[1].coins||0)})))),h('p',{class:'np-body dim',text:pick(['부자 소녀한테 밥 사달라고 하자.','어제는 다들 조용했다. 오늘은 랭킹을 흔들어보자.'])}));}
+  // 3) 랜덤 코너
+  const sum=f=>p.res.reduce((a,r)=>a+(f==='say'?said(r).length:(LY(r)[f]||0)),0);
+  const NM=[['att','방문','명',()=>p.att.length],['say','수다','마디'],['cheers','짠','번'],['heart','하트','개'],['hit','전차 사고','건'],['job','알바','명',()=>p.jobs.length],['pub','펍 손님','명',()=>p.res.filter(r=>LY(r).pub).length],['drink','음료','잔']];
+  const corners=[];
+  corners.push(()=>{const ok=NM.map(x=>[x,x[3]?x[3]():sum(x[0])]).filter(x=>x[1]>0).sort(()=>R()-.5).slice(0,3);if(ok.length<2)return null;return art(hd('BY THE NUMBERS · 숫자로 본 빌리지'),h('div',{class:'np-nums'},ok.map(([x,v])=>h('div',{},h('b',{text:v+x[2]}),h('span',{text:x[1]})))));});
+  corners.push(()=>{const sp=[];pool.forEach(r=>{const l=LY(r);for(const f in l)if(f.startsWith('v_')&&PLN[f.slice(2)]&&f!=='v_home')sp.push([r,f.slice(2)]);});if(!sp.length)return null;const T=[(n,pl)=>'어제 '+jo(n,'이','가')+' '+pl+' 쪽으로 걸어가는 모습이 목격됐다. 표정은 밝았다고.',(n,pl)=>pl+'에서 '+jo(n,'을','를')+' 봤다는 제보가 있다. 혼자였는지는 확인되지 않았다.',(n,pl)=>'"'+pl+' 앞에서 '+n+' 봤어요" — 익명의 주민'];return art(hd('SPOTTED · 목격담'),npList(sp.sort(()=>R()-.5).slice(0,2).map(([r,pl])=>pick(T)(nm(r),PLN[pl]))));});
+  corners.push(()=>{const c=p.chat.filter(m=>m.uid!==p.meU&&m.t.length>=4&&(!p.quote||m.t!==p.quote.t));if(!c.length)return null;const m=pick(c);return art(hd('INTERVIEW · 한마디 인터뷰'),h('p',{class:'np-body'},h('b',{text:'Q. '+pick(['어제 하루 어땠나요?','요즘 빌리지 생활은?','독자들에게 한마디','지금 심경은?'])}),h('br'),document.createTextNode('A. "'+m.t+'" — '+(m.name||'주민'))));});
+  corners.push(()=>{const f=pool.filter(r=>LY(r).furn).sort((a,b)=>LY(b).furn-LY(a).furn);const top=f[0]||(p.deco[0]&&p.deco[0][1]>0?p.deco[0][0]:null);if(!top)return null;const n=nm(top),c=LY(top).furn;return art(hd('HOME · 이웃집 소식'),h('p',{class:'np-body',text:c?pick([n+'네 집에 어제만 가구 '+c+'개가 들어갔다. 이사 온 줄.',n+', 어제 가구 '+c+'개 지름. 집들이 날짜 공개 요구가 빗발친다.']):pick([n+'네 집이 마을에서 제일 꽉 찼다는 소문. 구경 가볼 사람?','인테리어 하면 '+n+'. 가구 '+p.deco[0][1]+'개의 위엄.'])}));});
+  const order=[0,1,2,3].sort(()=>R()-.5);const c2=[gos];let used=0;for(const i of order){if(used>=2)break;const el=corners[i]();if(el){c2.push(el);used++;}}
+  if(p.posts.length)c2.push(art(hd('게시판 새 소식'),npList(p.posts.slice(0,4).map(x=>x[0]+': "'+x[1]+'"'))));
+  pages.push([run(1),flag('Village','마을 소식'),feat,h('div',{class:'np-cols'},c2)]);
   // ── A3 METRO & BUSINESS
   const c3=[];
-  if(p.hits.length)c3.push(art(hd('BLOTTER · 사건사고','red'),npList(p.hits.map(([r,n])=>nm(r)+' — 전차와 충돌 '+n+'회. "어질어질하다"며 자가 회복')),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'})));
-  else c3.push(art(hd('BLOTTER · 사건사고','red'),h('p',{class:'np-body dc',text:'어제는 전차 무사고! 철길 위의 평화가 계속되고 있다. 다만 본지는 방심은 금물이라고 경고한다. 전차는 기다려주지 않는다.'})));
-  c3.push(art(hd('알바 소식'),h('p',{class:'np-body',text:p.jobs.length?'어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.':'어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.'})));
-  if(p.deco[0]&&p.deco[0][1]>0)c3.push(art(hd('인테리어 경쟁'),h('p',{class:'np-body',text:'가구 제일 많은 집: '+nm(p.deco[0][0])+'네 ('+p.deco[0][1]+'개). 집들이 언제 하나요?'})));
+  if(p.hits.length)c3.push(art(hd('BLOTTER · 사건사고','red'),npList(p.hits.map(([r,n])=>nm(r)+' — 전차와 충돌 '+n+'회. '+pick(['"어질어질하다"며 자가 회복','"별이 보였다"고 진술','목격자 "전차가 반가워하는 것 같았다"']))),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'})));
+  else c3.push(art(hd('BLOTTER · 사건사고','red'),h('p',{class:'np-body dc',text:pick(['어제는 전차 무사고! 철길 위의 평화가 계속되고 있다. 다만 본지는 방심은 금물이라고 경고한다. 전차는 기다려주지 않는다.','전차 사고 0건. 전차 기사님은 "요즘 다들 너무 조심해서 심심하다"고 전했다.','어제 철길은 조용했다. 폭풍 전의 고요일지도 모른다.'])})));
+  c3.push(art(hd('알바 소식'),h('p',{class:'np-body',text:p.jobs.length?pick(['어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.',p.jobs.map(nm).join(', ')+', 어제 땀 흘려 눈송이를 벌었다. 노동의 가치.','알바 출근부: '+p.jobs.map(nm).join(', ')+'. 사장님이 칭찬했다는 후문.']):pick(['어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.','알바 구인 공고가 하루 종일 붙어 있었다. 지원자 0명.'])})));
   const mk=h('div',{class:'np-mkt'},h('div',{class:'np-mkt-h'},h('b',{text:'MARKETS'}),h('span',{text:'눈송이 시세 ❄'})),
     p.rich.slice(0,6).map((r,i)=>h('div',{class:'np-mkt-r'},h('span',{text:(i+1)+'. '+nm(r)}),h('b',{text:'❄ '+(r[1].coins||0)}),h('i',{class:i<3?'up':'',text:i<3?'▲':'–'}))));
   pages.push([run(2),flag('Metro & Business','사건 · 경제'),mk,h('div',{class:'np-cols'},c3)]);
@@ -2618,7 +2665,7 @@ function goMeet(x){const sc=x.pres.scene||'village';
   if(sc.startsWith('room:'))return enterRoom(sc.slice(5));
   const map={cafe:'cafe',diner:'diner',flower:'flower',post:'post',gift:'gift',books:'books',clinic:'clinic',townhall:'townhall',theater:'theater',studio:'gym',police:'police',gallery:'museum'};
   const id=map[sc];if(id){const go=()=>walkToPlace(id);if(S.scene!=='village')enterVillage(null,go);else go();toast(x.name+'은(는) '+sceneLabel(sc)+'에 있어!');}else toast(x.name+'은(는) 지금 '+sceneLabel(sc));}
-function sendWave(u,name){if(!S.room)return;S.room.emit('wave',{to:u,from:(S.me&&S.me.name)||'누군가'}).catch(()=>{});sfx('pop');toast('👋 '+name+'한테 손 흔들었어!');}
+function sendWave(u,name){if(!S.room)return;track('wave');S.room.emit('wave',{to:u,from:(S.me&&S.me.name)||'누군가'}).catch(()=>{});sfx('pop');toast('👋 '+name+'한테 손 흔들었어!');}
 function joinAlert(x){const e=h('div',{class:'joinalert',role:'status'},h('span',{text:'🔔 '+x.name+'이(가) 빌리지에 들어왔어!'}),h('button',{class:'chip on',onclick:ev=>{ev.stopPropagation();sendWave(x.u,x.name);e.remove();},text:'👋 반겨주기'}));joinStack().appendChild(e);sfx('ding');setTimeout(()=>e.classList.add('out'),5200);setTimeout(()=>e.remove(),5800);}
 function joinStack(){let st=app.querySelector('.joinstack');if(!st){st=h('div',{class:'joinstack'});app.appendChild(st);}return st;}
 function updateOnline(){const L=onlineList();const ids=new Set(L.map(x=>x.u));if(S._onSet&&Date.now()-(S._bootT||0)>5000){S._lastOn=S._lastOn||{};const now=Date.now();L.forEach(x=>{if(!S._onSet.has(x.u)&&now-(S._lastOn[x.u]||0)>180000)joinAlert(x);});}const nw=Date.now();S._lastOn=S._lastOn||{};ids.forEach(u=>S._lastOn[u]=nw);S._onSet=ids;const sig=L.map(x=>x.u+':'+x.pres.scene).join('|');if(sig!==S._onSig||!app.querySelector('.onbar')){S._onSig=sig;drawOnline();}}
