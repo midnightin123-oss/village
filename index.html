@@ -868,8 +868,8 @@ const ORN_NAME={ball_red:'빨간 공',ball_gold:'금색 공',ball_blue:'파란 �
 const DY=200; // vertical shift for bigger plaza
 const WW=1500,WH=2440;
 const B=[
- {id:'townhall',spr:'townhall',cx:780,base:340,w:330,ar:1.0375,name:'시계탑 시청'},{id:'daily',spr:'newsstand',cx:992,base:346,w:118,ar:1.172,name:'신문 가판대',always:true},
- {id:'pub',spr:'pub',cx:1110,base:480,w:180,ar:1.0125,name:'펍',always:true},
+ {id:'townhall',spr:'townhall',cx:780,base:340,w:330,ar:1.0375,name:'시계탑 시청'},{id:'daily',spr:'newsstand',cx:1008,base:346,w:118,ar:1.172,name:'신문 가판대',always:true},
+ {id:'pub',spr:'pub',cx:1130,base:530,w:180,ar:1.0125,name:'펍',always:true},
  {id:'writers',spr:'house',cx:450,base:480,w:165,ar:1.104,name:'회의실',always:true},
  {id:'tram',spr:'tram',cx:375,base:790,w:170,ar:.878,name:'트램 정류장'},
  {id:'diner',spr:'diner',cx:290,base:1075,w:220,ar:.819,name:'식당'},
@@ -1298,13 +1298,13 @@ const TR={d:0,mode:'loop',t:0};
 const PATHS=[{x:700,y:900,w:160,h:1470},{c:1,x:PLAZA.x,y:PLAZA.y,r:PLAZA.r},{x:30,y:1880,w:670,h:70},{x:30,y:2350,w:1110,h:80},{x:330,y:760,w:140,h:60}];
 B.forEach(b=>{if(b.noDoor||b.id==='townhall'||b.id==='tram'||b.id==='writers'||b.id==='pub'||b.hidden)return;if(b.cx<700)PATHS.push({x:b.cx-30,y:b.base-6,w:700-(b.cx-30),h:58});else PATHS.push({x:860,y:b.base-6,w:b.cx+30-860,h:58});});
 HOUSES.forEach(hh=>PATHS.push({x:hh.cx-24,y:hh.base-6,w:48,h:(hh.base<1880?1886:2356)-hh.base}));
-PATHS.push({x:410,y:476,w:150,h:64});PATHS.push({x:1010,y:476,w:160,h:64});
+PATHS.push({x:410,y:476,w:150,h:64});{const pb=B.find(b=>b.id==='pub');PATHS.push({x:pb.cx-100,y:pb.base-4,w:160,h:64});}
 const TREES=[];(function(){let s=11;const r=()=>(s=(s*16807)%2147483647)/2147483647;const add=(x,y)=>TREES.push({x,y,v:Math.floor(r()*6)});
   for(let y=420;y<2350;y+=150){add(30+r()*30,y+r()*40);}for(let y=420;y<1620;y+=150){add(1460-r()*30,y+r()*40);}
   [[200,440],[1380,480],[180,1250],[470,1100],[140,1330],[600,1560],[880,1300],[1180,1320],[1460,1750],[1180,1700],[880,2050],[1170,2080],[560,2000],[620,1880],[30,1640],[1200,600],[1350,760],[1120,1280],[1300,1300],[1420,1440],[1180,1450],[520,2190],[1080,2210],[1300,2240],[1440,2190],[600,1500],[960,1820],[230,620],[1330,620]].forEach(p=>add(p[0],p[1]));})();
 function clearOf(x,y,pad){for(const b of B){const hh=b.w*b.ar;if(Math.abs(x-b.cx)<b.w/2+pad&&y>b.base-hh-10&&y<b.base+70)return false;}for(const q of HOUSES){if(Math.abs(x-q.cx)<HOUSE_W/2+pad&&y>q.base-HOUSE_W*HOUSE_AR-10&&y<q.base+60)return false;}for(const p of PATHS){if(p.c)continue;if(x>p.x-14&&x<p.x+p.w+14&&y>p.y-4&&y<p.y+p.h+20)return false;}return Math.hypot(x-PLAZA.x,y-PLAZA.y)>PLAZA.r+30;}
 {const front=(x,y)=>B.some(b=>!b.hidden&&Math.abs(x-b.cx)<b.w/2+60&&y>=b.base&&y<b.base+210);const keep=TREES.filter(t=>clearOf(t.x,t.y,40)&&!front(t.x,t.y));TREES.length=0;keep.forEach(t=>TREES.push(t));}
-const LAMPS=[[690,1100],[870,1100],[690,1400],[870,1400],[690,1850],[870,1850],[690,2160],[870,2160],[520,560],[1040,560],[520,860],[1040,860]];
+const LAMPS=[[690,1100],[870,1100],[690,1400],[870,1400],[690,1850],[870,1850],[690,2160],[870,2160],[520,560],[1012,578],[520,860],[1040,860]];
 const _P0=null;
 const BENCHES=[[560,700],[1000,700],[640,980],[920,980]];
 const FLOWERS=[[600,620],[960,620],[640,880],[920,880]];
@@ -1996,7 +1996,7 @@ function enterPub(){if(todayKey()<'1116'){toast('🍻 펍은 11.16 자정에 가
   const R=tileRoom({cols:PUB.cols,rows:PUB.rows,wallH:PUB.wallH,floor:'wood',wall:'brick',floorTile:90,wallTile:80,items});
   const {stage,world}=R;const tableLayer=h('div',{style:{position:'absolute',inset:'0',pointerEvents:'none'}});world.appendChild(tableLayer);
   P.x=R.exit.x;P.y=R.exit.y-20;P.path=null;P.el=makeAva(S.me,true,74);world.appendChild(P.el);
-  const out=()=>{leaveSeat();enterVillage({x:1110,y:520});};
+  const out=()=>{leaveSeat();enterVillage({x:1130,y:570});};
   const doors=[{x:R.exit.x,y:R.exit.y,r:40,label:'밖으로 나가기',act:out}];
   for(const t in TABLES)for(const n of ['1','2','3','4']){const id=t+n;const p=seatPos(id);doors.push({x:p[0],y:p[1]+(n>'2'?0:4),r:22,hide:()=>seatTaken(id),label:'🍺 여기 자리 잡기',act:()=>sitDown(id)});}
   doors.push({x:130,y:240,r:40,label:'🔔 "한잔할 사람~" 종 울리기',act:ringBell});
