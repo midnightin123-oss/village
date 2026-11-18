@@ -653,7 +653,7 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .daze-stars i:nth-child(1){left:0}.daze-stars i:nth-child(2){left:14px;top:-4px}.daze-stars i:nth-child(3){left:28px}.daze-stars i:nth-child(4){left:7px;top:6px}
 .daze-stars.big{width:70px;margin-left:-35px;top:2px}.daze-stars.big i{font-size:18px}.daze-stars.big i:nth-child(2){left:24px;top:-8px}.daze-stars.big i:nth-child(3){left:50px}.daze-stars.big i:nth-child(4){left:14px;top:10px}
 @keyframes dzspin{0%{transform:rotateY(0) rotate(-6deg)}50%{transform:rotateY(180deg) rotate(6deg)}100%{transform:rotateY(360deg) rotate(-6deg)}}
-.hit-card{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.6);opacity:0;z-index:70;width:230px;background:#FFF8E6;border:4px solid #5A3A22;border-radius:18px;box-shadow:0 8px 0 rgba(0,0,0,.3);text-align:center;padding:14px 12px 12px;transition:transform .35s cubic-bezier(.3,1.6,.5,1),opacity .3s;pointer-events:none}
+.hit-card{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) scale(.6);opacity:0;z-index:70;width:230px;background:#FFF8E6;border:4px solid #5A3A22;border-radius:18px;box-shadow:0 8px 0 rgba(0,0,0,.3);text-align:center;padding:14px 12px 12px;transition:transform .35s cubic-bezier(.3,1.6,.5,1),opacity .3s}
 .hit-card.on{transform:translate(-50%,-50%) scale(1);opacity:1;animation:hitshake .5s .1s}
 .hit-card .hit-boom{font-size:30px;line-height:1}
 .hit-card .hit-ava{position:relative;height:118px;width:100px;margin:2px auto 0}
@@ -662,6 +662,9 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .hit-card b{display:block;font-size:19px;color:#D9483B;margin-top:4px}
 .hit-card p{font-size:12px;line-height:1.6;white-space:pre-line;margin:4px 0 0;color:#5A3A22}
 @keyframes hitshake{0%,100%{margin-left:0}20%{margin-left:-8px}40%{margin-left:8px}60%{margin-left:-5px}80%{margin-left:5px}}
+
+.hit-card .hit-msg{min-height:18px;font-weight:700;color:#7A4A22}
+.hit-btns{display:flex;gap:6px;margin-top:8px}.hit-btns button{flex:1;height:42px;font-size:13px}
 </style>
 </head>
 <body>
@@ -699,8 +702,19 @@ function showLogin(auth,fin){if(document.getElementById('pvlogin'))return;const 
   try{const last=localStorage.getItem('pv6_login');if(last&&NAMES.includes(last))pick(last);}catch(e){}}
 const now=()=>Date.now()+off;
 // ---------- db (Firestore; body stored as JSON string to dodge type limits) ----------
-const pack=d=>{const o={j:JSON.stringify(d===undefined?{}:d)};if(d&&typeof d.ts==='number')o.ts=d.ts;return o;};
-const wrapSnap=s=>({id:s.id,exists:!!s.exists,metadata:{fromCache:!!(s.metadata&&s.metadata.fromCache),hasPendingWrites:!!(s.metadata&&s.metadata.hasPendingWrites)},data:()=>{if(!s.exists)return undefined;const r=s.data();try{return r&&typeof r.j==='string'?JSON.parse(r.j):r;}catch(e){return undefined;}}});
+/*BLOB*/
+// ---- blob offload: big data:image strings live in their own docs (v6_meta/blob_<id>) so profile updates stay tiny
+const BLOB={};const BLOB_PEND={};const BLOB_UP={};let blobWaiters=[];
+const bhash=str=>{let h1=2166136261>>>0,h2=5381;for(let i=0;i<str.length;i+=3){const c=str.charCodeAt(i);h1=Math.imul(h1^c,16777619)>>>0;h2=((h2<<5)+h2+c)>>>0;}return h1.toString(36)+h2.toString(36)+str.length.toString(36);};
+try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('pvb_'))BLOB[k.slice(4)]=localStorage.getItem(k);}}catch(e){}
+function blobOut(v){if(typeof v==='string'){if(v.length>1500&&v.startsWith('data:image')){const id=bhash(v);if(!BLOB[id]){BLOB[id]=v;try{localStorage.setItem('pvb_'+id,v);}catch(e){}}if(!BLOB_UP[id]){BLOB_UP[id]=1;fs.doc('v6_meta/blob_'+id).set({d:v}).catch(()=>{BLOB_UP[id]=0;});}return 'blob:'+id;}return v;}
+  if(Array.isArray(v))return v.map(blobOut);if(v&&typeof v==='object'){const o={};for(const k in v)o[k]=blobOut(v[k]);return o;}return v;}
+let blobMissing=false;
+function blobIn(v){if(typeof v==='string'){if(v.startsWith('blob:')){const id=v.slice(5);if(BLOB[id])return BLOB[id];blobMissing=true;fetchBlob(id);return 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';}return v;}
+  if(Array.isArray(v))return v.map(blobIn);if(v&&typeof v==='object'){const o={};for(const k in v)o[k]=blobIn(v[k]);return o;}return v;}
+function fetchBlob(id){if(BLOB_PEND[id])return;BLOB_PEND[id]=1;fs.doc('v6_meta/blob_'+id).get().then(s=>{const d=s.exists&&s.data();if(d&&d.d){BLOB[id]=d.d;try{localStorage.setItem('pvb_'+id,d.d);}catch(e){}const w=blobWaiters;blobWaiters=[];w.forEach(f=>{try{f()}catch(e){}});}}).catch(()=>{BLOB_PEND[id]=0;});}
+const pack=d=>{const o={j:JSON.stringify(blobOut(d===undefined?{}:d))};if(d&&typeof d.ts==='number')o.ts=d.ts;return o;};
+const wrapSnap=s=>({id:s.id,exists:!!s.exists,metadata:{fromCache:!!(s.metadata&&s.metadata.fromCache),hasPendingWrites:!!(s.metadata&&s.metadata.hasPendingWrites)},data:()=>{if(!s.exists)return undefined;const r=s.data();try{return r&&typeof r.j==='string'?blobIn(JSON.parse(r.j)):r;}catch(e){return undefined;}}});
 const wrapQS=q=>{const docs=q.docs.map(wrapSnap);return {docs,size:docs.length,empty:!docs.length,metadata:{fromCache:!!(q.metadata&&q.metadata.fromCache),hasPendingWrites:false},docChanges:()=>[]};};
 function docRef(path){const r=fs.doc(path);return {id:r.id,path,
   get:async()=>wrapSnap(await r.get()),set:d=>r.set(pack(d)),
@@ -710,7 +724,7 @@ function docRef(path){const r=fs.doc(path);return {id:r.id,path,
 function query(q,path){return {
   where:(f,op,v)=>query(q.where(f,op,v),path),orderBy:(f,d)=>query(q.orderBy(f,d||'asc'),path),limit:n=>query(q.limit(n),path),
   get:async()=>wrapQS(await q.get()),
-  onSnapshot:(n,e)=>{let live=false,last=null;const tm=setTimeout(()=>{if(!live&&last){live=true;n(wrapQS(last));}},5000);return q.onSnapshot({includeMetadataChanges:true},s=>{if(s.metadata&&s.metadata.fromCache&&!live){last=s;return;}const first=!live;live=true;clearTimeout(tm);if(!first&&s.docChanges&&s.docChanges().length===0)return;if(s.metadata&&s.metadata.hasPendingWrites===false||true)n(wrapQS(s));},err=>{console.warn('qsnap',path,err);e&&e({code:'unavailable',message:String(err)});});}};}
+  onSnapshot:(n,e)=>{let live=false,last=null;const tm=setTimeout(()=>{if(!live&&last){live=true;n(wrapQS(last));}},5000);return q.onSnapshot({includeMetadataChanges:true},s=>{if(s.metadata&&s.metadata.fromCache&&!live){last=s;return;}const first=!live;live=true;clearTimeout(tm);if(!first&&s.docChanges&&s.docChanges().length===0)return;blobMissing=false;const w=wrapQS(s);w.docs.forEach(d=>d.data());n(w);if(blobMissing){blobWaiters.push(()=>{const w2=wrapQS(s);n(w2);});}},err=>{console.warn('qsnap',path,err);e&&e({code:'unavailable',message:String(err)});});}};}
 function collRef(path){const c=fs.collection(path);return Object.assign(query(c,path),{path,doc:id=>docRef(id?path+'/'+id:c.doc().path),add:async d=>{const r=await c.add(pack(d));return docRef(r.path);}});}
 const DB=Object.freeze({doc:docRef,collection:collRef});
 // ---------- room (Realtime Database) ----------
@@ -721,7 +735,9 @@ function startRoom(){const base=rtdb.ref('room/p');presRef=base.push();myConn=pr
   // stale cleanup: drop peers silent > 10 min
   setInterval(()=>{if(lastPresData)presRef.update({t:firebase.database.ServerValue.TIMESTAMP});},60000);}
 let lastPresData=null;
-function flushPres(){presT=null;if(!presPending)return;lastPresData=presPending;presPending=null;lastPres=Date.now();presRef.set({by:uid,presence:lastPresData,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{});}
+function flushPres(){presT=null;if(!presPending)return;const nd=presPending,od=lastPresData;presPending=null;lastPres=Date.now();lastPresData=nd;
+  if(!od){presRef.set({by:uid,presence:nd,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{});return;}
+  const up={};let n=0;for(const k in nd){if(JSON.stringify(nd[k])!==JSON.stringify(od[k])){up['presence/'+k]=nd[k]===undefined?null:nd[k];n++;}}for(const k in od){if(!(k in nd)){up['presence/'+k]=null;n++;}}if(n)presRef.update(up).catch(()=>{});}
 const ROOM=Object.freeze({
   presence:d=>{presPending=JSON.parse(JSON.stringify(d||{}));const wait=Math.max(0,250-(Date.now()-lastPres));if(!presT)presT=setTimeout(flushPres,wait);return Promise.resolve();},
   onPeers:(f)=>{peerSubs.push(f);if(peers.length)f({peers});return ()=>{};},
@@ -1056,7 +1072,7 @@ function hud(back,title,sub){const k=todayKey();const coins=(S.me&&S.me.coins)||
 function tray(){const b=(img,l,fn)=>h('button',{onclick:fn},h('img',{src:IMG(img),alt:''}),l);
   app.appendChild(h('div',{class:'tray panel'},b('u_i_hand','인사',()=>emitEmote('wave')),b('u_i_heart','하트',()=>emitEmote('heart')),b('u_i_chat','말하기',openSay),b('po_bag','주머니',openPocket),b('u_i_note','캘린더',openAdvent)));}
 function openSay(){const log=h('div',{class:'chatlog sheetlog'});const inp=h('input',{class:'txt',maxlength:'80',placeholder:'다 같이 보는 수다방 · 한마디!',enterkeyhint:'send'});
-  const send=()=>{const t=inp.value.trim();if(!t)return;inp.value='';sendChat(t);if(S.scene==='village'&&S.me){const p={sayN:(S.me.sayN||0)+1};if(todayKey()==='1202')p.sayN5=(S.me.sayN5||0)+1;saveMe(p);missionEvent('say');}inp.focus();};
+  const send=()=>{const t=inp.value.trim();if(!t)return;inp.value='';sendChat(t);if(S.scene==='village'&&S.me){if(todayKey()==='1202')saveMe({sayN5:(S.me.sayN5||0)+1});missionEvent('say');}inp.focus();};
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
   modal([h('div',{class:'chat-head'},h('b',{text:'💬 소녀들 수다방'}),h('span',{class:'small',text:'광장·펍 어디서든 같이 보여 · 매일 자정 리셋'})),log,h('div',{class:'chat-in'},inp,h('button',{class:'btn-g',onclick:send,text:'보내기'}))]);renderChat();setTimeout(()=>{log.scrollTop=log.scrollHeight;},30);}
 function bellBanner(name){const o=app.querySelector('.banner-bell');if(o)o.remove();
@@ -2308,14 +2324,18 @@ async function jobTick(){if(!S.job||S.scene!=='village')return;if(todayKey()<'11
 function tramHitCheck(tram){if(!tram||S.dazed||S.seat||S.hang||S.scene!=='village'||!P.el)return;if(TR.mode!=='loop'&&TR.mode!=='call')return;if(Date.now()<(S._hitCD||0))return;
   const tx=parseFloat(tram.style.left),ty=parseFloat(tram.style.top)-18;if(Math.hypot(P.x-tx,(P.y-ty)*1.3)>30)return;tramHit(tx,ty);}
 function tramHit(tx,ty){S._hitCD=Date.now()+20000;S.dazed=true;P.path=null;sfx('punch');
-  const dx=P.x-tx,dy=P.y-ty,d=Math.hypot(dx,dy)||1;for(let k=46;k>0;k-=8){const nx=P.x+dx/d*k,ny=P.y+dy/d*k;if(SC.walkable(nx,ny)){P.x=nx;P.y=ny;break;}}
-  playAct(P.el,'daze',4200);const stars=h('div',{class:'daze-stars'},h('i',{text:'⭐'}),h('i',{text:'💫'}),h('i',{text:'⭐'}));P.el.appendChild(stars);
-  const hosp=todayKey()>='1207';const card=h('div',{class:'hit-card'},h('div',{class:'hit-boom',text:'🚋💥'}),h('div',{class:'hit-ava'},(()=>{const a=makeAva(S.me,false,96);playAct(a,'daze',99999);setFrame(a,'daze');a.appendChild(h('div',{class:'daze-stars big'},h('i',{text:'⭐'}),h('i',{text:'💫'}),h('i',{text:'⭐'}),h('i',{text:'💫'})));return a;})()),
-    h('b',{text:'전차에 치였다!'}),h('p',{text:hosp?'어질어질… 🏥 병원에 가서 진료 받아봐!':'어질어질… 병원이 아직 안 열었어\n알아서 회복해 🩹'}));
-  app.appendChild(card);requestAnimationFrame(()=>card.classList.add('on'));
-  S.me.hitN=(S.me.hitN||0)+1;if(S.room)S.room.emit('notice',{t:'🚋💥 '+((S.me&&S.me.name)||'누군가')+'이(가) 전차에 치였다!',scene:'village',pn:1}).catch(()=>{});
-  setTimeout(()=>{card.classList.remove('on');setTimeout(()=>card.remove(),400);},3600);
-  setTimeout(()=>{S.dazed=false;stars.remove();toast(hosp?'정신 차렸다… 🏥 병원 가보는 거 추천':'휴, 겨우 정신 차렸다 😵‍💫 다음엔 전차 조심!');},4200);}
+  const a=trackAt((TR.d+6)%TRACK.len),b=trackAt((TR.d-6+TRACK.len)%TRACK.len);let tx2=a[0]-b[0],ty2=a[1]-b[1];const tl=Math.hypot(tx2,ty2)||1;let nx=-ty2/tl,ny=tx2/tl;if((P.x-tx)*nx+(P.y-ty)*ny<0){nx=-nx;ny=-ny;}
+  let moved=false;for(const k of [56,64,72,48,84,96]){for(const sg of [1,-1]){const X=P.x+nx*k*sg,Y=P.y+ny*k*sg;if(SC.walkable(X,Y)){P.x=X;P.y=Y;moved=true;break;}}if(moved)break;}
+  if(!moved){outer:for(const k of [50,64,80,100,120]){for(let a=0;a<16;a++){const an=a/16*Math.PI*2;const X=P.x+Math.cos(an)*k,Y=P.y+Math.sin(an)*k;const q=trackAt(TR.d);if(SC.walkable(X,Y)&&Math.hypot(X-q[0],Y-q[1])>44){P.x=X;P.y=Y;moved=true;break outer;}}}}
+  playAct(P.el,'daze',99999);const stars=h('div',{class:'daze-stars'},h('i',{text:'⭐'}),h('i',{text:'💫'}),h('i',{text:'⭐'}));P.el.appendChild(stars);S._daze={stars};
+  const hosp=todayKey()>='1207';const msg=h('p',{class:'hit-msg'});
+  const card=h('div',{class:'hit-card'},h('div',{class:'hit-boom',text:'🚋💥'}),h('div',{class:'hit-ava'},(()=>{const av=makeAva(S.me,false,96);playAct(av,'daze',99999);setFrame(av,'daze');av.appendChild(h('div',{class:'daze-stars big'},h('i',{text:'⭐'}),h('i',{text:'💫'}),h('i',{text:'⭐'}),h('i',{text:'💫'})));return av;})()),
+    h('b',{text:'전차에 치였다!'}),msg,
+    h('div',{class:'hit-btns'},h('button',{class:'btn-c',onclick:()=>{if(hosp){closeHit();endDaze(true);walkToPlace('clinic');toast('🏥 병원으로 가는 중…');return;}msg.textContent='아직 병원이 안 열었어… 알아서 회복해 🩹';sfx('pop');},text:'🏥 병원 가기'}),
+      h('button',{class:'btn-g',onclick:()=>{closeHit();toast('😵‍💫 회복 중… 10초만 가만히 있자');S._dazeT=setTimeout(()=>endDaze(),10000);},text:'🩹 회복하기'})));
+  const closeHit=()=>{card.classList.remove('on');setTimeout(()=>card.remove(),350);};
+  app.appendChild(card);requestAnimationFrame(()=>card.classList.add('on'));setTimeout(()=>{if(S.dazed&&!card.isConnected&&!S._dazeT)endDaze(true);},1500);S._dazeSafe=setTimeout(()=>{if(S.dazed){card.remove();endDaze(true);}},90000);}
+function endDaze(silent){clearTimeout(S._dazeT);clearTimeout(S._dazeSafe);S._dazeT=null;S.dazed=false;if(S._daze&&S._daze.stars)S._daze.stars.remove();S._daze=null;if(P.el)P.el._act=null;if(!silent)toast('휴, 겨우 정신 차렸다 😵‍💫 다음엔 전차 조심!');}
 
 // ================= ONLINE BAR + JOIN ALERTS =================
 const SCENE_NM={village:'🏘️ 마을',pub:'🍻 펍',writers:'✍️ 회의실',cafe:'☕ 카페',diner:'🍲 식당',flower:'💐 꽃집',post:'📮 우체국',gift:'🎁 선물가게',books:'📚 서점',clinic:'🏥 병원',townhall:'🏛️ 시청',theater:'🎤 공연장',studio:'🕺 연습실',police:'🚨 경찰서',gallery:'🖼️ 미술관',create:'🎨 캐릭터 꾸미는 중',opening:'💌 초대장 읽는 중'};
