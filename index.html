@@ -813,6 +813,12 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .cof-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
 .cof-b{height:50px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;white-space:nowrap;padding:0 6px}
 .cof-b .jemo{font-size:18px}.cof-b .jicon{width:24px;height:24px;object-fit:contain}
+
+.boss{text-align:center}
+.boss-ic{font-size:54px;line-height:1.1}
+.boss b{display:block;font-size:14px;color:#8A6A4E;margin:2px 0 6px}
+.boss-say{background:#FFF8EA;border:2px solid #E3D0A8;border-radius:14px;padding:10px 12px;font-size:15px;line-height:1.55;font-weight:700;margin:0 0 6px;position:relative}
+.boss small{font-size:12px;color:#B7322B;font-weight:700}
 </style>
 </head>
 <body>
@@ -2052,7 +2058,7 @@ function enterPub(){if(todayKey()<'1116'){toast('🍻 펍은 11.16 자정에 가
   for(const t in TABLES)for(const n of ['1','2','3','4']){const id=t+n;const p=seatPos(id);doors.push({x:p[0],y:p[1]+(n>'2'?0:4),r:22,hide:()=>seatTaken(id),label:'🍺 여기 자리 잡기',act:()=>sitDown(id)});}
   doors.push({x:130,y:240,r:40,label:'🔔 "한잔할 사람~" 종 울리기',act:ringBell});
   SC={kind:'pub',sitLift:20,stage,world,w:R.W,h:R.H,zoom:1.25,cell:10,speed:120,charH:74,camLift:40,padTop:70,padBottom:260,walkable:R.walk,doors,seatPos,promptBottom:250,
-    onPeers:drawTables};{const _ot=SC.onTick;SC.onTick=dt=>{_ot&&_ot(dt);jobTick();};}setTimeout(()=>{jobBtn();drawJobItems();},400);
+    onPeers:drawTables};{const _ot=SC.onTick;SC.onTick=dt=>{_ot&&_ot(dt);jobTick();};}setTimeout(()=>{jobBtn();drawJobItems();bossCheck();},400);
   hud(out,'🍻 펍','한잔해');
   // chat box
   const chat=h('div',{class:'chatbox panel'});const msgs=h('div',{class:'msgs chatlog'});const inp=h('input',{class:'txt',maxlength:'80',placeholder:'메시지 보내기'});
@@ -2449,8 +2455,8 @@ async function checkAttendance(){const k=todayKey();if(!S.me||!S.me.name||k<'111
   const streak=a.last===prevDay(k)?(a.n||0)+1:1;const nw=k>='1120';const base=nw?2:5;const bonus=nw?(streak%7===0?10:0):(streak%3===0?5:0);await saveMe(Object.assign({att:{last:k,n:streak},coins:(S.me.coins||0)+base+bonus},logInc('att')));refreshCoins&&refreshCoins();
   topNote('📅 출석 도장 쾅! 눈송이 +'+base+(bonus?' · '+streak+'일 연속 보너스 +'+bonus+' 🔥':(streak>1?' · '+streak+'일 연속'+(nw?' (7일 개근 +10)':''):'')));sfx('ding');}
 const JOBS={deliver:{t:'📰 신문 배달',type:'deliver',sc:'village',d:'오늘 신문 시킨 곳이 3군데 있대! 근데 어디서 시켰는지는 몰라… 친구들 집이랑 문 연 가게를 하나씩 다 가봐',it:['📰','🏠','🏪'],done:'배달 완료! 빌리지 소식이 퍼져나간다 📰'},
- serve:{t:'🍺 펍 서빙',type:'serve',sc:'pub',d:'카운터에서 맥주 받아서 주문 들어온 테이블에 갖다줘! 3잔 서빙하면 끝',it:['🍺','🙋','🍺'],done:'손님들이 팁 대신 칭찬을 남겼어 🍻'},
- dish:{t:'🧽 펍 설거지',type:'dish',sc:'pub',d:'테이블 위 빈 잔 3개 모아서 싱크대에서 박박 닦아줘!',it:['🍺','🧽','✨'],done:'잔이 반짝반짝! 사장님 감동 🥹'},
+ serve:{t:'🍺 펍 서빙',type:'serve',sc:'pub',boss:'오늘 손님이 많아서 정신이 없네… 서빙 좀 도와줄래? 맥주 3잔만 날라주면 돼!',d:'카운터에서 맥주 받아서 주문 들어온 테이블에 갖다줘! 3잔 서빙하면 끝',it:['🍺','🙋','🍺'],done:'손님들이 팁 대신 칭찬을 남겼어 🍻'},
+ dish:{t:'🧽 펍 설거지',type:'dish',sc:'pub',boss:'설거지가 산더미야 😭 테이블 위 빈 잔 3개만 모아서 박박 닦아줄래?',d:'테이블 위 빈 잔 3개 모아서 싱크대에서 박박 닦아줘!',it:['🍺','🧽','✨'],done:'잔이 반짝반짝! 사장님 감동 🥹'},
  coffee:{t:'☕ 커피 셔틀',type:'coffee',sc:'writers',d:'선배들 주문 메뉴를 확인하고 탕비실에서 챙겨서 갖다드려! 쫄병스낵 시킨 분도 있대',it:['☕','🍿','🥛'],done:'회의실에 평화가 찾아왔다 ☕'},
  phone:{t:'📞 섭외 전화 받기',type:'phone',sc:'writers',d:'회의실 여기저기서 섭외 전화가 울려! 3통 받아줘. 늦으면 끊겨',it:['📞','📞','📞'],done:'섭외 전화 3통 클리어! 오늘도 한 건 했다 📞'},
  trash:{t:'🧹 마을 청소',d:'마을 곳곳에 떨어진 쓰레기 3개를 주워줘!',it:['🥤','🧻','🍌'],done:'마을이 반짝반짝해졌어 ✨'},
@@ -2469,12 +2475,18 @@ function jobDone(){return S.me&&S.me.job===todayKey();}
 function jIcon(m,cls){const e=String(m).split(' ')[0];return e==='🍿'?h('img',{class:'jicon '+(cls||''),src:IMG('pr_jjolbyeong'),alt:'쫄병스낵'}):h('span',{class:'jemo '+(cls||''),text:e});}
 function jobCarry(){if(!P.el)return;const o=P.el.querySelector('.carry-ic');const j=S.job;let ic=null;if(j&&j.day===todayKey()){if(j.carry)ic=j.carry.split(' ')[0];else if(j.type==='dish'&&j.got>0)ic='🍺'.repeat(j.got);}if(!ic){if(o)o.remove();return;}if(o&&o._ic===ic)return;if(o)o.remove();const el=h('div',{class:'carry-ic',style:{bottom:((P.el._h||74)*.36)+'px'}},ic==='🍿'?jIcon('🍿'):document.createTextNode(ic));el._ic=ic;P.el.appendChild(el);}
 function jobBtn(){jobCarry();const o=app.querySelector('.jobbtn');if(o)o.remove();if(!S.me||!S.me.name||todayKey()<'1116')return;const J=curJob();const sc=J.sc||'village';if(S.scene!=='village'&&S.scene!==sc)return;
-  const lab=jobDone()?'✔ 알바 끝':(S.job&&S.job.day===todayKey()?'💼 알바 중 '+S.job.got+'/3'+(S.job.carry?' · '+(S.job.carry.split(' ')[1]||S.job.carry):''):'💼 오늘의 알바');
+  const lab=jobDone()?'✔ 알바 끝':(!(S.job&&S.job.day===todayKey())&&J.boss&&S.scene!==sc)?'💼 오늘의 알바 · '+JOB_PLACE[sc]:(S.job&&S.job.day===todayKey()?'💼 알바 중 '+S.job.got+'/3'+(S.job.carry?' · '+(S.job.carry.split(' ')[1]||S.job.carry):''):'💼 오늘의 알바');
   app.appendChild(h('button',{class:'jobbtn'+(jobDone()?' done':''),onclick:openJob,text:lab}));}
 function jobHint(J){return {deliver:'📰 신문 시킨 곳이 어딘지 몰라! 집이랑 가게 앞 📰 표시에 하나씩 가봐',serve:'🍺 카운터에서 맥주 받아서 주문 뜬 테이블로!',dish:S.job&&S.job.got>=3?'🧽 카운터 옆 싱크대로 가서 닦자!':'🍺 테이블 위 빈 잔을 모아줘',coffee:S.job&&S.job.carry?'☕ '+S.job.carry+' 시킨 선배한테 갖다드려!':'☕ 선배들 주문 확인하고 탕비실에서 챙겨!',phone:'📞 울리는 전화기 찾아서 받아!'}[J.type]||('🔎 '+(J.it||[]).join(' ')+' 찾아봐! 가까이 가면 반짝반짝 빛나');}
+const BOSS={pub:['🧔','펍 사장님']};
+function bossAsk(){const J=curJob();const b=BOSS[J.sc]||['🧑','사장님'];modal([h('div',{class:'boss'},h('div',{class:'boss-ic',text:b[0]}),h('b',{text:b[1]}),h('p',{class:'boss-say',text:'"'+J.boss+'"'}),h('small',{text:J.t+' · 💰 알바비 눈송이 +'+JOB_PAY})),
+  h('button',{class:'btn-g',style:{width:'100%',height:'50px',marginTop:'8px',fontSize:'16px'},onclick:()=>{closeModal();startJob();},text:'수락하기 💪'}),h('button',{class:'btn-c',style:{width:'100%',height:'40px',marginTop:'6px'},onclick:closeModal,text:'다음에 할게요'})]);}
+function bossCheck(){const J=curJob();if(!J.boss||S.scene!==J.sc||jobDone()||(S.job&&S.job.day===todayKey())||todayKey()<'1116'||!S.me||!S.me.name)return;S._bossAsk=S._bossAsk||{};if(S._bossAsk[todayKey()])return;S._bossAsk[todayKey()]=1;setTimeout(()=>{if(!document.querySelector('.veil'))bossAsk();},700);}
 function openJob(){const k=todayKey();const J=curJob();const sc=J.sc||'village';
   if(jobDone()){modal([h('h2',{style:{textAlign:'center'},text:'💼 오늘 알바 끝!'}),h('p',{class:'small',style:{textAlign:'center'},text:'알바는 하루에 한 번만 할 수 있어\n내일 새 알바가 기다리고 있어 ✨'})]);return;}
   if(S.job&&S.job.day===k){if(S.scene!==sc){toast('📍 '+JOB_PLACE[sc]+'에서 하는 알바야! 가서 마저 해줘');return;}toast(jobHint(J)+' ('+S.job.got+'/3)');return;}
+  if(J.boss){if(S.scene===sc){bossAsk();return;}modal([h('div',{style:{textAlign:'center'}},h('small',{class:'small',text:'오늘의 알바 · '+fmt(k)}),h('h2',{text:'📍 오늘 알바는 '+JOB_PLACE[sc]+'에서!'}),h('p',{class:'small',text:JOB_PLACE[sc]+'에 들어가면 '+(BOSS[sc]||['','사장님'])[1]+'이 일을 맡길 거야'}),h('p',{style:{fontWeight:'700',color:'#B7322B',fontSize:'13px'},text:'💰 알바비 눈송이 +'+JOB_PAY+' · 하루 한 번'})),
+    S.scene==='village'?h('button',{class:'btn-g',style:{width:'100%',height:'50px',marginTop:'8px',fontSize:'16px'},onclick:()=>{closeModal();const b=B.find(x=>x.id===sc);if(b)goTo(b.cx,b.base+26);},text:JOB_PLACE[sc]+'으로 가기'}):null]);return;}
   modal([h('div',{style:{textAlign:'center'}},h('small',{class:'small',text:'오늘의 알바 · '+fmt(k)+(sc!=='village'?' · 📍 '+JOB_PLACE[sc]:'')}),h('h2',{text:J.t}),h('div',{style:{fontSize:'40px',margin:'6px 0'},text:J.it.join(' ')}),h('p',{class:'small',text:J.d}),h('p',{style:{fontWeight:'700',color:'#B7322B',fontSize:'13px'},text:'💰 알바비 눈송이 +'+JOB_PAY+' · 하루 한 번'})),
     h('button',{class:'btn-g',style:{width:'100%',height:'50px',marginTop:'8px',fontSize:'16px'},onclick:()=>{closeModal();startJob();},text:sc!=='village'&&S.scene!==sc?'알바 시작! '+JOB_PLACE[sc]+'으로 💪':'알바 시작! 💪'})]);}
 function jRng(k){let s=hashN(k);return ()=>{s=hashN(String(s)+'j');return (s%10000)/10000;};}
