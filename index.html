@@ -2486,14 +2486,14 @@ async function paperDoc(k){if(!S.db||S.solo)return S._paperLocal&&S._paperLocal[
 async function makePaper(k){const y=prevDay(k);const res=residents();const P_={k,y,no:dailyNo(k)};const name=([u,p])=>p.name||'소녀';
   const L=(p,f)=>(p.log&&p.log[y]&&p.log[y][f])||0;
   const att=res.filter(([u,p])=>L(p,'att')||(p.att&&(p.att.last===y||(p.att.last===k&&p.att.n>=2))));
-  const NOSTAR=r=>(r[1]&&r[1].name)==='현디';const star=arr=>{const o=arr.filter(x=>!NOSTAR(Array.isArray(x[0])?x[0]:x));return o.length?o:arr;};
+  const NOSTAR=r=>(r[1]&&r[1].name)==='현디';const star=arr=>{if(k<='1118')return arr;const o=arr.filter(x=>!NOSTAR(Array.isArray(x[0])?x[0]:x));return o.length?o:arr;};
   const hits=star(res.map(r=>[r,L(r[1],'hit')]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]));
   const jobs=res.filter(([u,p])=>L(p,'job')||p.job===y);
   const rich=res.slice().sort((a,b)=>(b[1].coins||0)-(a[1].coins||0));
   const deco=star(res.map(r=>[r,((r[1].room&&r[1].room.items)||[]).length]).sort((a,b)=>b[1]-a[1]));
   const streak=star(res.map(r=>[r,(r[1].att&&r[1].att.n)||0]).sort((a,b)=>b[1]-a[1]));
   let chat=[];try{if(S.db&&!S.solo){const q=await S.db.collection(NS+'pubchat').orderBy('ts','desc').limit(300).get();chat=q.docs.map(d=>d.data()).filter(m=>m&&m.day===y&&!m.sys&&m.t);}else chat=(S.chat||[]).filter(m=>m.day===y&&!m.sys);}catch(e){}
-  const talk={};chat.forEach(m=>{talk[m.uid]=(talk[m.uid]||0)+1;});const meU=(res.find(r=>r[1].name==='현디')||[])[0];const topTalk=(Object.entries(talk).filter(e=>e[0]!==meU).sort((a,b)=>b[1]-a[1])[0])||Object.entries(talk).sort((a,b)=>b[1]-a[1])[0];
+  const talk={};chat.forEach(m=>{talk[m.uid]=(talk[m.uid]||0)+1;});const meU=k<='1118'?null:(res.find(r=>r[1].name==='현디')||[])[0];const topTalk=(Object.entries(talk).filter(e=>e[0]!==meU).sort((a,b)=>b[1]-a[1])[0])||Object.entries(talk).sort((a,b)=>b[1]-a[1])[0];
   const R=seeded(k);const cand0=chat.filter(m=>m.t.length>=6);const cand=cand0.filter(m=>m.uid!==meU).length?cand0.filter(m=>m.uid!==meU):cand0;const quote=cand.length?cand[Math.floor(R()*cand.length)]:(chat[0]||null);
   const posts=[];res.forEach(([u,p])=>(p.posts||[]).forEach(x=>{if(x.d===y)posts.push([p.name,x.t]);}));
   let tips=[];try{if(S.db&&!S.solo){for(const [u] of res){const s=await S.db.doc(NS+'meta/tip_'+y+'_'+u).get();if(s.exists){const d=s.data();(d.list||[]).forEach(t=>tips.push(t));}}}else tips=(S._tipsLocal&&S._tipsLocal[y])||[];}catch(e){}
@@ -2538,8 +2538,24 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   else pages.push([ears,dl,h('div',{class:'np-kicker',text:p.k===DAILY_START?'★ FIRST EDITION · 창간호 ★':'TOP STORY'}),h('h1',{class:'np-head',text:p.head}),h('div',{class:'np-sub',text:p.sub}),
     paperPhoto(p.att),h('div',{class:'np-cap',text:'▲ '+fy+' 빌리지를 찾은 소녀들 '+(p.att.length?'('+p.att.map(nm).join(', ')+')':'(자료 사진)')+'  /  PHOTO: VILLAGE DAILY'}),
     h('div',{class:'np-cols'},h('div',{class:'np-by',text:'By 빌리지 데일리 취재팀'}),h('p',{class:'np-body dc',text:lede})),idx]);
+  const art=(...k)=>h('div',{class:'np-art'},k);let c3;
+  if(p.k<='1118'){
+  // ── A2 VILLAGE
+  const nums=h('div',{class:'np-nums'},[[p.att.length+'명','방문'],[p.chatN+'','수다(마디)'],[p.hits.reduce((a,b)=>a+b[1],0)+'건','전차 사고']].map(([a,b])=>h('div',{},h('b',{text:a}),h('span',{text:b}))));
+  const c2=[art(hd('출석부 ROLL CALL'),npList(p.res.map(r=>(p.att.includes(r)?'✔ ':'· ')+nm(r)+(p.att.includes(r)?'':' (결석)'))))];
+  if(p.streak[0]&&p.streak[0][1]>=2)c2.push(art(hd('개근상'),h('p',{class:'np-body',text:'연속 출석 1위는 '+nm(p.streak[0][0])+'('+p.streak[0][1]+'일 연속). 성실 그 자체.'})));
+  c2.push(art(hd('수다왕'),h('p',{class:'np-body',text:p.topTalk?((S.profiles[p.topTalk[0]]||{}).name||'누군가')+' — 하루 '+p.topTalk[1]+'마디. 입이 쉬질 않았다는 후문.':'어제는 수다왕 후보가 없었다. 오늘 왕관의 주인은?'})));
+  c2.push(art(hd('게시판 새 소식'),p.posts.length?npList(p.posts.slice(0,4).map(x=>x[0]+': "'+x[1]+'"')):h('p',{class:'np-body dim',text:'게시판은 11.19부터 열린다. 첫 메모의 주인공은 누구?'})));
+  pages.push([run(1),flag('Village','마을 소식'),nums,h('div',{class:'np-cols'},c2)]);
+  // ── A3 METRO & BUSINESS
+  c3=[];
+  if(p.hits.length)c3.push(art(hd('BLOTTER · 사건사고','red'),npList(p.hits.map(([r,n])=>nm(r)+' — 전차와 충돌 '+n+'회. "어질어질하다"며 자가 회복')),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'})));
+  else c3.push(art(hd('BLOTTER · 사건사고','red'),h('p',{class:'np-body dc',text:'어제는 전차 무사고! 철길 위의 평화가 계속되고 있다. 다만 본지는 방심은 금물이라고 경고한다. 전차는 기다려주지 않는다.'})));
+  c3.push(art(hd('알바 소식'),h('p',{class:'np-body',text:p.jobs.length?'어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.':'어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.'})));
+  if(p.deco[0]&&p.deco[0][1]>0)c3.push(art(hd('인테리어 경쟁'),h('p',{class:'np-body',text:'가구 제일 많은 집: '+nm(p.deco[0][0])+'네 ('+p.deco[0][1]+'개). 집들이 언제 하나요?'})));
+  }else{
   // ── A2 VILLAGE (rotating: 오늘의 소녀 + 가십 TOP5 + 랜덤 코너)
-  const art=(...k)=>h('div',{class:'np-art'},k);const pick=a=>a[Math.floor(R()*a.length)];
+  const pick=a=>a[Math.floor(R()*a.length)];
   const jo=(w,a,b)=>{const c=String(w).charCodeAt(String(w).length-1);return w+((c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?a:b);};
   const LY=r=>(r[1].log&&r[1].log[y])||{};const notMe=r=>r[1].name!=='현디';const others=p.res.filter(notMe);const pool=others.length?others:p.res;
   const said=r=>p.chat.filter(m=>m.uid===r[0]);const act=r=>{const l=LY(r);return Object.keys(l).some(f=>f!=='att'&&l[f])||said(r).length>0;};
@@ -2579,10 +2595,11 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   if(p.posts.length)c2.push(art(hd('게시판 새 소식'),npList(p.posts.slice(0,4).map(x=>x[0]+': "'+x[1]+'"'))));
   pages.push([run(1),flag('Village','마을 소식'),feat,h('div',{class:'np-cols'},c2)]);
   // ── A3 METRO & BUSINESS
-  const c3=[];
+  c3=[];
   if(p.hits.length)c3.push(art(hd('BLOTTER · 사건사고','red'),npList(p.hits.map(([r,n])=>nm(r)+' — 전차와 충돌 '+n+'회. '+pick(['"어질어질하다"며 자가 회복','"별이 보였다"고 진술','목격자 "전차가 반가워하는 것 같았다"']))),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'})));
   else c3.push(art(hd('BLOTTER · 사건사고','red'),h('p',{class:'np-body dc',text:pick(['어제는 전차 무사고! 철길 위의 평화가 계속되고 있다. 다만 본지는 방심은 금물이라고 경고한다. 전차는 기다려주지 않는다.','전차 사고 0건. 전차 기사님은 "요즘 다들 너무 조심해서 심심하다"고 전했다.','어제 철길은 조용했다. 폭풍 전의 고요일지도 모른다.'])})));
   c3.push(art(hd('알바 소식'),h('p',{class:'np-body',text:p.jobs.length?pick(['어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.',p.jobs.map(nm).join(', ')+', 어제 땀 흘려 눈송이를 벌었다. 노동의 가치.','알바 출근부: '+p.jobs.map(nm).join(', ')+'. 사장님이 칭찬했다는 후문.']):pick(['어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.','알바 구인 공고가 하루 종일 붙어 있었다. 지원자 0명.'])})));
+  }
   const mk=h('div',{class:'np-mkt'},h('div',{class:'np-mkt-h'},h('b',{text:'MARKETS'}),h('span',{text:'눈송이 시세 ❄'})),
     p.rich.slice(0,6).map((r,i)=>h('div',{class:'np-mkt-r'},h('span',{text:(i+1)+'. '+nm(r)}),h('b',{text:'❄ '+(r[1].coins||0)}),h('i',{class:i<3?'up':'',text:i<3?'▲':'–'}))));
   pages.push([run(2),flag('Metro & Business','사건 · 경제'),mk,h('div',{class:'np-cols'},c3)]);
