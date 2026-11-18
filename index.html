@@ -823,6 +823,23 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .np-wph{margin:2px 0 6px;border:1px solid var(--rule);padding:4px;background:#fff}
 .np-wph img{width:100%;max-height:170px;object-fit:cover;display:block;filter:grayscale(1) contrast(1.15) sepia(.2)}
 .np-wph figcaption{font-size:10px;font-style:italic;margin-top:3px;line-height:1.4}
+
+.tray{grid-template-columns:repeat(6,1fr)!important}
+.tray button img{width:40px!important;height:41px!important}
+.tray button{font-size:10px!important;white-space:nowrap}
+.oi-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}.oi-hd img{width:46px;height:46px}.oi-hd h2{margin:0;color:#3E8E41}.oi-hd small{font-size:11px;color:#8A6A4E}
+.oi-tabs{display:flex;gap:6px;margin-bottom:8px}.oi-tabs button{flex:1;height:36px;font-size:13px}
+.oi-list{display:flex;flex-direction:column;gap:7px;max-height:56vh;overflow-y:auto}
+.oi-card{display:grid;grid-template-columns:54px 1fr auto;gap:8px;align-items:center;background:#FFFDF6;border:2px solid #E3D0A8;border-radius:12px;padding:7px}
+.oi-card.done{opacity:.6}
+.oi-img{width:54px;height:54px;object-fit:contain;background:#F3EAD6;border-radius:8px}
+.oi-mid b{display:block;font-size:13px}.oi-mid small{display:block;font-size:10.5px;color:#8A6A4E;margin-top:2px}
+.oi-pr{font-weight:800;color:#3E8E41;font-size:14px}.oi-memo{font-size:11.5px;color:#5A3E2B;margin-top:1px}
+.oi-act button{height:36px;padding:0 12px;font-size:13px}.oi-st{font-size:11px;font-weight:700;color:#8A6A4E;white-space:nowrap}
+.oi-sellhd{display:flex;gap:10px;align-items:center;margin:4px 0 8px}.oi-sellhd b{display:block}.oi-sellhd small{font-size:11px;color:#8A6A4E}
+.oi-rate{display:flex;flex-direction:column;gap:6px;margin:8px 0}.oi-rate button{height:40px}.oi-rate.sm{flex-direction:row;margin:5px 0 0}.oi-rate.sm button{height:30px;font-size:11px;padding:0 8px}
+.store-it{display:flex;flex-direction:column;align-items:center;gap:3px;background:#FFFDF6;border:2px solid #E3D0A8;border-radius:10px;padding:5px}
+.store-it .it{width:46px;height:46px;object-fit:contain}.store-it span{font-size:11px}.store-it button{width:100%;height:26px;font-size:11px;padding:0}
 </style>
 </head>
 <body>
@@ -1068,7 +1085,8 @@ function makeAva(prof,isMe,height){const cell=height/CELL_CH;const el=h('div',{c
   el.appendChild(h('div',{class:'shadow',style:{width:(cell*.36)+'px',height:(cell*.11)+'px',left:'0',top:'0'}}));
   const body=h('div',{class:'body',style:{width:cell+'px',height:cell+'px',left:(-cell/2)+'px',bottom:(-cell*(1-CELL_FOOT))+'px'}});
   const spr=h('div',{class:'stack chs',sheet:(prof&&prof.av),style:{width:cell+'px',height:cell+'px',backgroundSize:'400% 1200%'}});body.appendChild(spr);el.appendChild(body);el._spr=spr;el._av=prof&&prof.av;el._face='down';el._fr=null;setFrame(el,'idle');
-  el.appendChild(h('div',{class:'nametag pill',text:(isMe?'나 · ':'')+((prof&&prof.name)||'주민'),style:{bottom:(height*1.02)+'px'}}));el._h=height;return el;}
+  let _mt='';try{const _u=isMe?myId():uidByName(prof&&prof.name);if(_u&&S.oiM&&S.oiM[_u])_mt=' 🌡️'+oiTemp(_u);}catch(e){}
+  el.appendChild(h('div',{class:'nametag pill',text:(isMe?'나 · ':'')+((prof&&prof.name)||'주민')+_mt,style:{bottom:(height*1.02)+'px'}}));el._h=height;return el;}
 function faceTo(el,dx,dy){if(!el)return;if(Math.abs(dy)>Math.abs(dx)*1.25&&Math.abs(dy)>.2)el._face=dy<0?'up':'down';else if(Math.abs(dx)>.2)el._face='side';}
 const SITMAP={front:{sitDrink:'sitDrinkF',sip:'sitDrinkF',drink:'sitDrinkF',clink:'sitToastF',cheers:'sitToastF',cheer:'sitCheer',pour:'sitToastF',wave:'sitCheer',eat:'sitDrinkF',jump:'sitClap'},back:{cheer:'sitBackWave',wave:'sitBackWave',jump:'sitBackWave'},side:{sip:'sitDrink',drink:'sitDrink'}};
 function playAct(el,key,ms){if(!el)return;if(el._sit&&SITMAP[el._sit])key=SITMAP[el._sit][key]||key;el._act=key;el._actT=performance.now()+(ms||1400);}
@@ -1232,7 +1250,7 @@ function hud(back,title,sub){const k=todayKey();const coins=(S.me&&S.me.coins)||
   if(S.testDay&&isAdmin()&&!back)app.appendChild(h('button',{class:'testbar tm',onclick:adminMenu,text:'🛠️ 테스트 모드 · '+fmt(S.testDay)+' · 저장 안 됨 · 탭해서 전환'}));
   else if(isAdmin()&&!S.solo&&!back)app.appendChild(h('button',{class:'adminfab',onclick:adminMenu,'aria-label':'관리자 메뉴',text:'🛠️'}));setTimeout(drawOnline,0);}
 function tray(){const b=(img,l,fn)=>h('button',{onclick:fn},h('img',{src:IMG(img),alt:''}),l);
-  app.appendChild(h('div',{class:'tray panel'},b('u_i_hand','인사',()=>emitEmote('wave')),b('u_i_heart','하트',()=>emitEmote('heart')),b('u_i_chat','말하기',openSay),b('po_bag','주머니',openPocket),b('u_i_note','캘린더',openAdvent)));}
+  app.appendChild(h('div',{class:'tray panel'},b('u_i_hand','인사',()=>emitEmote('wave')),b('u_i_heart','하트',()=>emitEmote('heart')),b('u_i_chat','말하기',openSay),b('po_bag','주머니',openPocket),b('u_i_oi','오이마켓',()=>openOi()),b('u_i_note','캘린더',openAdvent)));}
 function openSay(){const log=h('div',{class:'chatlog sheetlog'});const inp=h('input',{class:'txt',maxlength:'80',placeholder:'다 같이 보는 수다방 · 한마디!',enterkeyhint:'send'});
   const send=()=>{const t=inp.value.trim();if(!t)return;inp.value='';sendChat(t);if(S.scene==='village'&&S.me){if(todayKey()==='1202')saveMe({sayN5:(S.me.sayN5||0)+1});missionEvent('say');}inp.focus();};
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
@@ -1431,7 +1449,7 @@ function enterVillage(spawn,after){if(TR.mode==='ride'){TR.mode='loop';TR.hold=f
     hitTest:(x,y)=>{for(const b of B){const hgt=b.w*b.ar;if(!b.noDoor&&!b.hidden&&x>b.cx-b.w/2&&x<b.cx+b.w/2&&y>b.base-hgt&&y<b.base)return {x:b.cx,y:b.base+24};}
       for(const hh of HOUSES){if(x>hh.cx-HOUSE_W/2&&x<hh.cx+HOUSE_W/2&&y>hh.base-HOUSE_W*HOUSE_AR&&y<hh.base)return {x:hh.cx,y:hh.base+24};}
       if(x>TREE.x-TREE.w/2&&x<TREE.x+TREE.w/2&&y>TREE.base-TREE.w*1.5&&y<TREE.base)return {x:TREE.x,y:TREE.base+40,then:startHang};return null;},onProfiles:()=>{drawTreeOrns();const sig=residents().map(r=>r[0]+':'+(r[1].name||'')).join('|');if(SC&&SC._resSig!==undefined&&SC._resSig!==sig&&!modalOpen()&&!app.querySelector('.op,.guide')&&!S.hang){SC._resSig=sig;enterVillage({x:P.x,y:P.y});return;}if(SC)SC._resSig=sig;},
-    onTick:dt=>tramTick(tram,dt)};SC._resSig=residents().map(r=>r[0]+':'+(r[1].name||'')).join('|');{const _ot=SC.onTick;SC.onTick=dt=>{_ot&&_ot(dt);jobTick();tramHitCheck(tram);};}setTimeout(()=>{jobBtn();drawJobItems();checkAttendance();dailyCheck();},400);
+    onTick:dt=>tramTick(tram,dt)};SC._resSig=residents().map(r=>r[0]+':'+(r[1].name||'')).join('|');{const _ot=SC.onTick;SC.onTick=dt=>{_ot&&_ot(dt);jobTick();tramHitCheck(tram);};}setTimeout(()=>{jobBtn();drawJobItems();checkAttendance();dailyCheck();setTimeout(oiSettle,1500);},400);
   hud();tray();bindInput(stage);promptKey='';startLoop();syncPeers();sendPresence();{const nk=todayKey();const NL=nk>='1218'?.85:nk>='1217'?.65:nk>='1215'?.42:0;if(NL){const ov=h('div',{class:'nightov',style:{opacity:String(NL),width:WW+'px',height:WH+'px'}});world.appendChild(ov);LAMPS.forEach(l=>world.appendChild(h('div',{class:'lampglow',style:{left:l[0]+'px',top:(l[1]-52)+'px',opacity:String(Math.min(1,NL*1.3))}})));
     const C=['#FFE58A','#FF8A8A','#8AD8FF','#B6FF9A','#FFFFFF'];for(let i=0;i<70;i++){const x=Math.random()*WW,y=380+Math.random()*(WH-420);world.appendChild(h('div',{class:'twinkle',style:{left:x+'px',top:y+'px',background:C[i%5],boxShadow:'0 0 8px 2px '+C[i%5],animationDelay:(Math.random()*1.4)+'s',opacity:String(NL)}}));}
     const sky=h('div',{class:'nightsky',style:{opacity:String(Math.min(1,NL+.15))}});for(let i=0;i<26;i++)sky.appendChild(h('i',{class:i%6===0?'big':'',style:{left:(Math.random()*100)+'%',top:(Math.random()*70)+'%',animationDelay:(Math.random()*1.8)+'s'}}));app.appendChild(sky);}}{const L=snowLevel();if(todayKey()>='1129'||L>0){const sn=snowLayer(Math.round(18+L*40+(todayKey()==='1212'?40:0)));sn.style.zIndex='20';app.appendChild(sn);}}villageExtras();if(after)setTimeout(after,50);}
@@ -2017,10 +2035,16 @@ function editPanel(items,redraw,owner){let tab=editPanel.tab||'furn';
   const wrap=h('div',{class:'panel editbar'+(editPanel.fold?' fold':'')});
   wrap.appendChild(h('div',{style:{display:'flex',gap:'6px',marginBottom:editPanel.fold?'0':'8px'}},h('button',{class:'btn-c',style:{padding:'5px 10px',fontSize:'12px'},onclick:()=>{editPanel.fold=!editPanel.fold;S.editRoom=true;enterRoom(owner);},text:editPanel.fold?'▲ 가구창 펼치기':'▼ 접고 방 보기'}),editPanel.fold?h('button',{class:'btn-g',style:{marginLeft:'auto',padding:'5px 14px',fontSize:'12px'},onclick:()=>{S.editRoom=false;S.sel=null;editPanel.fold=false;enterRoom(owner);},text:'단장 끝'}):null));
   if(editPanel.fold)return wrap;
-  const tabs=h('div',{style:{display:'flex',gap:'6px',marginBottom:'10px'}},[['furn','가구'],['wall','벽지'],['floor','바닥']].map(([k,l])=>h('button',{class:k===tab?'btn-g':'btn-c',style:{padding:'5px 12px',fontSize:'12px'},onclick:()=>{editPanel.tab=k;wrap.replaceWith(editPanel(items,redraw,owner));},text:l})));
+  const tabs=h('div',{style:{display:'flex',gap:'6px',marginBottom:'10px'}},[['furn','가구'],['store','창고'+((S.me.store||[]).length?' '+S.me.store.length:'')],['wall','벽지'],['floor','바닥']].map(([k,l])=>h('button',{class:k===tab?'btn-g':'btn-c',style:{padding:'5px 12px',fontSize:'12px'},onclick:()=>{editPanel.tab=k;wrap.replaceWith(editPanel(items,redraw,owner));},text:l})));
   wrap.appendChild(tabs);
   const room=Object.assign({},S.me.room||{});
-  if(tab==='wall'||tab==='floor'){const opts=tab==='wall'?WALLS:FLOORS;const g=h('div',{style:{display:'flex',gap:'10px',flexWrap:'wrap'}});
+  if(tab==='store'){const st=S.me.store||[];const g=h('div',{class:'shop'});
+    if(!st.length)wrap.appendChild(h('p',{class:'small',style:{textAlign:'center',padding:'10px 0'},text:'창고가 비었어 📦\n방에서 가구를 골라 「📦 창고」를 누르거나, 🥒 오이마켓에서 사 오면 여기 들어와'}));
+    st.forEach((it,i)=>{const f=FURN[it.k];if(!f)return;g.appendChild(h('div',{class:'store-it'},h('img',{class:'it',src:IMG('f_'+it.k),alt:''}),h('span',{text:f[0]}),
+      h('button',{class:'btn-g',onclick:()=>{if(items.length>=24){toast('가구는 24개까지!');return;}const wall=f[5]==='wall';const n={k:it.k,x:Math.round(80+Math.random()*360),y:wall?100:Math.round(ROOM.wallH+60+Math.random()*180)};if(it.ph)n.ph=it.ph;items.push(n);S.sel=items.length-1;const s2=st.slice();s2.splice(i,1);S.me.room=Object.assign({},S.me.room||{},{items:items.map(x=>Object.assign({},x))});saveMe({room:S.me.room,store:s2}).then(()=>missionEvent('furn'));redraw();wrap.replaceWith(editPanel(items,redraw,owner));},text:'놓기'}),
+      h('button',{class:'btn-c',onclick:()=>oiSell(it.k,{from:'store',idx:i},()=>{S.editRoom=true;enterRoom(owner);}),text:'🥒 팔기'})));});
+    wrap.appendChild(g);}
+  else if(tab==='wall'||tab==='floor'){const opts=tab==='wall'?WALLS:FLOORS;const g=h('div',{style:{display:'flex',gap:'10px',flexWrap:'wrap'}});
     for(const k in opts){const xl=XWF[k]&&todayKey()<XUNLOCK;g.appendChild(h('button',{class:'btn-c'+(xl?' xlock':''),disabled:xl,style:{display:'flex',flexDirection:'column',alignItems:'center',gap:'4px',padding:'6px',borderRadius:'12px',outline:(room[tab]||(tab==='wall'?'stripe':'wood'))===k?'3px solid #D9483B':'none'},onclick:()=>{room[tab]=k;room.items=items.map(x=>Object.assign({},x));S.me.room=room;saveMe({room});S.editRoom=true;enterRoom(owner);}},
       h('div',{class:'xsw',style:{width:'60px',height:'44px',borderRadius:'8px',border:'2px solid #5A3A22',backgroundImage:'url('+IMG('t_'+k)+')',backgroundSize:'60px'}}),h('span',{style:{fontSize:'11px'},text:xl?'🎄 '+fmt(XUNLOCK)+' 공개':(XWF[k]?'🎄 ':'')+opts[k]})));}
     wrap.appendChild(g);}
@@ -2033,10 +2057,59 @@ function editPanel(items,redraw,owner){let tab=editPanel.tab||'furn';
         unlock?h('span',{class:'small',style:{fontSize:'9px'},text:'미션 한정'}):h('span',{style:{display:'flex',alignItems:'center',gap:'2px',fontWeight:'700',fontSize:'11px'}},h('img',{src:IMG('u_coin'),alt:'',style:{width:'14px'}}),String(price))));}
     const sel=S.sel!=null&&items[S.sel];
     wrap.appendChild(h('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'10px'}},h('span',{class:'small',text:sel?'선택: '+FURN[sel.k][0]+' · 끌어서 옮기기':'가구를 사서 끌어다 놓아요'}),
-      sel?h('button',{class:'btn-c',style:{marginLeft:'auto',padding:'5px 10px',fontSize:'11px'},onclick:()=>{const it=items.splice(S.sel,1)[0];const f=FURN[it.k];S.sel=null;S.me.room=Object.assign({},S.me.room||{},{items:items.map(x=>Object.assign({},x))});saveMe({room:S.me.room,coins:(S.me.coins||0)+(f[2]?0:f[1])});redraw();refreshCoins();wrap.replaceWith(editPanel(items,redraw,owner));},text:'넣기 (환불)'}):null));
+      sel?h('button',{class:'btn-c',style:{marginLeft:'auto',padding:'5px 10px',fontSize:'11px'},onclick:()=>{const it=items.splice(S.sel,1)[0];S.sel=null;const si={k:it.k};if(it.ph)si.ph=it.ph;S.me.room=Object.assign({},S.me.room||{},{items:items.map(x=>Object.assign({},x))});saveMe({room:S.me.room,store:(S.me.store||[]).concat([si])});toast('📦 창고에 넣었어');redraw();wrap.replaceWith(editPanel(items,redraw,owner));},text:'📦 창고'}):null,
+      sel?h('button',{class:'btn-c',style:{padding:'5px 10px',fontSize:'11px'},onclick:()=>{const idx=S.sel;oiSell(sel.k,{from:'room',idx},()=>{S.editRoom=true;enterRoom(owner);});},text:'🥒 오이마켓'}):null));
     wrap.appendChild(shop);}
   wrap.appendChild(h('button',{class:'btn-g',style:{width:'100%',height:'44px',marginTop:'12px',fontSize:'15px'},onclick:()=>{S.editRoom=false;S.sel=null;enterRoom(owner);},text:'단장 끝'}));
   return wrap;}
+
+// ================= OI MARKET (중고거래) =================
+const OI_DOC=()=>NS+'meta/oimarket';
+function oiRaw(){try{if(S.solo||isTest()||!window.firebase||!firebase.apps||!firebase.apps.length)return null;return firebase.apps[0].firestore().doc(OI_DOC());}catch(e){return null;}}
+function oiBlank(){return {list:[],manner:{}};}
+async function oiGet(){const r=oiRaw();let d;if(!r)d=S._oiLocal||(S._oiLocal=oiBlank());else{try{const s=await r.get();d=s.exists?JSON.parse(s.data().j||'{}'):oiBlank();}catch(e){d=oiBlank();}}d.list=d.list||[];d.manner=d.manner||{};S.oiM=d.manner;return d;}
+async function oiTx(fn){const r=oiRaw();const prune=d=>{d.list=d.list.filter(x=>x.st==='open'||(x.st==='sold'&&!x.paid)||Date.now()-(x.sts||x.ts)<14*864e5);};
+  if(!r){const d=await oiGet();const res=fn(d);prune(d);return res;}
+  try{return await firebase.apps[0].firestore().runTransaction(async tx=>{const s=await tx.get(r);let d=oiBlank();if(s.exists){try{d=Object.assign(oiBlank(),JSON.parse(s.data().j||'{}'));}catch(e){}}const res=fn(d);if(res===false||res==null)return res;prune(d);S.oiM=d.manner;tx.set(r,{j:JSON.stringify(d),ts:Date.now()});return res;});}catch(e){toast('🥒 오이마켓 연결이 불안정해… 잠시 후 다시!');return null;}}
+function oiTemp(u){const n=(S.oiM||{})[u]||0;return (36.5+n*.5).toFixed(1);}
+function uidByName(n){const r=residents().find(([u,p])=>p&&p.name===n);return r?r[0]:null;}
+function oiPrice(p){return p>0?'❄ '+p:'나눔 🎁';}
+function oiAgo(t){const m=Math.floor((Date.now()-t)/60000);return m<1?'방금':m<60?m+'분 전':m<1440?Math.floor(m/60)+'시간 전':Math.floor(m/1440)+'일 전';}
+function oiItemImg(k){return h('img',{class:'oi-img',src:IMG('f_'+k),alt:''});}
+// 판매 등록: src = {from:'room'|'store', idx}
+function oiSell(k,src,after){const f=FURN[k];if(!f)return;const free=!!f[2];const max=free?0:f[1];const pi=h('input',{class:'txt',type:'tel',inputmode:'numeric',value:String(free?0:Math.ceil(f[1]/2)),style:{textAlign:'center',fontSize:'18px'}});if(free)pi.disabled=true;
+  const mi=h('input',{class:'txt',maxlength:'30',placeholder:'한마디 (예: 이사 가서 급처합니다)'});
+  modal([h('h2',{style:{textAlign:'center'},text:'🥒 오이마켓에 올리기'}),h('div',{class:'oi-sellhd'},oiItemImg(k),h('div',{},h('b',{text:f[0]}),h('small',{text:free?'미션 보상 가구는 나눔만 가능해':'원래 가격 ❄ '+f[1]+' · 0~'+max+' 사이로 정해줘'}))),
+    h('small',{class:'small',text:'가격 (0 = 나눔)'}),pi,mi,
+    h('button',{class:'btn-g',style:{width:'100%',height:'50px',marginTop:'8px',fontSize:'16px'},onclick:async ev=>{let p=parseInt(pi.value,10);if(isNaN(p)||p<0)p=0;if(p>max){toast('원래 가격보다 비싸게는 못 팔아! (최대 ❄ '+max+')');return;}ev.currentTarget.disabled=true;
+      const e={id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),s:myId(),sn:S.me.name,k,p,m:mi.value.trim().slice(0,30),ts:Date.now(),st:'open'};
+      const ok=await oiTx(d=>{d.list.push(e);return true;});if(!ok){ev.currentTarget.disabled=false;return;}
+      if(src.from==='store'){const st=(S.me.store||[]).slice();st.splice(src.idx,1);await saveMe({store:st});}else{const items=((S.me.room&&S.me.room.items)||[]).slice();items.splice(src.idx,1);S.sel=null;await saveMe({room:Object.assign({},S.me.room,{items})});}
+      closeModal();sfx('ding');toast('🥒 오이마켓에 올렸어! 누가 사가면 눈송이가 들어와');after&&after();},text:'올리기'})]);}
+async function openOi(tab){tab=tab||'list';modal([h('div',{class:'np-loading',text:'🥒 오이 따는 중…'})]);const d=await oiGet();const me=myId();
+  const open=d.list.filter(x=>x.st==='open').sort((a,b)=>b.ts-a.ts);const mine=d.list.filter(x=>x.s===me||x.b===me).sort((a,b)=>(b.sts||b.ts)-(a.sts||a.ts));
+  const tabs=h('div',{class:'oi-tabs'},[['list','매물 '+open.length],['mine','내 거래']].map(([k,l])=>h('button',{class:k===tab?'btn-g':'btn-c',onclick:()=>openOi(k),text:l})));
+  const card=x=>{const f=FURN[x.k]||['가구'];const own=x.s===me;const st=x.st==='sold'?(x.b===me?'구매 완료':'판매 완료'+(x.paid?'':' · 정산 대기')):x.st==='off'?'내림':null;
+    return h('div',{class:'oi-card'+(x.st!=='open'?' done':'')},oiItemImg(x.k),h('div',{class:'oi-mid'},h('b',{text:f[0]}),h('div',{class:'oi-pr',text:oiPrice(x.p)}),x.m?h('div',{class:'oi-memo',text:'"'+x.m+'"'}):null,h('small',{text:x.sn+' 🌡️'+oiTemp(x.s)+'° · '+oiAgo(x.ts)+(x.st==='sold'&&x.bn?' · → '+x.bn:'')})),
+      h('div',{class:'oi-act'},st?h('span',{class:'oi-st',text:st}):own?h('button',{class:'btn-c',onclick:()=>oiOff(x),text:'내리기'}):h('button',{class:'btn-g',onclick:()=>oiBuy(x),text:'구매'})));};
+  const body=tab==='list'?(open.length?open.map(card):[h('p',{class:'small',style:{textAlign:'center',padding:'18px 0'},text:'아직 올라온 매물이 없어 🥒\n방 단장하기에서 가구를 골라 「🥒 오이마켓」을 눌러 올려봐!'})]):(mine.length?mine.map(card):[h('p',{class:'small',style:{textAlign:'center',padding:'18px 0'},text:'아직 거래 내역이 없어'})]);
+  modal([h('div',{class:'oi-hd'},h('img',{src:IMG('u_i_oi'),alt:''}),h('div',{},h('h2',{text:'오이마켓'}),h('small',{text:'빌리지 중고거래 · 내 매너온도 🌡️'+oiTemp(me)+'°'}))),tabs,h('div',{class:'oi-list'},body)]);}
+async function oiBuy(x){const f=FURN[x.k];const coins=S.me.coins||0;if(coins<x.p){toast('눈송이가 모자라… 🥲');return;}if((S.me.store||[]).length>=40){toast('창고가 꽉 찼어!');return;}
+  const ok=await oiTx(d=>{const y=d.list.find(z=>z.id===x.id);if(!y||y.st!=='open')return false;if(y.s===myId())return false;y.st='sold';y.b=myId();y.bn=S.me.name;y.sts=Date.now();y.paid=false;return true;});
+  if(ok===false){toast('앗, 방금 팔렸어요 🥲');openOi();return;}if(!ok)return;
+  await saveMe({coins:coins-x.p,store:(S.me.store||[]).concat([{k:x.k}])});refreshCoins&&refreshCoins();sfx('ding');
+  const rate=async(t)=>{await oiTx(d=>{const y=d.list.find(z=>z.id===x.id);if(!y||y.rb)return false;y.rb=t;d.manner[y.s]=(d.manner[y.s]||0)+1;return true;});closeModal();toast('🌡️ '+x.sn+'님 매너온도가 올라갔어!');};
+  modal([h('div',{class:'cele'},h('h2',{text:'🥒 거래 완료!'}),h('div',{style:{textAlign:'center'}},oiItemImg(x.k)),h('p',{style:{textAlign:'center'},text:f[0]+'을(를) '+(x.p?'❄ '+x.p+'에':'나눔으로')+' 샀어!\n내 창고에 들어갔어 (방 단장하기 → 창고)'}),h('small',{class:'small',style:{display:'block',textAlign:'center'},text:x.sn+'님은 어땠나요?'}),
+    h('div',{class:'oi-rate'},['친절해요 😊','응답이 빨라요 ⚡','좋은 물건이에요 ✨'].map(t=>h('button',{class:'btn-c',onclick:()=>rate(t),text:t}))),h('button',{class:'linkbtn',onclick:closeModal,text:'건너뛰기'}))]);}
+async function oiOff(x){const ok=await oiTx(d=>{const y=d.list.find(z=>z.id===x.id);if(!y||y.st!=='open'||y.s!==myId())return false;y.st='off';y.sts=Date.now();return true;});if(ok===false){toast('앗, 이미 팔렸어!');openOi('mine');return;}if(!ok)return;
+  await saveMe({store:(S.me.store||[]).concat([{k:x.k}])});toast('📦 내렸어! 창고로 돌아갔어');openOi('mine');}
+async function oiSettle(){if(!S.me||!S.me.name||S._oiSet)return;S._oiSet=1;setTimeout(()=>{S._oiSet=0;},60000);const me=myId();const d=await oiGet();const due=d.list.filter(x=>x.st==='sold'&&x.s===me&&!x.paid);if(!due.length)return;
+  const got=await oiTx(dd=>{const ids=[];dd.list.forEach(y=>{if(y.st==='sold'&&y.s===me&&!y.paid){y.paid=true;ids.push(y.id);}});return ids.length?ids:false;});if(!got||!got.length)return;
+  const done=due.filter(x=>got.includes(x.id));const sum=done.reduce((a,x)=>a+(x.p||0),0);if(sum)await saveMe({coins:(S.me.coins||0)+sum});refreshCoins&&refreshCoins();sfx('ding');topNote('🥒 오이마켓 거래 완료! '+(sum?'눈송이 +'+sum:'나눔 완료 🎁'));
+  const rate=async(x,t)=>{await oiTx(dd=>{const y=dd.list.find(z=>z.id===x.id);if(!y||y.rs)return false;y.rs=t;dd.manner[y.b]=(dd.manner[y.b]||0)+1;return true;});};
+  modal([h('h2',{style:{textAlign:'center'},text:'🥒 팔렸어요!'}),h('div',{class:'oi-list'},done.map(x=>{const row=h('div',{class:'oi-card'},oiItemImg(x.k),h('div',{class:'oi-mid'},h('b',{text:(FURN[x.k]||['가구'])[0]+' → '+(x.bn||'친구')}),h('div',{class:'oi-pr',text:x.p?'눈송이 +'+x.p:'나눔 완료'}),h('small',{text:x.bn+'님한테 칭찬 남기기'}),
+      h('div',{class:'oi-rate sm'},['친절해요 😊','쿨거래 👍'].map(t=>h('button',{class:'btn-c',onclick:async e=>{row.querySelectorAll('.oi-rate button').forEach(b=>b.disabled=true);await rate(x,t);e.target.textContent='🌡️ 칭찬 완료';},text:t})))));return row;})),
+    h('button',{class:'btn-g',style:{width:'100%',height:'46px',marginTop:'8px'},onclick:closeModal,text:'확인'})]);}
 
 // ================= PUB =================
 // scale: chibi visible height ~78px ≈ 1.65m → ~47px/m
@@ -2599,6 +2672,7 @@ async function makePaper(k){const y=prevDay(k);const res=residents();const P_={k
   const talk={};chat.forEach(m=>{talk[m.uid]=(talk[m.uid]||0)+1;});const meU=k<='1118'?null:(res.find(r=>r[1].name==='현디')||[])[0];const topTalk=(Object.entries(talk).filter(e=>e[0]!==meU).sort((a,b)=>b[1]-a[1])[0])||Object.entries(talk).sort((a,b)=>b[1]-a[1])[0];
   const R=seeded(k);const cand0=chat.filter(m=>m.t.length>=6);const cand=cand0.filter(m=>m.uid!==meU).length?cand0.filter(m=>m.uid!==meU):cand0;const quote=cand.length?cand[Math.floor(R()*cand.length)]:(chat[0]||null);
   const posts=[];res.forEach(([u,p])=>(p.posts||[]).forEach(x=>{if(x.d===y)posts.push([p.name,x.t]);}));
+  let oi=null;try{if(S.db&&!S.solo&&!isTest()){const s=await S.db.doc(NS+'meta/oimarket').get();oi=s.exists?s.data():null;}else oi=S._oiLocal||null;}catch(e){}
   let tips=[];try{if(S.db&&!S.solo){for(const [u] of res){const s=await S.db.doc(NS+'meta/tip_'+y+'_'+u).get();if(s.exists){const d=s.data();(d.list||[]).forEach(t=>tips.push(t));}}}else tips=(S._tipsLocal&&S._tipsLocal[y])||[];}catch(e){}
   const doc=await paperDoc(k)||{};
   // headline
@@ -2610,7 +2684,7 @@ async function makePaper(k){const y=prevDay(k);const res=residents();const P_={k
   else {head='조용했던 빌리지의 하루';sub='다들 어디 갔나… 오늘은 꼭 들르자';}
   if(k===DAILY_START){head='프로젝트 빌리지 개장! 소녀 '+N+'명 입주 완료';sub='창간호 기념 특집 · 내일(11.19)부터 본격 미션 시작';}
   if(doc.head)head=doc.head;if(doc.sub)sub=doc.sub;
-  Object.assign(P_,{chat,meU,head,sub,att,hits,jobs,rich,deco,streak,chatN:chat.length,topTalk,quote,posts,tips,doc,res,R});return P_;}
+  Object.assign(P_,{oi,chat,meU,head,sub,att,hits,jobs,rich,deco,streak,chatN:chat.length,topTalk,quote,posts,tips,doc,res,R});return P_;}
 function paperPhoto(list){const box=h('div',{class:'np-photo'});const L=(list.length?list:residents()).slice(0,6);const n=L.length;L.forEach(([u,p],i)=>{const a=makeAva(p,false,74);a.classList.add('np-ava');a.style.left=(n<2?50:(12+i*(76/(n-1))))+'%';box.appendChild(a);});return box;}
 function npList(arr){return h('ul',{class:'np-ul'},arr.map(t=>h('li',{text:t})));}
 function enDate(k,short){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2));const W=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'],M=['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];return short?(W[d.getDay()].slice(0,3)+', '+M[d.getMonth()].slice(0,3)+' '+d.getDate()+', 2026'):(W[d.getDay()]+', '+M[d.getMonth()]+' '+d.getDate()+', 2026');}
@@ -2703,6 +2777,8 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   c3=[];
   if(p.hits.length)c3.push(art(hd('BLOTTER · 사건사고','red'),npList(p.hits.map(([r,n])=>nm(r)+' — 전차와 충돌 '+n+'회. '+pick(['"어질어질하다"며 자가 회복','"별이 보였다"고 진술','목격자 "전차가 반가워하는 것 같았다"']))),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'})));
   else c3.push(art(hd('BLOTTER · 사건사고','red'),h('p',{class:'np-body dc',text:pick(['어제는 전차 무사고! 철길 위의 평화가 계속되고 있다. 다만 본지는 방심은 금물이라고 경고한다. 전차는 기다려주지 않는다.','전차 사고 0건. 전차 기사님은 "요즘 다들 너무 조심해서 심심하다"고 전했다.','어제 철길은 조용했다. 폭풍 전의 고요일지도 모른다.'])})));
+  if(p.oi&&p.oi.list){const kst=t=>{const d=new Date(t+9*3600e3);return String(d.getUTCMonth()+1).padStart(2,'0')+String(d.getUTCDate()).padStart(2,'0');};const sold=p.oi.list.filter(x=>x.st==='sold'&&x.sts&&kst(x.sts)===y);const op=p.oi.list.filter(x=>x.st==='open');
+    if(sold.length||op.length)c3.push(art(hd('OI MARKET · 오늘의 오이'),sold.length?npList(sold.slice(0,5).map(x=>x.sn+'의 '+((FURN[x.k]||['가구'])[0])+' → '+(x.bn||'?')+' · '+(x.p?'❄'+x.p:'나눔'))):h('p',{class:'np-body',text:pick(['어제 오이마켓 거래는 0건. 오이가 시들고 있다.','매물은 있는데 사는 사람이 없다. 오이 시세 하락 중.'])}),op.length?h('p',{class:'np-body dim',text:'현재 매물 '+op.length+'개. '+pick(['득템 찬스!','오이마켓을 확인하라.','나눔도 있다는 소문.'])}):null));}
   c3.push(art(hd('알바 소식'),h('p',{class:'np-body',text:p.jobs.length?pick(['어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.',p.jobs.map(nm).join(', ')+', 어제 땀 흘려 눈송이를 벌었다. 노동의 가치.','알바 출근부: '+p.jobs.map(nm).join(', ')+'. 사장님이 칭찬했다는 후문.']):pick(['어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.','알바 구인 공고가 하루 종일 붙어 있었다. 지원자 0명.'])})));
   }
   const mk=h('div',{class:'np-mkt'},h('div',{class:'np-mkt-h'},h('b',{text:'MARKETS'}),h('span',{text:'눈송이 시세 ❄'})),
@@ -2818,7 +2894,7 @@ async function boot(){app.innerHTML='';app.appendChild(h('div',{style:{position:
     room.on('act',m=>{if(m.isMe&&m.sameTab)return;const d=m.data||{};if(!d||d.scene!==sceneId())return;
       if(d.k==='drink')drinkAnim(m.peer,d.d);else if(d.k==='eat'&&ANJU[d.d])eatAnim(m.peer,d.d);else if(d.k==='pour'&&d.d&&d.d.seat)pourAnim2(m.peer,d.d.seat,d.d.d==='soju'?'soju':'beer');else if(ACT_FX[d.k])ACT_FX[d.k](m.peer,d.d);},()=>{});
     room.on('bell',m=>{if(m.isMe&&m.sameTab)return;bellBanner(m.data&&m.data.name);},()=>{});}}
-if(location.protocol==='file:'||location.hostname==='localhost')window.__pv={missionEvent:(e)=>missionEvent(e),jobForce:(t)=>{JOB_MAP[todayKey()]=t;},enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),findPath:(a,b,c,d)=>findPath(a,b,c,d),jobVis:()=>jobVis(),S,P,openPaper,openStand,openTip,openTipBox,publishPaper,tramHit,startJob,jobTick,openJob,checkAttendance,blockRects,openSay,updateOnline:()=>updateOnline(),adminMenu,setMode,bqEl,manittoOf:(u)=>manittoOf(u),saveMe:(x)=>saveMe(x),sendThing:(a,b,c)=>sendThing(a,b,c),mailCount:()=>mailCount(),myId:()=>myId(),pocketDetail,photoPick,openPocket2:()=>openPocket(),buildSnowman,openSay,syncPeers,peersInScene,sceneId,eveWait,letterFlow,wallPut,placeAtDoor,maniPost,viewThing,thSit,thSeats,thCamStart,thStageUp,thPerform,openPocket,bouquetFlow,certFlow,invAdd,enterRoom:(u)=>enterRoom(u),wTake,sitDown,lightCheer,toss,enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),goTo:(x,y)=>goTo(x,y),enterGallery,enterPolice,enterStudio,rankFlow,caseFlow,runwayFlow,partyFlow,enterFlower,enterPost,enterGift,enterBooks,enterClinic,enterTownhall,openMailbox,quizWrite,quizShelf,giftFlow,clinicFlow,callTram,rideTram,treeLighting,enterTheater,enterCarousel,enterCafe,enterDiner,openBoardUI,openVote,enterVillage,openCafeMenu,openDinerMenu,buyDrink,orderFood,crackCookie,showOpening,showInvite,showCreate,showTicket,showGuide,playCut,arrive,get SC(){return SC},sitDown,leaveSeat,wTake,startHang,hangTap,completeDay};
+if(location.protocol==='file:'||location.hostname==='localhost')window.__pv={openOi:(t)=>openOi(t),oiSettle:()=>{S._oiSet=0;return oiSettle();},enterRoom:(o)=>enterRoom(o),missionEvent:(e)=>missionEvent(e),jobForce:(t)=>{JOB_MAP[todayKey()]=t;},enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),findPath:(a,b,c,d)=>findPath(a,b,c,d),jobVis:()=>jobVis(),S,P,openPaper,openStand,openTip,openTipBox,publishPaper,tramHit,startJob,jobTick,openJob,checkAttendance,blockRects,openSay,updateOnline:()=>updateOnline(),adminMenu,setMode,bqEl,manittoOf:(u)=>manittoOf(u),saveMe:(x)=>saveMe(x),sendThing:(a,b,c)=>sendThing(a,b,c),mailCount:()=>mailCount(),myId:()=>myId(),pocketDetail,photoPick,openPocket2:()=>openPocket(),buildSnowman,openSay,syncPeers,peersInScene,sceneId,eveWait,letterFlow,wallPut,placeAtDoor,maniPost,viewThing,thSit,thSeats,thCamStart,thStageUp,thPerform,openPocket,bouquetFlow,certFlow,invAdd,enterRoom:(u)=>enterRoom(u),wTake,sitDown,lightCheer,toss,enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),goTo:(x,y)=>goTo(x,y),enterGallery,enterPolice,enterStudio,rankFlow,caseFlow,runwayFlow,partyFlow,enterFlower,enterPost,enterGift,enterBooks,enterClinic,enterTownhall,openMailbox,quizWrite,quizShelf,giftFlow,clinicFlow,callTram,rideTram,treeLighting,enterTheater,enterCarousel,enterCafe,enterDiner,openBoardUI,openVote,enterVillage,openCafeMenu,openDinerMenu,buyDrink,orderFood,crackCookie,showOpening,showInvite,showCreate,showTicket,showGuide,playCut,arrive,get SC(){return SC},sitDown,leaveSeat,wTake,startHang,hangTap,completeDay};
 boot();
 })();
 
