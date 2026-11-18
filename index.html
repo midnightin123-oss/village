@@ -2424,8 +2424,8 @@ function rerender(){if(S.scene==='writers')return enterWriters();if(S.scene==='v
 function nextDay(k){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2)+1);return String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
 function prevDay(k){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2)-1);return String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
 async function checkAttendance(){const k=todayKey();if(!S.me||!S.me.name||k<'1116'||S._attK===k)return;S._attK=k;const a=S.me.att||{};if(a.last===k)return;
-  const streak=a.last===prevDay(k)?(a.n||0)+1:1;const bonus=streak%3===0?5:0;await saveMe(Object.assign({att:{last:k,n:streak},coins:(S.me.coins||0)+5+bonus},logInc('att')));refreshCoins&&refreshCoins();
-  topNote('📅 출석 도장 쾅! 눈송이 +5'+(bonus?' · '+streak+'일 연속 보너스 +5 🔥':(streak>1?' · '+streak+'일 연속':'')));sfx('ding');}
+  const streak=a.last===prevDay(k)?(a.n||0)+1:1;const nw=k>='1120';const base=nw?2:5;const bonus=nw?(streak%7===0?10:0):(streak%3===0?5:0);await saveMe(Object.assign({att:{last:k,n:streak},coins:(S.me.coins||0)+base+bonus},logInc('att')));refreshCoins&&refreshCoins();
+  topNote('📅 출석 도장 쾅! 눈송이 +'+base+(bonus?' · '+streak+'일 연속 보너스 +'+bonus+' 🔥':(streak>1?' · '+streak+'일 연속'+(nw?' (7일 개근 +10)':''):'')));sfx('ding');}
 const JOBS={trash:{t:'🧹 마을 청소',d:'마을 곳곳에 떨어진 쓰레기 3개를 주워줘!',it:['🥤','🧻','🍌'],done:'마을이 반짝반짝해졌어 ✨'},
   leaves:{t:'🍂 낙엽 쓸기',d:'길에 쌓인 낙엽 더미 3개를 쓸어줘!',it:['🍂','🍁','🍂'],done:'길이 깨끗해졌어 🍂'},
   cat:{t:'🐈 길냥이 밥 주기',d:'배고픈 길고양이 3마리에게 밥을 줘!',it:['🐈','🐈‍⬛','🐈'],done:'냥이들이 배불러서 골골송 😽'},
