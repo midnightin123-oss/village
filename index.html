@@ -700,7 +700,9 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .np-cols{column-count:2;column-gap:14px;column-rule:1px solid rgba(43,38,30,.55)}
 .np-cols>*{break-inside:avoid}
 .np-by{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:9.5px;font-weight:700;margin-bottom:3px}
-.np-body{font-size:11.8px;line-height:1.68;text-align:justify;margin:2px 0 8px;word-break:normal;line-break:strict;break-inside:auto!important}
+.np-body{font-size:11.8px;line-height:1.68;text-align:justify;margin:2px 0 8px;word-break:normal;line-break:strict}
+.np-art{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;display:inline-block;width:100%;vertical-align:top}
+.np-cols>.np-body.dc{break-inside:auto}
 .np-body.dim{color:#5A5244}
 .np-body.dc::first-letter{float:left;font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:38px;line-height:.92;padding:3px 4px 0 0}
 .np-index{margin-top:8px;border-top:3px double var(--rule);border-bottom:1px solid var(--rule);display:flex;align-items:stretch;gap:0;padding:4px 0}
@@ -859,7 +861,7 @@ const ORN_NAME={ball_red:'빨간 공',ball_gold:'금색 공',ball_blue:'파란 �
 const DY=200; // vertical shift for bigger plaza
 const WW=1500,WH=2440;
 const B=[
- {id:'townhall',spr:'townhall',cx:780,base:340,w:330,ar:1.0375,name:'시계탑 시청'},{id:'daily',spr:'newsstand',cx:992,base:346,w:118,ar:1.172,name:'빌리지 데일리',always:true},
+ {id:'townhall',spr:'townhall',cx:780,base:340,w:330,ar:1.0375,name:'시계탑 시청'},{id:'daily',spr:'newsstand',cx:992,base:346,w:118,ar:1.172,name:'신문 가판대',always:true},
  {id:'pub',spr:'pub',cx:1110,base:480,w:180,ar:1.0125,name:'펍',always:true},
  {id:'writers',spr:'house',cx:450,base:480,w:165,ar:1.104,name:'회의실',always:true},
  {id:'tram',spr:'tram',cx:375,base:790,w:170,ar:.878,name:'트램 정류장'},
@@ -1317,7 +1319,7 @@ function enterVillage(spawn,after){if(TR.mode==='ride'){TR.mode='loop';TR.hold=f
     if(b.hidden&&!placeOpenDay(b.id)){return;}
     const img=h('img',{class:'spr',src:IMG('v_'+b.spr),alt:b.name,style:{left:b.cx+'px',top:b.base+'px',width:b.w+'px',zIndex:String(b.base)}});if(sea==='winter')img.style.filter='saturate(.75) brightness(1.03)';world.appendChild(img);
     if((od&&od===todayKey())||b.always)world.appendChild(h('div',{class:'glow',style:{left:b.cx+'px',top:(b.base-b.w*b.ar*.45)+'px',width:(b.w*1.5)+'px',height:(b.w*1.3)+'px',zIndex:String(b.base-1)}}));
-    const sg=h('div',{class:'sign pill'+(od||b.always?' open':''),style:{left:b.cx+'px',top:(b.base+18)+'px',zIndex:String(b.base+1)},text:b.id==='writers'?'✍️ 회의실':b.id==='board'?'📌 게시판':b.id==='daily'?'📰 빌리지 데일리':b.always?'🍻 펍':(b.name+(od?(od===todayKey()?' · 오늘!':''):(nx?' · '+fmt(nx):'')))});world.appendChild(sg);if(b.id==='pub')pubSignEl=sg;});
+    const sg=h('div',{class:'sign pill'+(od||b.always?' open':''),style:{left:b.cx+'px',top:(b.base+18)+'px',zIndex:String(b.id==='daily'?600:b.base+1)},text:b.id==='writers'?'✍️ 회의실':b.id==='board'?'📌 게시판':b.id==='daily'?'📰 신문 가판대':b.always?'🍻 펍':(b.name+(od?(od===todayKey()?' · 오늘!':''):(nx?' · '+fmt(nx):'')))});world.appendChild(sg);if(b.id==='pub')pubSignEl=sg;});
   const res=residents();
   HOUSES.forEach((hh,i)=>{world.appendChild(h('img',{class:'spr',src:IMG('h_'+i),alt:'집',style:{left:hh.cx+'px',top:(hh.base+4)+'px',width:HOUSE_W+'px',zIndex:String(hh.base)}}));const r=res[i];const mine=r&&r[0]===(S.uid||'local');
     world.appendChild(h('div',{class:'sign pill'+(mine?' open':''),style:{left:hh.cx+'px',top:(hh.base+16)+'px',zIndex:String(hh.base+1)},text:r?(mine?'우리 집':r[1].name+'네'):'빈 집'}));
@@ -2488,24 +2490,24 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
     h('div',{class:'np-cols'},h('div',{class:'np-by',text:'By 빌리지 데일리 취재팀'}),h('p',{class:'np-body dc',text:lede})),idx]);
   // ── A2 VILLAGE
   const nums=h('div',{class:'np-nums'},[[p.att.length+'명','방문'],[p.chatN+'','수다(마디)'],[p.hits.reduce((a,b)=>a+b[1],0)+'건','전차 사고']].map(([a,b])=>h('div',{},h('b',{text:a}),h('span',{text:b}))));
-  const c2=[hd('출석부 ROLL CALL'),npList(p.res.map(r=>(p.att.includes(r)?'✔ ':'· ')+nm(r)+(p.att.includes(r)?'':' (결석)')))];
-  if(p.streak[0]&&p.streak[0][1]>=2)c2.push(hd('개근상'),h('p',{class:'np-body',text:'연속 출석 1위는 '+nm(p.streak[0][0])+'('+p.streak[0][1]+'일 연속). 성실 그 자체.'}));
-  c2.push(hd('수다왕'),h('p',{class:'np-body',text:p.topTalk?((S.profiles[p.topTalk[0]]||{}).name||'누군가')+' — 하루 '+p.topTalk[1]+'마디. 입이 쉬질 않았다는 후문.':'어제는 수다왕 후보가 없었다. 오늘 왕관의 주인은?'}));
-  c2.push(hd('게시판 새 소식'),p.posts.length?npList(p.posts.slice(0,4).map(x=>x[0]+': "'+x[1]+'"')):h('p',{class:'np-body dim',text:'게시판은 11.19부터 열린다. 첫 메모의 주인공은 누구?'}));
+  const art=(...k)=>h('div',{class:'np-art'},k);const c2=[art(hd('출석부 ROLL CALL'),npList(p.res.map(r=>(p.att.includes(r)?'✔ ':'· ')+nm(r)+(p.att.includes(r)?'':' (결석)'))))];
+  if(p.streak[0]&&p.streak[0][1]>=2)c2.push(art(hd('개근상'),h('p',{class:'np-body',text:'연속 출석 1위는 '+nm(p.streak[0][0])+'('+p.streak[0][1]+'일 연속). 성실 그 자체.'})));
+  c2.push(art(hd('수다왕'),h('p',{class:'np-body',text:p.topTalk?((S.profiles[p.topTalk[0]]||{}).name||'누군가')+' — 하루 '+p.topTalk[1]+'마디. 입이 쉬질 않았다는 후문.':'어제는 수다왕 후보가 없었다. 오늘 왕관의 주인은?'})));
+  c2.push(art(hd('게시판 새 소식'),p.posts.length?npList(p.posts.slice(0,4).map(x=>x[0]+': "'+x[1]+'"')):h('p',{class:'np-body dim',text:'게시판은 11.19부터 열린다. 첫 메모의 주인공은 누구?'})));
   pages.push([run(1),flag('Village','마을 소식'),nums,h('div',{class:'np-cols'},c2)]);
   // ── A3 METRO & BUSINESS
-  const c3=[hd('BLOTTER · 사건사고','red')];
-  if(p.hits.length)c3.push(npList(p.hits.map(([r,n])=>nm(r)+' — 전차와 충돌 '+n+'회. "어질어질하다"며 자가 회복')),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'}));
-  else c3.push(h('p',{class:'np-body dc',text:'어제는 전차 무사고! 철길 위의 평화가 계속되고 있다. 다만 본지는 방심은 금물이라고 경고한다. 전차는 기다려주지 않는다.'}));
-  c3.push(hd('알바 소식'),h('p',{class:'np-body',text:p.jobs.length?'어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.':'어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.'}));
-  if(p.deco[0]&&p.deco[0][1]>0)c3.push(hd('인테리어 경쟁'),h('p',{class:'np-body',text:'가구 제일 많은 집: '+nm(p.deco[0][0])+'네 ('+p.deco[0][1]+'개). 집들이 언제 하나요?'}));
+  const c3=[];
+  if(p.hits.length)c3.push(art(hd('BLOTTER · 사건사고','red'),npList(p.hits.map(([r,n])=>nm(r)+' — 전차와 충돌 '+n+'회. "어질어질하다"며 자가 회복')),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'})));
+  else c3.push(art(hd('BLOTTER · 사건사고','red'),h('p',{class:'np-body dc',text:'어제는 전차 무사고! 철길 위의 평화가 계속되고 있다. 다만 본지는 방심은 금물이라고 경고한다. 전차는 기다려주지 않는다.'})));
+  c3.push(art(hd('알바 소식'),h('p',{class:'np-body',text:p.jobs.length?'어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.':'어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.'})));
+  if(p.deco[0]&&p.deco[0][1]>0)c3.push(art(hd('인테리어 경쟁'),h('p',{class:'np-body',text:'가구 제일 많은 집: '+nm(p.deco[0][0])+'네 ('+p.deco[0][1]+'개). 집들이 언제 하나요?'})));
   const mk=h('div',{class:'np-mkt'},h('div',{class:'np-mkt-h'},h('b',{text:'MARKETS'}),h('span',{text:'눈송이 시세 ❄'})),
     p.rich.slice(0,6).map((r,i)=>h('div',{class:'np-mkt-r'},h('span',{text:(i+1)+'. '+nm(r)}),h('b',{text:'❄ '+(r[1].coins||0)}),h('i',{class:i<3?'up':'',text:i<3?'▲':'–'}))));
   pages.push([run(2),flag('Metro & Business','사건 · 경제'),mk,h('div',{class:'np-cols'},c3)]);
   // ── A4 OPINION & LIFE
   const q=p.quote?h('blockquote',{class:'np-quote'},h('span',{text:'“'+p.quote.t+'”'}),h('small',{text:'— '+(p.quote.name||'익명')+', 수다방에서'})):h('p',{class:'np-body dim',text:'어제 수다방은 조용했다. 오늘의 명대사를 기다린다.'});
   const tips=p.tips.length?p.tips.slice(0,4).map(t=>h('div',{class:'np-tip'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:'"'+t.t+'"'}),h('small',{text:'— 익명의 제보자'}))):[h('p',{class:'np-body dim',text:'가판대에서 익명 제보를 받고 있다. 사진도 환영. 제보는 다음 날 신문에 실린다.'})];
-  const c4=[hd('LETTERS · 익명 제보'),...tips,hd('HOROSCOPE · 오늘의 운세'),npList(p.res.map(r=>nm(r)+': '+FORTUNE[Math.floor(R()*FORTUNE.length)])),hd('WEATHER · 날씨'),h('p',{class:'np-body',text:wx[0]+' '+(lv>.7?'함박눈. 눈사람 만들기 딱 좋은 날':lv>.3?'눈발 날림. 목도리 필수':lv>0?'첫눈 예감. 하늘 자주 볼 것':'맑고 쌀쌀. 따뜻하게 입자')})];
+  const c4=[art(hd('LETTERS · 익명 제보'),...tips),art(hd('HOROSCOPE · 오늘의 운세'),(()=>{const F=FORTUNE.slice().sort(()=>R()-.5);return npList(p.res.map((r,i)=>nm(r)+': '+F[i%F.length]));})()),art(hd('WEATHER · 날씨'),h('p',{class:'np-body',text:wx[0]+' '+(lv>.7?'함박눈. 눈사람 만들기 딱 좋은 날':lv>.3?'눈발 날림. 목도리 필수':lv>0?'첫눈 예감. 하늘 자주 볼 것':'맑고 쌀쌀. 따뜻하게 입자')}))];
   const ad=ADS.slice().sort(()=>R()-.5).slice(0,4);
   pages.push([run(3),flag('Opinion & Life','오피니언 · 생활'),hd('QUOTE OF THE DAY · 어제의 명대사'),q,h('div',{class:'np-cols'},c4),h('div',{class:'np-cls'},h('div',{class:'np-cls-h',text:'CLASSIFIEDS · 광고'}),h('div',{class:'np-ads'},ad.map(a=>h('div',{class:'np-ad'},h('b',{text:a[0]}),h('span',{text:a[1]}))))),h('div',{class:'np-end',text:'— 30 —'})]);
   // ── BOOK (page flip)
