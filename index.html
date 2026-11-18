@@ -805,6 +805,14 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 
 .ava .carry-ic{position:absolute;left:calc(50% + 4px);transform:translateX(-50%);font-size:22px;line-height:1;z-index:6;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35));animation:carryBob .9s ease-in-out infinite;pointer-events:none;white-space:nowrap}
 @keyframes carryBob{0%,100%{transform:translate(-10%,0) rotate(-5deg)}50%{transform:translate(-10%,-3px) rotate(5deg)}}
+
+.jobitem.sm .jb-ic{font-size:15px}.jobitem.sm.near .jb-ic{font-size:18px}.jobitem.sm.close .jb-ic{font-size:20px}
+.jobitem.sm .jb-lb{font-size:8.5px;padding:0 4px;border-width:1px;line-height:1.4}
+.jobitem .jicon{width:1.1em;height:1.1em;object-fit:contain;image-rendering:pixelated}
+.carry-ic .jicon{width:22px;height:22px;object-fit:contain;display:block}
+.cof-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.cof-b{height:50px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;white-space:nowrap;padding:0 6px}
+.cof-b .jemo{font-size:18px}.cof-b .jicon{width:24px;height:24px;object-fit:contain}
 </style>
 </head>
 <body>
@@ -2458,9 +2466,10 @@ const JOB_PAY=10;
 const JOB_PLACE={village:'마을',pub:'🍻 펍',writers:'✍️ 회의실'};
 function curJob(){return JOBS[jobOf(todayKey())];}
 function jobDone(){return S.me&&S.me.job===todayKey();}
-function jobCarry(){if(!P.el)return;const o=P.el.querySelector('.carry-ic');const j=S.job;let ic=null;if(j&&j.day===todayKey()){if(j.carry)ic=j.carry.split(' ')[0];else if(j.type==='dish'&&j.got>0)ic='🍺'.repeat(j.got);}if(!ic){if(o)o.remove();return;}if(o){o.textContent=ic;return;}P.el.appendChild(h('div',{class:'carry-ic',text:ic,style:{bottom:((P.el._h||74)*.36)+'px'}}));}
+function jIcon(m,cls){const e=String(m).split(' ')[0];return e==='🍿'?h('img',{class:'jicon '+(cls||''),src:IMG('pr_jjolbyeong'),alt:'쫄병스낵'}):h('span',{class:'jemo '+(cls||''),text:e});}
+function jobCarry(){if(!P.el)return;const o=P.el.querySelector('.carry-ic');const j=S.job;let ic=null;if(j&&j.day===todayKey()){if(j.carry)ic=j.carry.split(' ')[0];else if(j.type==='dish'&&j.got>0)ic='🍺'.repeat(j.got);}if(!ic){if(o)o.remove();return;}if(o&&o._ic===ic)return;if(o)o.remove();const el=h('div',{class:'carry-ic',style:{bottom:((P.el._h||74)*.36)+'px'}},ic==='🍿'?jIcon('🍿'):document.createTextNode(ic));el._ic=ic;P.el.appendChild(el);}
 function jobBtn(){jobCarry();const o=app.querySelector('.jobbtn');if(o)o.remove();if(!S.me||!S.me.name||todayKey()<'1116')return;const J=curJob();const sc=J.sc||'village';if(S.scene!=='village'&&S.scene!==sc)return;
-  const lab=jobDone()?'✔ 알바 끝':(S.job&&S.job.day===todayKey()?'💼 알바 중 '+S.job.got+'/3'+(S.job.carry?' · '+S.job.carry:''):'💼 오늘의 알바');
+  const lab=jobDone()?'✔ 알바 끝':(S.job&&S.job.day===todayKey()?'💼 알바 중 '+S.job.got+'/3'+(S.job.carry?' · '+(S.job.carry.split(' ')[1]||S.job.carry):''):'💼 오늘의 알바');
   app.appendChild(h('button',{class:'jobbtn'+(jobDone()?' done':''),onclick:openJob,text:lab}));}
 function jobHint(J){return {deliver:'📰 신문 시킨 곳이 어딘지 몰라! 집이랑 가게 앞 📰 표시에 하나씩 가봐',serve:'🍺 카운터에서 맥주 받아서 주문 뜬 테이블로!',dish:S.job&&S.job.got>=3?'🧽 카운터 옆 싱크대로 가서 닦자!':'🍺 테이블 위 빈 잔을 모아줘',coffee:S.job&&S.job.carry?'☕ '+S.job.carry+' 시킨 선배한테 갖다드려!':'☕ 선배들 주문 확인하고 탕비실에서 챙겨!',phone:'📞 울리는 전화기 찾아서 받아!'}[J.type]||('🔎 '+(J.it||[]).join(' ')+' 찾아봐! 가까이 가면 반짝반짝 빛나');}
 function openJob(){const k=todayKey();const J=curJob();const sc=J.sc||'village';
@@ -2485,10 +2494,10 @@ function jobVis(){const j=S.job;if(!j)return [];const t=j.type||'collect';
   if(t==='collect'||t==='deliver')return j.items.map((it,i)=>Object.assign({i},it)).filter(it=>!it.ok&&!it.no);
   if(t==='serve'){const o=[];if(!j.carry)o.push({x:130,y:196,ic:'🍺',lb:'카운터',ax:130,ay:246});const tb=TABLES[j.ord];const sp=seatPos(j.ord+'1');o.push({x:tb[0],y:tb[1]-34,ic:'🙋',lb:'주문',cls:'ord',ax:sp[0],ay:sp[1]});return o;}
   if(t==='dish'){const o=j.items.filter(it=>!it.ok);if(j.got>=3)o.push({x:262,y:258,ic:'🚰',lb:'싱크대'});return o;}
-  if(t==='coffee'){const o=j.items.filter(it=>!it.ok).map(it=>Object.assign({},it,{lb:it.menu,cls:'ord'}));o.push({x:WR.sideL+230,y:WR.wallH+30,ic:'☕',lb:'탕비실'});return o;}
-  if(t==='phone')return j.ring?[{x:j.ring.x,y:j.ring.y,ic:'📞',cls:'ring'}]:[];return [];}
+  if(t==='coffee'){const o=j.items.filter(it=>!it.ok).map(it=>Object.assign({},it,{lb:it.menu.split(' ')[1],cls:'ord sm'}));o.push({x:WR.sideL+230,y:WR.wallH+30,ic:'☕',lb:'탕비실',cls:'sm'});return o;}
+  if(t==='phone')return j.ring?[{x:j.ring.x,y:j.ring.y,ic:'📞',cls:'ring sm'}]:[];return [];}
 function drawJobItems(){document.querySelectorAll('.jobitem').forEach(e=>e.remove());if(!S.job||!SC||!SC.world||S.job.day!==todayKey())return;const J=curJob();if(S.scene!==(J.sc||'village'))return;
-  jobVis().forEach(it=>{const e=h('button',{class:'jobitem'+(it.cls?' '+it.cls:''),style:{left:it.x+'px',top:it.y+'px',zIndex:String(Math.round(it.y)+400)},'aria-label':it.lb||'알바',onclick:ev=>{ev.stopPropagation();if(it.ax!=null)goTo(it.ax,it.ay);else goTo(it.x,it.y+(S.scene==='village'?0:20));}},h('span',{class:'jb-ring'}),h('span',{class:'jb-ic',text:it.ic}),it.lb?h('span',{class:'jb-lb',text:it.lb}):null);e._it=it;SC.world.appendChild(e);});}
+  jobVis().forEach(it=>{const e=h('button',{class:'jobitem'+(it.cls?' '+it.cls:''),style:{left:it.x+'px',top:it.y+'px',zIndex:String(Math.round(it.y)+400)},'aria-label':it.lb||'알바',onclick:ev=>{ev.stopPropagation();if(it.ax!=null)goTo(it.ax,it.ay);else goTo(it.x,it.y+(S.scene==='village'?0:20));}},h('span',{class:'jb-ring'}),h('span',{class:'jb-ic'},it.ic==='🍿'?jIcon('🍿'):document.createTextNode(it.ic)),it.lb?h('span',{class:'jb-lb',text:it.lb}):null);e._it=it;SC.world.appendChild(e);});}
 const DLV_OK=['어! 저희 시킨 거 맞아요 감사합니다 📰','드디어 왔다! 기다렸어요','신문 왔다~ 운세부터 봐야지','수고하셨어요! 팁은 마음으로 드릴게요','맞아요 맞아요! 오늘 1면 뭐예요?','오 빠르다! 별 다섯 개 드릴게요 ⭐'];
 const DLV_NO=['저희 신문 안 시켰는데요…?','여기 아닌데요 ㅎㅎ','신문이요? 저 글자 안 읽어요','구독 해지했어요 죄송해요','어… 혹시 옆집 아니에요?','저희는 종이 안 써요. 환경 보호 중 🌱','방금 받았어요 (거짓말)','지금 바빠요! 나중에 와요!','신문은 됐고 혹시 붕어빵은 없어요?'];
 const SRV_NO=['여긴 주문 안 했는데요?','저희 아직 메뉴판도 안 봤어요','어 저희 거 아닌데… 근데 주시면 마실게요','사장님 여기 아니에요~'];
@@ -2502,7 +2511,7 @@ const CALLS=[["안녕하세요~ 매니저입니다. 그날 스케줄이 좀 애�
  ["녹화 몇 시간 걸려요?",["금방 끝나요!","금방이 몇 시간인데요? …12시간이요?"],["솔직히 말씀드릴까요?","아뇨 듣고 싶지 않아요 (뚝)"]],
  ["저희 애가 요즘 너무 바빠서요. 근데 무슨 프로라고요?",["5시의 소녀들이요","아 그 유명한! 바로 할게요"],["빌리지 데일리요","…신문이요?"]],
  ["사전 인터뷰는 전화로 해도 되나요?",["네! 지금 바로 할까요?","지금이요? 저 아직 잠옷인데…"],["대면으로 꼭 부탁드려요","그럼 커피 사주세요. 쫄병스낵도요"]]];
-function jobRing(){const j=S.job;if(!j||j.type!=='phone')return;const spots=WSPOTS.map(s=>[s[0],s[1]]).concat([[WR.sideL+113,WR.wallH+30],[WR.sideL+347,WR.wallH+30]]);let p;do{p=spots[Math.floor(Math.random()*spots.length)];}while(j.ring&&p[0]===j.ring.x&&p[1]===j.ring.y);
+function jobRing(){const j=S.job;if(!j||j.type!=='phone')return;const spots=WSPOTS.map(s=>[s[0],s[1]]).concat([[WR.sideL+113,WR.wallH+30],[WR.sideL+347,WR.wallH+30]]);const far=spots.filter(s=>Math.hypot(s[0]-P.x,s[1]-P.y)>90&&!(j.ring&&s[0]===j.ring.x&&s[1]===j.ring.y));const p=(far.length?far:spots)[Math.floor(Math.random()*(far.length||spots.length))];
   j.ring={x:p[0],y:p[1],until:Date.now()+15000};if(S.scene==='writers'){sfx('ding');drawJobItems();}}
 async function jobFinish(){const J=curJob();S.job=null;document.querySelectorAll('.jobitem').forEach(e=>e.remove());if(SC&&SC._jsp){SC.speed=SC._jsp;SC._jsp=null;}
   await saveMe(Object.assign({job:todayKey(),coins:(S.me.coins||0)+JOB_PAY},logInc('job')));refreshCoins&&refreshCoins();jobBtn();sfx('ding');
@@ -2513,7 +2522,7 @@ function scrubGame(){let dist=0,last=null;const NEED=2600;const bar=h('div',{cla
   const mv=e=>{const t=e.touches?e.touches[0]:e;if(!t)return;if(last){dist+=Math.hypot(t.clientX-last[0],t.clientY-last[1]);}last=[t.clientX,t.clientY];const r=Math.min(1,dist/NEED);bar.style.width=(r*100)+'%';pad.querySelector('.scrub-foam').style.opacity=String(.3+r*.7);if(r>=.34)cups.textContent=r>=.67?(r>=1?'✨✨✨':'✨✨🍺'):'✨🍺🍺';if(r>=1&&!pad._done){pad._done=1;sfx('ding');setTimeout(()=>{closeModal();jobFinish();},600);}e.preventDefault&&e.preventDefault();};
   pad.addEventListener('touchmove',mv,{passive:false});pad.addEventListener('mousemove',e=>{if(e.buttons)mv(e);});pad.addEventListener('touchend',()=>{last=null;});pad.addEventListener('mouseup',()=>{last=null;});
   modal([h('h2',{style:{textAlign:'center'},text:'🧽 박박 닦기!'}),h('p',{class:'small',style:{textAlign:'center'},text:'손가락으로 문질러서 잔 3개를 반짝반짝하게!'}),pad,h('div',{class:'scrub-bar'},bar)]);}
-function coffeePick(){modal([h('h2',{style:{textAlign:'center'},text:'☕ 탕비실'}),h('p',{class:'small',style:{textAlign:'center'},text:'누가 뭐 시켰더라…? 하나 들고 가자'}),h('div',{class:'pk-grid'},['🧊 아아','🥛 라떼','🍦 바닐라라떼','🍿 쫄병스낵'].map(m=>h('button',{class:'btn-c',style:{height:'56px',fontSize:'15px'},onclick:()=>{S.job.carry=m;closeModal();sfx('pop');jobBtn();toast(m+' 챙겼다! 시킨 선배한테 가자');},text:m})))]);}
+function coffeePick(){modal([h('h2',{style:{textAlign:'center'},text:'☕ 탕비실'}),h('p',{class:'small',style:{textAlign:'center'},text:'누가 뭐 시켰더라…? 하나 들고 가자'}),h('div',{class:'cof-grid'},['🧊 아아','🥛 라떼','🍦 바닐라라떼','🍿 쫄병스낵'].map(m=>h('button',{class:'btn-c cof-b',onclick:()=>{S.job.carry=m;closeModal();sfx('pop');jobBtn();toast(m.split(' ')[1]+' 챙겼다! 시킨 선배한테 가자');}},jIcon(m),h('span',{text:m.split(' ')[1]}))))]);}
 function phoneCall(){const j=S.job;j.ring=null;drawJobItems();const c=CALLS[Math.floor(Math.random()*CALLS.length)];const fin=res=>{modal([h('h2',{style:{textAlign:'center'},text:'📞 통화 종료'}),h('p',{style:{textAlign:'center',fontSize:'15px',lineHeight:'1.6'},text:res}),h('button',{class:'btn-g',style:{width:'100%',height:'46px'},onclick:()=>{closeModal();jGot(P.x,P.y);if(S.job.got>=3)jobFinish();else setTimeout(jobRing,1800);},text:S.job.got>=2?'마지막 통화 끝!':'다음 전화 받으러 가기'})]);};
   modal([h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:'44px'},text:'📞'}),h('small',{class:'small',text:'따르르릉… 섭외 전화 ('+(j.got+1)+'/3)'}),h('p',{style:{fontSize:'16px',fontWeight:'700',lineHeight:'1.5',margin:'8px 0 12px'},text:'"'+c[0]+'"'})),
     h('button',{class:'btn-c',style:{width:'100%',height:'48px',marginBottom:'6px'},onclick:()=>fin(c[1][1]),text:c[1][0]}),h('button',{class:'btn-c',style:{width:'100%',height:'48px'},onclick:()=>fin(c[2][1]),text:c[2][0]})]);}
