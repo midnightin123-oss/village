@@ -534,7 +534,7 @@ input.txt,textarea.txt,select.txt{font-family:inherit;font-size:15px;color:var(-
 .bq-pv2{height:186px;align-items:flex-end}
 .vasec{width:24px;height:38px;transform:translate(-50%,-100%)}
 .fphoto{position:absolute;transform:translate(-50%,-50%);background:#F3E6CC center/cover no-repeat;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:1px}
-.fphoto span{font-size:11px;font-weight:700;color:#B08A55;animation:twk 1.6s infinite}
+.fphoto span{font-size:18px;font-weight:700;color:#B08A55;animation:twk 1.6s infinite}
 .photo-big{display:block;width:min(260px,80vw);margin:6px auto;border:8px solid #C9963A;border-radius:4px;box-shadow:0 4px 0 #7A5320}
 .wallit.diag{background:#FFFDF4;border:1px solid #9BC3D9;font-size:9px;padding:2px 4px;border-radius:2px}
 .wallit.fortune{font-size:8px;padding:1px 4px}
@@ -982,7 +982,7 @@ const FURN={
  sofa:['소파',16,0,96,.774,'floor',48],coffeetable:['티테이블',8,0,50,.941,'floor',36],wardrobe:['옷장',14,0,66,1.31,'floor',36],kitchen:['주방',18,0,90,1.116,'floor',40],
  fireplace:['벽난로',20,0,72,1.133,'floor',36],tv:['TV',12,0,50,1.278,'floor',32],dining:['식탁',14,0,84,.796,'floor',48],cushion:['방석',4,0,34,.812,'flat'],
  record:['턴테이블',10,0,44,1.14,'floor',34],mat:['현관 매트',3,0,60,.574,'flat'],
- window:['창문',6,0,58,.919,'wall'],frame:['액자',4,0,26,1.087,'wall'],fairy:['꼬마전구',6,0,110,.417,'wall'],
+ window:['창문',6,0,58,.919,'wall'],frame:['액자',4,0,58,1.087,'wall'],fairy:['꼬마전구',6,0,110,.417,'wall'],
  xtree:['미니 트리',0,'1210',46,1.456,'floor',24],wreathdoor:['리스 문',0,'1210',50,1.319,'wall'],
  x_tree:['크리스마스 트리',0,'1210',64,1.371,'floor',28],x_fire:['벽난로 (X-mas)',0,'1210',80,.979,'floor',36],x_gifts:['선물 더미',0,'1210',54,.914,'floor',24],x_window:['눈 오는 창문',0,'1210',60,.927,'wall'],x_lights:['전구 가랜드',0,'1210',100,.347,'wall'],x_wreath:['리스',0,'1210',40,1.036,'wall'],x_chair:['체크 안락의자',0,'1210',56,.943,'floor',34],x_ginger:['진저브레드 하우스',0,'1210',40,1.15,'floor',20],x_nut:['호두까기 인형',0,'1210',24,2.319,'floor',12],x_globe:['스노우볼',0,'1210',32,1.252,'floor',14],x_mistle:['겨우살이',0,'1210',34,1.182,'wall'],x_rug:['눈꽃 러그',0,'1210',110,.574,'flat']};
 const WALLS={stripe:'줄무늬',flower:'꽃무늬',brick:'벽돌',xred:'홀리 레드',xstripe:'진저 스트라이프'},FLOORS={wood:'원목',checker:'체크 타일',xplaid:'타탄 카펫',xparquet:'스노우 파케이'};
@@ -1067,7 +1067,7 @@ function confirmTwice(b){if(b._arm)return true;b._arm=1;const t=b.textContent;b.
 function openedKey(){return isTest()?'pv6_opened_t':'pv6_opened';}
 function setMode(day){S.job=null;S.testDay=day||null;lsSet('pv6_test',S.testDay||'real');composeMe(S.real);if(S.me)S.profiles[S.uid||'local']=S.me;if(isTest())testSent();else{for(const u of Object.keys(S.profiles))if(String(u).startsWith('tf'))delete S.profiles[u];}S._preShown=0;closeModal();enterVillage();toast(day?'🛠️ 테스트 모드 · '+fmt(day)+' (저장 안 됨)':'🎮 내 플레이 모드 · 실제 날짜 '+fmt(realKey()));}
 function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
-  for(const [d] of [['1115'],['1116'],['1117'],['1118']].concat(PLAN,[['1219']]))sel.appendChild(h('option',{value:d,text:fmt(d)+(d==='1219'?' 파티':DAYS[d]?' · '+DAYS[d].title:' · 입주 준비'),selected:(S.testDay||realKey())===d}));
+  for(const [d] of [['1115'],['1116'],['1117'],['1118']].concat(PLAN,[['1219']]).filter(([d])=>d>=realKey()))sel.appendChild(h('option',{value:d,text:fmt(d)+(d==='1219'?' 파티':DAYS[d]?' · '+DAYS[d].title:' · 입주 준비'),selected:(S.testDay||realKey())===d}));
   modal([h('h2',{style:{textAlign:'center'},text:'🛠️ 관리자 메뉴'}),h('p',{class:'small',style:{textAlign:'center'},text:'이 메뉴는 너한테만 보여'}),
     h('div',{class:'mode-card'+(!test?' on':'')},h('b',{text:'🎮 내 플레이 모드'}),h('small',{text:'실제 날짜('+fmt(realKey())+') · 진짜 기록 저장 · 친구들이랑 같이 보임'}),
       test?h('button',{class:'btn-g',onclick:()=>setMode(null),text:'플레이 모드로 돌아가기'}):h('span',{class:'small',text:'✓ 지금 이 모드야'})),
