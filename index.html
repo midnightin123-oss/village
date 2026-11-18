@@ -2437,7 +2437,7 @@ function prevDay(k){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2)-1);return 
 async function checkAttendance(){const k=todayKey();if(!S.me||!S.me.name||k<'1116'||S._attK===k)return;S._attK=k;const a=S.me.att||{};if(a.last===k)return;
   const streak=a.last===prevDay(k)?(a.n||0)+1:1;const nw=k>='1120';const base=nw?2:5;const bonus=nw?(streak%7===0?10:0):(streak%3===0?5:0);await saveMe(Object.assign({att:{last:k,n:streak},coins:(S.me.coins||0)+base+bonus},logInc('att')));refreshCoins&&refreshCoins();
   topNote('📅 출석 도장 쾅! 눈송이 +'+base+(bonus?' · '+streak+'일 연속 보너스 +'+bonus+' 🔥':(streak>1?' · '+streak+'일 연속'+(nw?' (7일 개근 +10)':''):'')));sfx('ding');}
-const JOBS={deliver:{t:'📰 신문 배달',type:'deliver',sc:'village',d:'오늘 신문 시킨 곳이 3군데 있대! 근데 어디서 시켰는지는 몰라… 집이랑 가게를 하나씩 다 가봐',it:['📰','🏠','🏪'],done:'배달 완료! 빌리지 소식이 퍼져나간다 📰'},
+const JOBS={deliver:{t:'📰 신문 배달',type:'deliver',sc:'village',d:'오늘 신문 시킨 곳이 3군데 있대! 근데 어디서 시켰는지는 몰라… 친구들 집이랑 문 연 가게를 하나씩 다 가봐',it:['📰','🏠','🏪'],done:'배달 완료! 빌리지 소식이 퍼져나간다 📰'},
  serve:{t:'🍺 펍 서빙',type:'serve',sc:'pub',d:'카운터에서 맥주 받아서 주문 들어온 테이블에 갖다줘! 3잔 서빙하면 끝',it:['🍺','🙋','🍺'],done:'손님들이 팁 대신 칭찬을 남겼어 🍻'},
  dish:{t:'🧽 펍 설거지',type:'dish',sc:'pub',d:'테이블 위 빈 잔 3개 모아서 싱크대에서 박박 닦아줘!',it:['🍺','🧽','✨'],done:'잔이 반짝반짝! 사장님 감동 🥹'},
  coffee:{t:'☕ 커피 셔틀',type:'coffee',sc:'writers',d:'선배들 주문 메뉴를 확인하고 탕비실에서 챙겨서 갖다드려! 쫄병스낵 시킨 분도 있대',it:['☕','🍿','🥛'],done:'회의실에 평화가 찾아왔다 ☕'},
@@ -2468,7 +2468,7 @@ function jRng(k){let s=hashN(k);return ()=>{s=hashN(String(s)+'j');return (s%100
 function startJob(){const k=todayKey();const J=curJob();const t=J.type||'collect';const r=jRng(k+(S.uid||''));
   if(t==='collect'){const cand=B.filter(b=>b.id&&!['board','tram'].includes(b.id)&&b.cx);const pick=[];while(pick.length<3&&cand.length)pick.push(cand.splice(Math.floor(r()*cand.length),1)[0]);
     S.job={day:k,type:t,got:0,items:pick.map((b,i)=>({x:b.cx+((i%2)?-50:50),y:b.base+78,ic:J.it[i%J.it.length]}))};}
-  else if(t==='deliver'){const me=myId();const res=residents();const c=B.filter(b=>b.id&&b.cx&&!['board','tram','daily'].includes(b.id)).map(b=>({x:b.cx,y:b.base+30,nm:b.name||'가게'}));
+  else if(t==='deliver'){const me=myId();const res=residents();const c=B.filter(b=>b.id&&b.cx&&!['board','tram','daily'].includes(b.id)&&(b.always||placeOpenDay(b.id))).map(b=>({x:b.cx,y:b.base+30,nm:b.name||'가게'}));
     HOUSES.forEach((hh,i)=>{const u=res[i]&&res[i][0];if(!u||u===me)return;c.push({x:hh.cx,y:hh.base+34,nm:pname(u)+'네 집'});});
     const idx=c.map((_,i)=>i).sort(()=>r()-.5).slice(0,3);idx.forEach(i=>c[i].right=true);S.job={day:k,type:t,got:0,items:c.map(o=>Object.assign(o,{ic:'📰'}))};}
   else if(t==='serve'){S.job={day:k,type:t,got:0,carry:null,ord:Object.keys(TABLES)[Math.floor(r()*3)]};}
