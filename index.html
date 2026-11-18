@@ -831,8 +831,10 @@ function fetchBlob(id){if(BLOB_PEND[id])return;BLOB_PEND[id]=1;fs.doc('v6_meta/b
 const pack=d=>{const o={j:JSON.stringify(blobOut(d===undefined?{}:d))};if(d&&typeof d.ts==='number')o.ts=d.ts;return o;};
 const wrapSnap=s=>({id:s.id,exists:!!s.exists,metadata:{fromCache:!!(s.metadata&&s.metadata.fromCache),hasPendingWrites:!!(s.metadata&&s.metadata.hasPendingWrites)},data:()=>{if(!s.exists)return undefined;const r=s.data();try{return r&&typeof r.j==='string'?blobIn(JSON.parse(r.j)):r;}catch(e){return undefined;}}});
 const wrapQS=q=>{const docs=q.docs.map(wrapSnap);return {docs,size:docs.length,empty:!docs.length,metadata:{fromCache:!!(q.metadata&&q.metadata.fromCache),hasPendingWrites:false},docChanges:()=>[]};};
+async function preBlobs(s){try{if(!s.exists)return;const r=s.data();if(!r||typeof r.j!=='string'||r.j.indexOf('"blob:')<0)return;const ids=[...new Set((r.j.match(/"blob:([a-z0-9]+)"/g)||[]).map(x=>x.slice(6,-1)))].filter(id=>!BLOB[id]);
+  await Promise.all(ids.map(id=>fs.doc('v6_meta/blob_'+id).get().then(b=>{const d=b.exists&&b.data();if(d&&d.d){BLOB[id]=d.d;try{localStorage.setItem('pvb_'+id,d.d);}catch(e){}}}).catch(()=>{})));}catch(e){}}
 function docRef(path){const r=fs.doc(path);return {id:r.id,path,
-  get:async()=>wrapSnap(await r.get()),set:d=>r.set(pack(d)),
+  get:async()=>{const s=await r.get();await preBlobs(s);return wrapSnap(s);},set:d=>r.set(pack(d)),
   update:async d=>{const s=await r.get();const cur=s.exists?(wrapSnap(s).data()||{}):null;if(!cur)throw {code:'invalid_argument',message:'no doc'};return r.set(pack(Object.assign({},cur,d)));},
   delete:()=>r.delete(),onSnapshot:(n,e)=>r.onSnapshot({includeMetadataChanges:false},s=>n(wrapSnap(s)),err=>{console.warn('snap',path,err);e&&e({code:'unavailable',message:String(err)});}),
   collection:c=>collRef(path+'/'+c)};}
