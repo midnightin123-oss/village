@@ -1317,7 +1317,7 @@ function enterVillage(spawn,after){if(TR.mode==='ride'){TR.mode='loop';TR.hold=f
     if(b.hidden&&!placeOpenDay(b.id)){return;}
     const img=h('img',{class:'spr',src:IMG('v_'+b.spr),alt:b.name,style:{left:b.cx+'px',top:b.base+'px',width:b.w+'px',zIndex:String(b.base)}});if(sea==='winter')img.style.filter='saturate(.75) brightness(1.03)';world.appendChild(img);
     if((od&&od===todayKey())||b.always)world.appendChild(h('div',{class:'glow',style:{left:b.cx+'px',top:(b.base-b.w*b.ar*.45)+'px',width:(b.w*1.5)+'px',height:(b.w*1.3)+'px',zIndex:String(b.base-1)}}));
-    const sg=h('div',{class:'sign pill'+(od||b.always?' open':''),style:{left:b.cx+'px',top:(b.base+18)+'px',zIndex:String(b.base+1)},text:b.id==='writers'?'✍️ 회의실':b.id==='board'?'📌 게시판':b.always?'🍻 펍':(b.name+(od?(od===todayKey()?' · 오늘!':''):(nx?' · '+fmt(nx):'')))});world.appendChild(sg);if(b.id==='pub')pubSignEl=sg;});
+    const sg=h('div',{class:'sign pill'+(od||b.always?' open':''),style:{left:b.cx+'px',top:(b.base+18)+'px',zIndex:String(b.base+1)},text:b.id==='writers'?'✍️ 회의실':b.id==='board'?'📌 게시판':b.id==='daily'?'📰 빌리지 데일리':b.always?'🍻 펍':(b.name+(od?(od===todayKey()?' · 오늘!':''):(nx?' · '+fmt(nx):'')))});world.appendChild(sg);if(b.id==='pub')pubSignEl=sg;});
   const res=residents();
   HOUSES.forEach((hh,i)=>{world.appendChild(h('img',{class:'spr',src:IMG('h_'+i),alt:'집',style:{left:hh.cx+'px',top:(hh.base+4)+'px',width:HOUSE_W+'px',zIndex:String(hh.base)}}));const r=res[i];const mine=r&&r[0]===(S.uid||'local');
     world.appendChild(h('div',{class:'sign pill'+(mine?' open':''),style:{left:hh.cx+'px',top:(hh.base+16)+'px',zIndex:String(hh.base+1)},text:r?(mine?'우리 집':r[1].name+'네'):'빈 집'}));
