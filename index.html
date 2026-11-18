@@ -666,41 +666,93 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 .hit-card .hit-msg{min-height:18px;font-weight:700;color:#7A4A22}
 .hit-btns{display:flex;gap:6px;margin-top:8px}.hit-btns button{flex:1;height:42px;font-size:13px}
 /* ===== Village Daily ===== */
-.np{background:#F3EAD2;background-image:radial-gradient(rgba(120,100,60,.08) 1px,transparent 1px);background-size:4px 4px;color:#1E1A14;border:2px solid #3B3326;border-radius:6px;margin:-6px;padding:10px 12px 12px;box-shadow:inset 0 0 30px rgba(120,90,40,.18)}
-.np-mast{text-align:center;border-bottom:3px double #1E1A14;padding-bottom:6px}
-.np-top{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.08em;border-bottom:1px solid #1E1A14;padding-bottom:3px;color:#3B3326}
-.np-title{font-family:Georgia,'Times New Roman',serif;font-weight:900;font-size:28px;letter-spacing:.02em;line-height:1.05;margin-top:6px;font-style:italic}
-.np-kr{font-size:10px;letter-spacing:.5em;margin-top:2px;color:#3B3326}
-.np-date{font-size:10px;border-top:1px solid #1E1A14;margin-top:5px;padding-top:3px;color:#3B3326}
-.np-tabs{display:flex;gap:4px;margin:8px 0 6px}
-.np-tabs button{flex:1;height:30px;border:1.5px solid #1E1A14;background:transparent;font:inherit;font-size:11px;font-weight:700;color:#1E1A14;border-radius:3px}
-.np-tabs button.on{background:#1E1A14;color:#F3EAD2}
-.np-body-wrap{max-height:56vh;overflow-y:auto;padding-right:2px}
-.np-page{animation:noteIn .25s both}
-.np-kicker{font-size:10px;font-weight:700;letter-spacing:.3em;text-align:center;color:#8A2E2E;margin:2px 0}
-.np-head{font-size:22px;line-height:1.25;text-align:center;margin:4px 0 4px;font-weight:900;word-break:keep-all}
-.np-sub{font-size:12px;text-align:center;color:#3B3326;margin-bottom:8px;word-break:keep-all}
-.np-photo{position:relative;height:118px;border:2px solid #1E1A14;background:repeating-linear-gradient(0deg,#C9C0A8 0 2px,#BDB39A 2px 4px);overflow:hidden;filter:grayscale(1) contrast(1.15) sepia(.25)}
-.np-photo .np-ava{position:absolute!important;top:106px!important;transform:translateX(-50%)!important}
+.veil.np-veil{align-items:center}
+.sheet.np-sheet{background:transparent;border:0;box-shadow:none;padding:0;margin:0 6px;max-height:96%;overflow-y:auto;overflow-x:hidden}
+.np{--ink:#191612;--paper:#F5EFE0;--rule:#2B261E;position:relative;color:var(--ink);font-family:'Nanum Myeongjo','Noto Serif KR','Apple SD Gothic Neo',serif;padding:4px 0 2px}
+.np-top{display:flex;align-items:center;justify-content:space-between;margin:0 4px 2px;color:#F5EFE0;font-size:12px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.np-x{width:30px;height:30px;border-radius:50%;border:0;background:rgba(25,22,18,.82);color:#F5EFE0;font-size:15px;font-weight:700}
+.np-stage{position:relative;height:min(70vh,640px);perspective:1800px;perspective-origin:0 50%;margin:6px 4px 0}
+.np-stage::before,.np-stage::after{content:'';position:absolute;inset:0;background:#E9E0CA;border:1px solid #CFC3A6;border-radius:2px;transform:translate(3px,3px);z-index:0}
+.np-stage::after{transform:translate(6px,6px);background:#DDD2B8;z-index:-1}
+.np-leaf{position:absolute;inset:0;transform-origin:0 50%;transition:transform .78s cubic-bezier(.45,.05,.25,1),box-shadow .78s;-webkit-backface-visibility:hidden;backface-visibility:hidden;background:var(--paper);background-image:radial-gradient(ellipse at 50% 40%,rgba(255,255,255,.55),transparent 70%),radial-gradient(rgba(110,90,50,.07) 1px,transparent 1.2px),linear-gradient(90deg,rgba(0,0,0,.07),transparent 5%,transparent 94%,rgba(0,0,0,.05));background-size:auto,3px 3px,auto;border:1px solid #CBBF9F;border-radius:2px;box-shadow:0 2px 6px rgba(40,30,10,.25);overflow:hidden}
+.np-leaf.turned{transform:rotateY(-180deg);box-shadow:-20px 0 40px rgba(0,0,0,.35);pointer-events:none}
+.np-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.05) 55%,rgba(0,0,0,.28) 100%);opacity:0;transition:opacity .78s}
+.np-leaf.turned .np-shade{opacity:1}
+.np-scroll{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 13px 40px;overscroll-behavior:contain}
+.np-curl{position:absolute;right:0;bottom:0;width:38px;height:38px;border:0;padding:0;background:linear-gradient(135deg,transparent 49%,#CDBF9C 50%,#F1E7CF 72%,#E2D6B8 100%);box-shadow:-2px -2px 5px rgba(0,0,0,.18);border-top-left-radius:5px;z-index:5;animation:npCurl 2.4s ease-in-out infinite}
+@keyframes npCurl{0%,70%,100%{width:34px;height:34px}82%{width:46px;height:46px}}
+/* front page */
+.np-ears{display:grid;grid-template-columns:46px 1fr 46px;align-items:center;gap:4px}
+.np-ear{border:1px solid var(--rule);padding:3px 1px;text-align:center;font-size:8.5px;line-height:1.3;word-break:keep-all}
+.np-ear b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:7.5px;letter-spacing:.12em;border-bottom:1px solid var(--rule);margin-bottom:2px}
+.np-mh{text-align:center}
+.np-mh-t{font-family:'UnifrakturMaguntia','Old English Text MT',Georgia,serif;font-size:min(7.4vw,32px);line-height:1;letter-spacing:0;white-space:nowrap}
+.np-mh-s{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:8.5px;margin-top:3px;color:#3A342A}
+.np-dl{display:flex;justify-content:space-between;gap:4px;font-family:'Playfair Display',Georgia,serif;font-size:7.6px;font-weight:700;letter-spacing:.06em;border-top:3px double var(--rule);border-bottom:1px solid var(--rule);padding:3px 0;margin:7px 0 8px;white-space:nowrap}
+.np-kicker{font-family:'Playfair Display',Georgia,serif;font-size:9px;font-weight:900;letter-spacing:.22em;text-align:center;color:#8E2A22;margin:2px 0}
+.np-head{font-family:'Nanum Myeongjo',serif;font-size:24px;line-height:1.22;text-align:center;margin:3px 2px 5px;font-weight:800;word-break:keep-all;letter-spacing:-.02em}
+.np-sub{font-size:12px;text-align:center;font-style:italic;color:#3A342A;margin:0 4px 8px;word-break:keep-all;border-bottom:1px solid var(--rule);padding-bottom:7px}
+.np-photo{position:relative;height:126px;border:1px solid var(--rule);background:linear-gradient(180deg,#B8B2A3,#9E978A 70%,#8C857A);overflow:hidden;filter:grayscale(1) contrast(1.2) sepia(.2)}
+.np-photo::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(0,0,0,.4) .8px,transparent 1.2px);background-size:3px 3px;mix-blend-mode:multiply;pointer-events:none}
+.np-photo .np-ava{position:absolute!important;top:112px!important;transform:translateX(-50%)!important}
 .np-photo .nametag,.np-photo .shadow{display:none!important}
-.np-cap{font-size:10px;color:#3B3326;margin:3px 0 6px;font-style:italic}
-.np-body{font-size:12.5px;line-height:1.7;text-align:justify;margin:4px 0 8px;word-break:keep-all}
-.np-body.dim{color:#5C5444}
-.np-sec{font-size:13px;font-weight:900;border-top:2px solid #1E1A14;border-bottom:1px solid #1E1A14;padding:3px 0;margin:10px 0 4px;letter-spacing:.05em}
-.np-page h3{font-size:12px;margin:8px 0 2px;font-weight:900}
-.np-ul{list-style:none;padding:0;margin:2px 0 6px;font-size:12.5px;line-height:1.75}
-.np-ul li{border-bottom:1px dotted rgba(30,26,20,.35)}
-.np-quote{margin:6px 0 8px;padding:10px 12px;border-left:4px solid #1E1A14;background:rgba(255,255,255,.35);font-size:15px;font-weight:700;line-height:1.5}
-.np-quote small{display:block;font-size:10px;font-weight:400;margin-top:4px;color:#3B3326}
-.np-tip{border:1px dashed #1E1A14;padding:8px;margin:6px 0;background:rgba(255,255,255,.3)}
-.np-tip img{width:100%;max-height:180px;object-fit:cover;filter:grayscale(1) contrast(1.1) sepia(.3);border:1px solid #1E1A14;display:block;margin-bottom:6px}
-.np-tip p{margin:0;font-size:12.5px;line-height:1.6}.np-tip small{font-size:10px;color:#5C5444}
-.np-ads{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
-.np-ad{border:2px solid #1E1A14;padding:6px;text-align:center;font-size:10.5px;line-height:1.5;background:rgba(255,255,255,.3)}
-.np-ad b{display:block;font-size:12px;border-bottom:1px solid #1E1A14;margin-bottom:3px}
-.np-admin{margin-top:10px;border-top:2px dashed #8A2E2E;padding-top:8px;display:flex;flex-direction:column;gap:5px}
-.np-admin b{font-size:12px;color:#8A2E2E}.np-admin .txt{margin:0;font-size:14px!important}.np-admin .btn-g{height:44px}
+.np-cap{font-size:9.5px;color:#3A342A;margin:3px 0 8px;font-style:italic;line-height:1.4}
+.np-cols{column-count:2;column-gap:14px;column-rule:1px solid rgba(43,38,30,.55)}
+.np-cols>*{break-inside:avoid}
+.np-by{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:9.5px;font-weight:700;margin-bottom:3px}
+.np-body{font-size:11.8px;line-height:1.68;text-align:justify;margin:2px 0 8px;word-break:normal;line-break:strict;break-inside:auto!important}
+.np-body.dim{color:#5A5244}
+.np-body.dc::first-letter{float:left;font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:38px;line-height:.92;padding:3px 4px 0 0}
+.np-index{margin-top:8px;border-top:3px double var(--rule);border-bottom:1px solid var(--rule);display:flex;align-items:stretch;gap:0;padding:4px 0}
+.np-index>b{font-family:'Playfair Display',Georgia,serif;font-size:9px;letter-spacing:.15em;writing-mode:vertical-rl;transform:rotate(180deg);padding:0 4px;border-left:1px solid var(--rule)}
+.np-index button{flex:1;border:0;background:none;font:inherit;color:var(--ink);text-align:left;padding:2px 6px;border-right:1px dotted rgba(43,38,30,.5);line-height:1.3}
+.np-index button:last-child{border-right:0}
+.np-index i{display:block;font-family:'Playfair Display',Georgia,serif;font-style:normal;font-weight:900;font-size:13px}
+.np-index span{font-size:10px}
+/* inner pages */
+.np-run{display:flex;justify-content:space-between;align-items:baseline;font-family:'Playfair Display',Georgia,serif;font-size:8.5px;font-weight:700;letter-spacing:.06em;border-bottom:1px solid var(--rule);padding-bottom:3px}
+.np-run b{font-family:'UnifrakturMaguntia',Georgia,serif;font-weight:400;font-size:13px;letter-spacing:0}
+.np-flag{display:flex;align-items:baseline;justify-content:space-between;border-bottom:3px double var(--rule);margin:8px 0 8px;padding-bottom:3px}
+.np-flag-en{font-family:'Playfair Display',Georgia,serif;font-weight:900;font-style:italic;font-size:27px;line-height:1;letter-spacing:-.01em}
+.np-flag-kr{font-size:11px;font-weight:800;letter-spacing:.1em}
+.np-h3{font-family:'Nanum Myeongjo',serif;font-size:12.5px;font-weight:800;margin:6px 0 3px;border-top:1px solid var(--rule);padding-top:4px;letter-spacing:-.01em}
+.np-h3.red{color:#8E2A22;border-top:2px solid #8E2A22}
+.np-ul{list-style:none;padding:0;margin:2px 0 8px;font-size:11.5px;line-height:1.6}
+.np-ul li{border-bottom:1px dotted rgba(43,38,30,.4);padding:1px 0}
+.np-nums{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);margin-bottom:9px}
+.np-nums div{text-align:center;padding:5px 2px;border-right:1px solid var(--rule)}.np-nums div:last-child{border-right:0}
+.np-nums b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:900;line-height:1.1}
+.np-nums span{font-size:9.5px}
+.np-mkt{border:1px solid var(--rule);margin-bottom:9px;font-size:11.5px}
+.np-mkt-h{display:flex;justify-content:space-between;background:var(--ink);color:var(--paper);padding:3px 7px;font-size:10px}
+.np-mkt-h b{font-family:'Playfair Display',Georgia,serif;letter-spacing:.15em}
+.np-mkt-r{display:grid;grid-template-columns:1fr auto 18px;gap:6px;padding:3px 7px;border-top:1px dotted rgba(43,38,30,.4);font-variant-numeric:tabular-nums}
+.np-mkt-r i{font-style:normal;text-align:right;color:#777}.np-mkt-r i.up{color:#2F6B3A}
+.np-quote{margin:4px 0 10px;padding:8px 6px 9px;border-top:3px double var(--rule);border-bottom:3px double var(--rule);text-align:center;font-size:17px;font-weight:800;line-height:1.45;word-break:keep-all}
+.np-quote small{display:block;font-size:9.5px;font-weight:400;font-style:italic;margin-top:5px;color:#3A342A}
+.np-tip{border:1px solid var(--rule);padding:6px;margin:4px 0 7px;background:rgba(255,255,255,.35)}
+.np-tip img{width:100%;max-height:150px;object-fit:cover;filter:grayscale(1) contrast(1.15) sepia(.25);border:1px solid var(--rule);display:block;margin-bottom:5px}
+.np-tip p{margin:0;font-size:11.5px;line-height:1.55}.np-tip small{font-size:9.5px;color:#5A5244;font-style:italic}
+.np-cls{margin-top:6px;border-top:3px double var(--rule);padding-top:4px}
+.np-cls-h{font-family:'Playfair Display',Georgia,serif;font-weight:900;font-size:10px;letter-spacing:.2em;text-align:center;margin-bottom:5px}
+.np-ads{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.np-ad{border:1.5px solid var(--rule);padding:5px;text-align:center;font-size:10px;line-height:1.45;background:rgba(255,255,255,.3)}
+.np-ad:nth-child(2n){border-style:double;border-width:3px}
+.np-ad b{display:block;font-size:11.5px;border-bottom:1px solid var(--rule);margin-bottom:3px}
+.np-end{text-align:center;font-family:'Playfair Display',Georgia,serif;font-size:10px;margin-top:10px;letter-spacing:.2em}
+/* nav */
+.np-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 4px 0}
+.np-nb{width:44px;height:40px;border-radius:20px;border:0;background:rgba(245,239,224,.95);color:var(--ink);font-size:24px;font-weight:700;line-height:1;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.np-nb:disabled{opacity:.3}
+.np-navc{flex:1;text-align:center;color:#F5EFE0;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.np-pg{font-family:'Playfair Display',Georgia,serif;font-size:12px;font-weight:700;letter-spacing:.06em}
+.np-dots{display:flex;justify-content:center;gap:6px;margin-top:4px}
+.np-dots i{width:7px;height:7px;border-radius:50%;background:rgba(245,239,224,.4)}
+.np-dots i.on{background:#F5EFE0}
+.np-admin{margin:10px 4px 4px;background:#FFF8EA;border:2px dashed #8E2A22;border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:5px;font-family:inherit}
+.np-admin b{font-size:12px;color:#8E2A22}.np-admin .txt{margin:0;font-size:16px!important}.np-admin .btn-g{height:44px}
 .np-loading{text-align:center;padding:30px 0;font-weight:700}
+@media (prefers-reduced-motion:reduce){.np-leaf{transition-duration:.2s}.np-curl{animation:none}}
 .tip-pv{min-height:40px;border:2px dashed #C9A97E;border-radius:10px;margin-top:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8A6A4E;overflow:hidden}.tip-pv img{width:100%;max-height:200px;object-fit:cover}
 .joinalert.daily{background:#F3EAD2;border-color:#1E1A14}
 </style>
@@ -2411,47 +2463,69 @@ async function makePaper(k){const y=prevDay(k);const res=residents();const P_={k
   if(k===DAILY_START){head='프로젝트 빌리지 개장! 소녀 '+N+'명 입주 완료';sub='창간호 기념 특집 · 내일(11.19)부터 본격 미션 시작';}
   if(doc.head)head=doc.head;if(doc.sub)sub=doc.sub;
   Object.assign(P_,{head,sub,att,hits,jobs,rich,deco,streak,chatN:chat.length,topTalk,quote,posts,tips,doc,res,R});return P_;}
-function paperPhoto(list){const box=h('div',{class:'np-photo'});(list.length?list:residents()).slice(0,6).forEach(([u,p],i)=>{const a=makeAva(p,false,74);a.classList.add('np-ava');a.style.left=(10+i*(80/Math.max(1,Math.min(6,list.length||6)-1||1)))+'%';box.appendChild(a);});return box;}
+function paperPhoto(list){const box=h('div',{class:'np-photo'});const L=(list.length?list:residents()).slice(0,6);const n=L.length;L.forEach(([u,p],i)=>{const a=makeAva(p,false,74);a.classList.add('np-ava');a.style.left=(n<2?50:(12+i*(76/(n-1))))+'%';box.appendChild(a);});return box;}
 function npList(arr){return h('ul',{class:'np-ul'},arr.map(t=>h('li',{text:t})));}
-async function openPaper(k,opt){opt=opt||{};const loading=h('div',{class:'np-loading',text:'📰 신문 찍어내는 중…'});modal([loading]);
+function enDate(k,short){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2));const W=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'],M=['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];return short?(W[d.getDay()].slice(0,3)+', '+M[d.getMonth()].slice(0,3)+' '+d.getDate()+', 2026'):(W[d.getDay()]+', '+M[d.getMonth()]+' '+d.getDate()+', 2026');}
+function npFonts(){if(document.getElementById('npfont'))return;const l=document.createElement('link');l.id='npfont';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Nanum+Myeongjo:wght@400;700;800&display=swap';document.head.appendChild(l);}
+async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{class:'np-loading',text:'📰 윤전기 돌리는 중…'});modal([loading]);
   const p=await makePaper(k);const nm=([u,q])=>q.name||'소녀';const y=p.y;const R=p.R;const fy=fmt(y);
-  const pages=[];
-  // page 1
-  pages.push(h('div',{class:'np-page'},h('div',{class:'np-kicker',text:p.k===DAILY_START?'★ 창 간 호 ★':'오늘의 1면'}),h('h1',{class:'np-head',text:p.head}),h('div',{class:'np-sub',text:p.sub}),paperPhoto(p.att),h('div',{class:'np-cap',text:'▲ '+fy+' 빌리지를 찾은 소녀들 '+(p.att.length?'('+p.att.map(nm).join(', ')+')':'(자료 사진)')}),
-    h('p',{class:'np-body',text:p.k===DAILY_START?'5시의 소녀들이 모여 사는 프로젝트 빌리지가 드디어 문을 열었다. 입주민 '+p.res.length+'명은 각자 집을 받고 마을 구석구석을 둘러보며 첫날을 보냈다. 본지는 앞으로 매일 아침 어제의 빌리지 소식을 전한다. 많은 제보 바란다.':
-      fy+' 빌리지에는 '+p.att.length+'명이 다녀갔다. 수다방에는 '+p.chatN+'마디가 오갔고'+(p.hits.length?', 전차 사고도 '+p.hits.reduce((a,b)=>a+b[1],0)+'건 발생했다.':', 다행히 큰 사고는 없었다.')+' 자세한 소식은 다음 면에서.'})));
-  // page 2 village
-  const p2=[h('h2',{class:'np-sec',text:'🏘️ 마을 소식'}),h('h3',{text:'출석부'}),npList(p.res.map(r=>(p.att.includes(r)?'✅ ':'⬜ ')+nm(r)))];
-  if(p.streak[0]&&p.streak[0][1]>=2)p2.push(h('p',{class:'np-body',text:'🔥 연속 출석 1위는 '+nm(p.streak[0][0])+' ('+p.streak[0][1]+'일 연속). 성실 그 자체.'}));
-  if(p.topTalk){p2.push(h('h3',{text:'수다왕'}),h('p',{class:'np-body',text:'🗣️ '+((S.profiles[p.topTalk[0]]||{}).name||'누군가')+' — 하루 '+p.topTalk[1]+'마디. 입이 쉬질 않았다는 후문.'}));}
-  p2.push(h('h3',{text:'게시판 새 소식'}),p.posts.length?npList(p.posts.slice(0,4).map(x=>'📌 '+x[0]+': "'+x[1]+'"')):h('p',{class:'np-body dim',text:'게시판은 11.19부터 열린다. 첫 메모의 주인공은 누구?'}));
-  pages.push(h('div',{class:'np-page'},p2));
-  // page 3 incidents & economy
-  const p3=[h('h2',{class:'np-sec',text:'🚨 사건사고'})];
-  if(p.hits.length)p3.push(npList(p.hits.map(([r,n])=>'🚋💥 '+nm(r)+' — 전차와 충돌 '+n+'회. "어질어질하다"며 자가 회복')),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'}));
-  else p3.push(h('p',{class:'np-body',text:'어제는 전차 무사고! 🚋 이 기록 오늘도 이어갈 수 있을까.'}));
-  p3.push(h('h2',{class:'np-sec',text:'💰 경제'}),h('h3',{text:'눈송이 부자 TOP 3'}),npList(p.rich.slice(0,3).map((r,i)=>['🥇','🥈','🥉'][i]+' '+nm(r)+' — ❄ '+(r[1].coins||0))));
-  p3.push(h('h3',{text:'알바 소식'}),h('p',{class:'np-body',text:p.jobs.length?'💼 어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.':'💼 어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.'}));
-  if(p.deco[0]&&p.deco[0][1]>0)p3.push(h('h3',{text:'인테리어 경쟁'}),h('p',{class:'np-body',text:'🛋️ 가구 제일 많은 집: '+nm(p.deco[0][0])+'네 ('+p.deco[0][1]+'개). 집들이 언제 하나요?'}));
-  pages.push(h('div',{class:'np-page'},p3));
-  // page 4 opinion & life
-  const p4=[h('h2',{class:'np-sec',text:'💬 어제의 명대사'})];
-  p4.push(p.quote?h('blockquote',{class:'np-quote'},h('span',{text:'“'+p.quote.t+'”'}),h('small',{text:'— '+(p.quote.name||'익명')+', 수다방에서'})):h('p',{class:'np-body dim',text:'어제 수다방은 조용했다. 오늘의 명대사를 기다린다.'}));
-  p4.push(h('h2',{class:'np-sec',text:'📮 익명 제보'}));
-  if(p.tips.length)p.tips.slice(0,4).forEach(t=>p4.push(h('div',{class:'np-tip'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:'"'+t.t+'"'}),h('small',{text:'— 익명의 제보자'}))));
-  else p4.push(h('p',{class:'np-body dim',text:'가판대에서 익명 제보를 받고 있다. 사진도 환영. 제보는 다음 날 신문에 실린다.'}));
-  p4.push(h('h2',{class:'np-sec',text:'🔮 오늘의 운세'}),npList(p.res.map(r=>nm(r)+': '+FORTUNE[Math.floor(R()*FORTUNE.length)])));
-  const lv=snowLevel();p4.push(h('h2',{class:'np-sec',text:'☁️ 날씨'}),h('p',{class:'np-body',text:lv>.7?'함박눈 ☃️ 눈사람 만들기 딱 좋은 날':lv>.3?'눈발 날림 ❄️ 목도리 필수':lv>0?'첫눈 예감 🌨️':'맑고 쌀쌀 🍂 따뜻하게 입자'}));
-  const ad=ADS.slice().sort(()=>R()-.5).slice(0,2);p4.push(h('div',{class:'np-ads'},ad.map(a=>h('div',{class:'np-ad'},h('b',{text:a[0]}),h('span',{text:a[1]})))));
-  pages.push(h('div',{class:'np-page'},p4));
-  let cur=0;const body=h('div',{class:'np-body-wrap'});const tabs=h('div',{class:'np-tabs'});const names=['1면','마을','사건·경제','생활'];
-  const show=i=>{cur=i;body.replaceChildren(pages[i]);body.scrollTop=0;tabs.querySelectorAll('button').forEach((b,j)=>b.classList.toggle('on',j===i));};
-  names.forEach((n,i)=>tabs.appendChild(h('button',{onclick:()=>show(i),text:n})));
-  const mast=h('div',{class:'np-mast'},h('div',{class:'np-top'},h('span',{text:'No.'+p.no}),h('span',{text:'VOL.1'}),h('span',{text:'값 ❄0'})),h('div',{class:'np-title',text:'THE VILLAGE DAILY'}),h('div',{class:'np-kr',text:'빌 리 지 데 일 리'}),h('div',{class:'np-date',text:kDate(p.k)+' · 어제('+fy+') 소식'}));
+  const lv=snowLevel();const wx=lv>.7?['☃️','함박눈']:lv>.3?['❄️','눈발']:lv>0?['🌨️','첫눈 예감']:['🍂','맑고 쌀쌀'];
+  const SEC=[['A1','1면'],['A2','마을'],['A3','사건·경제'],['A4','오피니언·생활']];
+  const run=i=>h('div',{class:'np-run'},h('span',{text:SEC[i][0]}),h('b',{text:'The Village Daily'}),h('span',{text:enDate(p.k,true)}));
+  const flag=(en,kr)=>h('div',{class:'np-flag'},h('div',{class:'np-flag-en',text:en}),h('div',{class:'np-flag-kr',text:kr}));
+  const hd=(t,c)=>h('h3',{class:'np-h3'+(c?' '+c:''),text:t});
+  const pages=[];let go=()=>{};
+  // ── A1 FRONT PAGE
+  const ears=h('div',{class:'np-ears'},h('div',{class:'np-ear'},h('b',{text:'WEATHER'}),h('span',{text:wx[0]+' '+wx[1]})),
+    h('div',{class:'np-mh'},h('div',{class:'np-mh-t',text:'The Village Daily'}),h('div',{class:'np-mh-s',text:'“All the News That’s Fit to Gossip”'})),
+    h('div',{class:'np-ear'},h('b',{text:'PRICE'}),h('span',{text:'❄ 0'})));
+  const dl=h('div',{class:'np-dl'},h('span',{text:'VOL. I · No. '+p.no}),h('span',{text:enDate(p.k)}),h('span',{text:'SEOUL EDITION'}));
+  const lede=p.k===DAILY_START?'5시의 소녀들이 모여 사는 프로젝트 빌리지가 드디어 문을 열었다. 입주민 '+p.res.length+'명은 각자 집을 받고 마을 구석구석을 둘러보며 첫날을 보냈다. 본지는 앞으로 매일 아침 어제의 빌리지 소식을 전한다. 광장에는 아직 낙엽이 굴러다니고, 전차는 오늘도 제 갈 길을 간다. 입주민들은 "생각보다 마을이 넓다", "우리 집 위치 좋다"며 저마다 감상을 남겼다는 후문. 많은 제보 바란다.':
+    fy+' 빌리지에는 '+p.att.length+'명이 다녀갔다. 수다방에는 '+p.chatN+'마디가 오갔고'+(p.hits.length?', 전차 사고도 '+p.hits.reduce((a,b)=>a+b[1],0)+'건 발생했다.':', 다행히 큰 사고는 없었다.')+(p.jobs.length?' 알바에 나선 소녀도 '+p.jobs.length+'명. 마을 경제가 조금씩 돌아가고 있다.':' 오늘은 또 어떤 일이 벌어질지, 본지가 지켜보겠다.')+' 자세한 소식은 안쪽 면에서.';
+  const idx=h('div',{class:'np-index'},h('b',{text:'INSIDE'}),SEC.slice(1).map((s,i)=>h('button',{onclick:()=>go(i+1)},h('i',{text:s[0]}),h('span',{text:s[1]}))));
+  pages.push([ears,dl,h('div',{class:'np-kicker',text:p.k===DAILY_START?'★ FIRST EDITION · 창간호 ★':'TOP STORY'}),h('h1',{class:'np-head',text:p.head}),h('div',{class:'np-sub',text:p.sub}),
+    paperPhoto(p.att),h('div',{class:'np-cap',text:'▲ '+fy+' 빌리지를 찾은 소녀들 '+(p.att.length?'('+p.att.map(nm).join(', ')+')':'(자료 사진)')+'  /  PHOTO: VILLAGE DAILY'}),
+    h('div',{class:'np-cols'},h('div',{class:'np-by',text:'By 빌리지 데일리 취재팀'}),h('p',{class:'np-body dc',text:lede})),idx]);
+  // ── A2 VILLAGE
+  const nums=h('div',{class:'np-nums'},[[p.att.length+'명','방문'],[p.chatN+'','수다(마디)'],[p.hits.reduce((a,b)=>a+b[1],0)+'건','전차 사고']].map(([a,b])=>h('div',{},h('b',{text:a}),h('span',{text:b}))));
+  const c2=[hd('출석부 ROLL CALL'),npList(p.res.map(r=>(p.att.includes(r)?'✔ ':'· ')+nm(r)+(p.att.includes(r)?'':' (결석)')))];
+  if(p.streak[0]&&p.streak[0][1]>=2)c2.push(hd('개근상'),h('p',{class:'np-body',text:'연속 출석 1위는 '+nm(p.streak[0][0])+'('+p.streak[0][1]+'일 연속). 성실 그 자체.'}));
+  c2.push(hd('수다왕'),h('p',{class:'np-body',text:p.topTalk?((S.profiles[p.topTalk[0]]||{}).name||'누군가')+' — 하루 '+p.topTalk[1]+'마디. 입이 쉬질 않았다는 후문.':'어제는 수다왕 후보가 없었다. 오늘 왕관의 주인은?'}));
+  c2.push(hd('게시판 새 소식'),p.posts.length?npList(p.posts.slice(0,4).map(x=>x[0]+': "'+x[1]+'"')):h('p',{class:'np-body dim',text:'게시판은 11.19부터 열린다. 첫 메모의 주인공은 누구?'}));
+  pages.push([run(1),flag('Village','마을 소식'),nums,h('div',{class:'np-cols'},c2)]);
+  // ── A3 METRO & BUSINESS
+  const c3=[hd('BLOTTER · 사건사고','red')];
+  if(p.hits.length)c3.push(npList(p.hits.map(([r,n])=>nm(r)+' — 전차와 충돌 '+n+'회. "어질어질하다"며 자가 회복')),h('p',{class:'np-body dim',text:'※ 빌리지 병원은 12.07 개원 예정. 그전까진 알아서 회복해야 한다.'}));
+  else c3.push(h('p',{class:'np-body dc',text:'어제는 전차 무사고! 철길 위의 평화가 계속되고 있다. 다만 본지는 방심은 금물이라고 경고한다. 전차는 기다려주지 않는다.'}));
+  c3.push(hd('알바 소식'),h('p',{class:'np-body',text:p.jobs.length?'어제 알바한 소녀: '+p.jobs.map(nm).join(', ')+'. 마을이 한결 깨끗해졌다.':'어제는 알바한 사람이 없었다. 오늘의 알바를 노려보자.'}));
+  if(p.deco[0]&&p.deco[0][1]>0)c3.push(hd('인테리어 경쟁'),h('p',{class:'np-body',text:'가구 제일 많은 집: '+nm(p.deco[0][0])+'네 ('+p.deco[0][1]+'개). 집들이 언제 하나요?'}));
+  const mk=h('div',{class:'np-mkt'},h('div',{class:'np-mkt-h'},h('b',{text:'MARKETS'}),h('span',{text:'눈송이 시세 ❄'})),
+    p.rich.slice(0,6).map((r,i)=>h('div',{class:'np-mkt-r'},h('span',{text:(i+1)+'. '+nm(r)}),h('b',{text:'❄ '+(r[1].coins||0)}),h('i',{class:i<3?'up':'',text:i<3?'▲':'–'}))));
+  pages.push([run(2),flag('Metro & Business','사건 · 경제'),mk,h('div',{class:'np-cols'},c3)]);
+  // ── A4 OPINION & LIFE
+  const q=p.quote?h('blockquote',{class:'np-quote'},h('span',{text:'“'+p.quote.t+'”'}),h('small',{text:'— '+(p.quote.name||'익명')+', 수다방에서'})):h('p',{class:'np-body dim',text:'어제 수다방은 조용했다. 오늘의 명대사를 기다린다.'});
+  const tips=p.tips.length?p.tips.slice(0,4).map(t=>h('div',{class:'np-tip'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:'"'+t.t+'"'}),h('small',{text:'— 익명의 제보자'}))):[h('p',{class:'np-body dim',text:'가판대에서 익명 제보를 받고 있다. 사진도 환영. 제보는 다음 날 신문에 실린다.'})];
+  const c4=[hd('LETTERS · 익명 제보'),...tips,hd('HOROSCOPE · 오늘의 운세'),npList(p.res.map(r=>nm(r)+': '+FORTUNE[Math.floor(R()*FORTUNE.length)])),hd('WEATHER · 날씨'),h('p',{class:'np-body',text:wx[0]+' '+(lv>.7?'함박눈. 눈사람 만들기 딱 좋은 날':lv>.3?'눈발 날림. 목도리 필수':lv>0?'첫눈 예감. 하늘 자주 볼 것':'맑고 쌀쌀. 따뜻하게 입자')})];
+  const ad=ADS.slice().sort(()=>R()-.5).slice(0,4);
+  pages.push([run(3),flag('Opinion & Life','오피니언 · 생활'),hd('QUOTE OF THE DAY · 어제의 명대사'),q,h('div',{class:'np-cols'},c4),h('div',{class:'np-cls'},h('div',{class:'np-cls-h',text:'CLASSIFIEDS · 광고'}),h('div',{class:'np-ads'},ad.map(a=>h('div',{class:'np-ad'},h('b',{text:a[0]}),h('span',{text:a[1]}))))),h('div',{class:'np-end',text:'— 30 —'})]);
+  // ── BOOK (page flip)
+  const N=pages.length;let cur=0,busy=false;
+  const leaves=pages.map((c,i)=>{const sc=h('div',{class:'np-scroll'},c);const lf=h('div',{class:'np-leaf'+(i===0?' front':'')},sc,h('div',{class:'np-shade'}),i<N-1?h('button',{class:'np-curl','aria-label':'다음 면',onclick:()=>go(cur+1)}):null);lf.style.zIndex=N-i;lf._sc=sc;return lf;});
+  const stage=h('div',{class:'np-stage'},leaves);
+  const lab=h('span',{class:'np-pg'});const pv=h('button',{class:'np-nb',text:'‹','aria-label':'이전 면',onclick:()=>go(cur-1)}),nx=h('button',{class:'np-nb',text:'›','aria-label':'다음 면',onclick:()=>go(cur+1)});
+  const dots=h('div',{class:'np-dots'},SEC.map((s,i)=>h('i',{onclick:()=>go(i)})));
+  const upd=()=>{lab.textContent=SEC[cur][0]+' · '+SEC[cur][1];pv.disabled=cur===0;nx.disabled=cur===N-1;dots.querySelectorAll('i').forEach((d,j)=>d.classList.toggle('on',j===cur));};
+  go=t=>{if(busy||t<0||t>=N||t===cur)return;busy=true;sfx('paper');
+    if(t>cur){for(let i=cur;i<t;i++){const L=leaves[i];setTimeout(()=>L.classList.add('turned'),(i-cur)*130);}}
+    else{for(let i=cur-1;i>=t;i--){const L=leaves[i];L._sc.scrollTop=0;setTimeout(()=>L.classList.remove('turned'),(cur-1-i)*130);}}
+    leaves[t]._sc.scrollTop=0;cur=t;upd();setTimeout(()=>{busy=false;},760+Math.abs(t-cur)*130);};
+  let sx=0,sy=0,st=0;stage.addEventListener('touchstart',e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;st=Date.now();},{passive:true});
+  stage.addEventListener('touchend',e=>{const t=e.changedTouches[0];const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.4&&Date.now()-st<800)go(cur+(dx<0?1:-1));},{passive:true});
+  const nav=h('div',{class:'np-nav'},pv,h('div',{class:'np-navc'},lab,dots),nx);
   const foot=[];
   if(opt.preview&&isAdmin()){const hi=h('input',{class:'txt',value:p.head,placeholder:'헤드라인 직접 쓰기'});const si=h('input',{class:'txt',value:p.sub,placeholder:'부제'});
     foot.push(h('div',{class:'np-admin'},h('b',{text:'🛠️ 관리자 · '+(p.doc.pub?'발행됨 ✅':'아직 미발행')}),hi,si,h('button',{class:'btn-g',onclick:async()=>{await publishPaper(p.k,{head:hi.value.trim()||null,sub:si.value.trim()||null,pub:true});toast('📰 발행 완료! 친구들한테 알림이 가');closeModal();},text:p.doc.pub?'수정해서 다시 발행':'📰 발행하기'})));}
-  modal([h('div',{class:'np'},mast,tabs,body,...foot)]);show(0);
+  const v=modal([h('div',{class:'np'},h('div',{class:'np-top'},h('span',{text:'📰 빌리지 데일리 No.'+p.no+(opt.preview?' · 미리보기':'')}),h('button',{class:'np-x','aria-label':'닫기',onclick:closeModal,text:'✕'})),stage,nav,...foot)]);const pn=v.querySelector('.panel');if(pn)pn.classList.add('np-sheet');v.classList.add('np-veil');upd();
   try{localStorage.setItem('pv6_daily_read',p.k);}catch(e){}}
 async function publishPaper(k,patch){const cur=await paperDoc(k)||{};const d=Object.assign({},cur,patch,{ts:Date.now()});Object.keys(d).forEach(x=>{if(d[x]==null)delete d[x];});
   if(S.db&&!S.solo){await S.db.doc(NS+'meta/daily_'+k).set(d);if(S.room)S.room.emit('notice',{t:'📰',daily:k,scene:'*'}).catch(()=>{});}else{S._paperLocal=S._paperLocal||{};S._paperLocal[k]=d;}}
