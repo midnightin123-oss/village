@@ -757,6 +757,13 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important}
 @media (prefers-reduced-motion:reduce){.np-leaf{transition-duration:.2s}.np-curl{animation:none}}
 .tip-pv{min-height:40px;border:2px dashed #C9A97E;border-radius:10px;margin-top:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8A6A4E;overflow:hidden}.tip-pv img{width:100%;max-height:200px;object-fit:cover}
 .joinalert.daily{background:#F3EAD2;border-color:#1E1A14}
+
+.tipbox{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.tipbox-day>b{display:block;font-size:12px;color:#8A6A4E;border-bottom:2px solid #E3D0A8;padding-bottom:3px;margin-bottom:6px}
+.tipbox-it{background:#FFFDF6;border:2px solid #E3D0A8;border-radius:10px;padding:7px 9px;margin-bottom:6px}
+.tipbox-it img{width:100%;max-height:200px;object-fit:cover;border-radius:6px;display:block;margin-bottom:5px}
+.tipbox-it p{margin:0;font-size:13px;line-height:1.5;word-break:break-all}
+.tipbox-it small{font-size:10px;color:#8A6A4E}
 </style>
 </head>
 <body>
@@ -1039,6 +1046,7 @@ function adminMenu(){const test=!!S.testDay;const sel=h('select',{class:'txt'});
       sel,h('button',{class:test?'btn-c':'btn-g',onclick:()=>setMode(sel.value),text:test?'이 날짜로 바꾸기':'테스트 모드 들어가기'}),
       test?h('button',{class:'btn-c',onclick:()=>{lsSet(sbKey(),{});lsSet('pv6_opened_t',[]);setMode(S.testDay);toast('🧹 테스트 기록 싹 지우기!');},text:'🧹 테스트 기록 싹 지우기'}):null),
     h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openPaper(todayKey(),{preview:true});},text:'📰 오늘 빌리지 데일리 미리보기 · 발행'}),
+    h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>{closeModal();openTipBox();},text:'📮 제보함 보기 (나만 보여)'}),
     window.__pvLogout?h('button',{class:'btn-c',style:{width:'100%',marginTop:'10px',height:'40px'},onclick:()=>window.__pvLogout(),text:'🔑 로그아웃 (다른 이름으로 들어가기)'}):null]);}
 function sbKey(){return 'pv6_sb_'+(S.uid||'local');}
 function composeMe(real){S.real=real||null;if(!real){S.me=null;return;}S.me=isTest()?migrate(Object.assign(JSON.parse(JSON.stringify(real)),{done:{},orns:[],tree:[],coins:30,room:{items:[],wall:'stripe',floor:'wood'},posts:[],sent:{},desk:{},snowman:null,cast:[],carouselSeen:0,wish:null,smashN:0,inv:[],wall:[],certs:[],workC:null,caseOk:0,culprit:null,solved:{},vase:[],picked:{},eveW:0,photo:null,quiz:[],votes:{},mani:null},lsGet(sbKey())||{})):real;}
@@ -2384,6 +2392,7 @@ function rerender(){if(S.scene==='writers')return enterWriters();if(S.scene==='v
 
 
 // ================= ATTENDANCE + 알바 =================
+function nextDay(k){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2)+1);return String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
 function prevDay(k){const d=new Date(2026,+k.slice(0,2)-1,+k.slice(2)-1);return String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
 async function checkAttendance(){const k=todayKey();if(!S.me||!S.me.name||k<'1116'||S._attK===k)return;S._attK=k;const a=S.me.att||{};if(a.last===k)return;
   const streak=a.last===prevDay(k)?(a.n||0)+1:1;const bonus=streak%3===0?5:0;await saveMe(Object.assign({att:{last:k,n:streak},coins:(S.me.coins||0)+5+bonus},logInc('att')));refreshCoins&&refreshCoins();
@@ -2534,7 +2543,7 @@ async function publishPaper(k,patch){const cur=await paperDoc(k)||{};const d=Obj
 async function openStand(){const k=todayKey();const doc=await paperDoc(k);const pub=doc&&doc.pub;const btn=(t,f,c)=>h('button',{class:c||'btn-c',style:{width:'100%',height:'48px',marginTop:'8px',fontSize:'15px'},onclick:f,text:t});const items=[];
   items.push(h('div',{style:{textAlign:'center'}},h('img',{src:IMG('v_newsstand'),alt:'',style:{width:'110px'}}),h('h2',{text:'📰 빌리지 데일리 가판대'}),h('p',{class:'small',text:k<DAILY_START?'창간호는 11.18에 나와요!':pub?'오늘 신문 나왔어요! 따끈따끈 🔥':'오늘 신문은 아직 인쇄 중… 🖨️'})));
   if(pub)items.push(btn('📰 오늘 신문 보기 (No.'+dailyNo(k)+')',()=>openPaper(k),'btn-g'));
-  if(isAdmin()&&k>=DAILY_START)items.push(btn('🛠️ 오늘 신문 미리보기 · 발행',()=>openPaper(k,{preview:true})));
+  if(isAdmin()&&k>=DAILY_START)items.push(btn('🛠️ 오늘 신문 미리보기 · 발행',()=>openPaper(k,{preview:true})));if(isAdmin())items.push(btn('📮 제보함 보기 (관리자)',()=>openTipBox()));
   items.push(btn('🗂️ 지난 신문',openArchive));
   items.push(btn('📮 익명 제보하기',openTip));
   modal(items);}
@@ -2547,6 +2556,14 @@ function openTip(){const fi=h('input',{type:'file',accept:'image/*',style:{displ
     h('button',{class:'btn-g',style:{width:'100%',height:'48px',marginTop:'8px'},onclick:async()=>{const t=ta.value.trim();if(!t&&!img){toast('제보 내용을 적어줘!');return;}const k=todayKey();const item={t:t||'(사진 제보)',img:img||null,ts:Date.now()};
       if(S.db&&!S.solo&&!isTest()){const ref=S.db.doc(NS+'meta/tip_'+k+'_'+myId());let list=[];try{const s=await ref.get();if(s.exists)list=(s.data().list||[]);}catch(e){}list=list.concat([item]).slice(-5);await ref.set({list});}else{S._tipsLocal=S._tipsLocal||{};(S._tipsLocal[k]=S._tipsLocal[k]||[]).push(item);}
       closeModal();sfx('paper');toast('📮 제보 접수! 내일 신문을 기대해 🤫');},text:'제보하기'})]);}
+async function openTipBox(){if(!isAdmin())return;modal([h('div',{class:'np-loading',text:'📮 제보함 여는 중…'})]);const days=[];let k=todayKey();for(let i=0;i<8&&k>='1115';i++){days.push(k);k=prevDay(k);}const out=[];
+  for(const d of days){let list=[];try{if(S.db&&!S.solo&&!isTest()){const snaps=await Promise.all(residents().map(([u])=>S.db.doc(NS+'meta/tip_'+d+'_'+u).get().catch(()=>null)));snaps.forEach(s=>{if(s&&s.exists)(s.data().list||[]).forEach(t=>list.push(t));});}else list=((S._tipsLocal||{})[d]||[]).slice();}catch(e){}
+    if(list.length)out.push([d,list.sort((a,b)=>(a.ts||0)-(b.ts||0))]);}
+  const hm=ts=>{if(!ts)return '';const x=new Date(ts);return String(x.getHours()).padStart(2,'0')+':'+String(x.getMinutes()).padStart(2,'0');};
+  const total=out.reduce((a,b)=>a+b[1].length,0);
+  modal([h('h2',{style:{textAlign:'center'},text:'📮 제보함 (관리자 전용)'}),h('p',{class:'small',style:{textAlign:'center'},text:'최근 8일 · 총 '+total+'건 · 제보한 날 다음 날 신문에 실려'}),
+    out.length?h('div',{class:'tipbox'},out.map(([d,list])=>h('div',{class:'tipbox-day'},h('b',{text:fmt(d)+' 제보 '+list.length+'건 → '+fmt(nextDay(d))+' 신문'+(nextDay(d)===todayKey()?' (오늘 신문)':nextDay(d)>todayKey()?' (내일 신문)':'')}),
+      list.map(t=>h('div',{class:'tipbox-it'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:t.t||''}),h('small',{text:hm(t.ts)})))))):h('p',{class:'small',style:{textAlign:'center',padding:'16px 0'},text:'아직 들어온 제보가 없어'})]);}
 async function dailyCheck(){const k=todayKey();if(k<DAILY_START||!S.me||!S.me.name)return;let read=null;try{read=localStorage.getItem('pv6_daily_read');}catch(e){}if(read===k||S._dailyNoted===k)return;const d=await paperDoc(k);if(!d||!d.pub)return;S._dailyNoted=k;dailyAlert(k);}
 function dailyAlert(k){const e=h('div',{class:'joinalert daily',role:'status'},h('span',{text:'📰 빌리지 데일리 No.'+dailyNo(k)+' 발행!'}),h('button',{class:'chip on',onclick:ev=>{ev.stopPropagation();e.remove();const go=()=>{const b=B.find(x=>x.id==='daily');goTo(b.cx,b.base+26,()=>openPaper(k));};if(S.scene!=='village')enterVillage(null,go);else go();},text:'가판대로 가기'}));joinStack().appendChild(e);sfx('ding');setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),600);},15000);}
 
@@ -2597,7 +2614,7 @@ async function boot(){app.innerHTML='';app.appendChild(h('div',{style:{position:
     room.on('act',m=>{if(m.isMe&&m.sameTab)return;const d=m.data||{};if(!d||d.scene!==sceneId())return;
       if(d.k==='drink')drinkAnim(m.peer,d.d);else if(d.k==='eat'&&ANJU[d.d])eatAnim(m.peer,d.d);else if(d.k==='pour'&&d.d&&d.d.seat)pourAnim2(m.peer,d.d.seat,d.d.d==='soju'?'soju':'beer');else if(ACT_FX[d.k])ACT_FX[d.k](m.peer,d.d);},()=>{});
     room.on('bell',m=>{if(m.isMe&&m.sameTab)return;bellBanner(m.data&&m.data.name);},()=>{});}}
-if(location.protocol==='file:'||location.hostname==='localhost')window.__pv={S,P,openPaper,openStand,openTip,publishPaper,tramHit,startJob,jobTick,openJob,checkAttendance,blockRects,openSay,updateOnline:()=>updateOnline(),adminMenu,setMode,bqEl,manittoOf:(u)=>manittoOf(u),saveMe:(x)=>saveMe(x),sendThing:(a,b,c)=>sendThing(a,b,c),mailCount:()=>mailCount(),myId:()=>myId(),pocketDetail,photoPick,openPocket2:()=>openPocket(),buildSnowman,openSay,syncPeers,peersInScene,sceneId,eveWait,letterFlow,wallPut,placeAtDoor,maniPost,viewThing,thSit,thSeats,thCamStart,thStageUp,thPerform,openPocket,bouquetFlow,certFlow,invAdd,enterRoom:(u)=>enterRoom(u),wTake,sitDown,lightCheer,toss,enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),goTo:(x,y)=>goTo(x,y),enterGallery,enterPolice,enterStudio,rankFlow,caseFlow,runwayFlow,partyFlow,enterFlower,enterPost,enterGift,enterBooks,enterClinic,enterTownhall,openMailbox,quizWrite,quizShelf,giftFlow,clinicFlow,callTram,rideTram,treeLighting,enterTheater,enterCarousel,enterCafe,enterDiner,openBoardUI,openVote,enterVillage,openCafeMenu,openDinerMenu,buyDrink,orderFood,crackCookie,showOpening,showInvite,showCreate,showTicket,showGuide,playCut,arrive,get SC(){return SC},sitDown,leaveSeat,wTake,startHang,hangTap,completeDay};
+if(location.protocol==='file:'||location.hostname==='localhost')window.__pv={S,P,openPaper,openStand,openTip,openTipBox,publishPaper,tramHit,startJob,jobTick,openJob,checkAttendance,blockRects,openSay,updateOnline:()=>updateOnline(),adminMenu,setMode,bqEl,manittoOf:(u)=>manittoOf(u),saveMe:(x)=>saveMe(x),sendThing:(a,b,c)=>sendThing(a,b,c),mailCount:()=>mailCount(),myId:()=>myId(),pocketDetail,photoPick,openPocket2:()=>openPocket(),buildSnowman,openSay,syncPeers,peersInScene,sceneId,eveWait,letterFlow,wallPut,placeAtDoor,maniPost,viewThing,thSit,thSeats,thCamStart,thStageUp,thPerform,openPocket,bouquetFlow,certFlow,invAdd,enterRoom:(u)=>enterRoom(u),wTake,sitDown,lightCheer,toss,enterPub:()=>enterPub(),enterWriters:()=>enterWriters(),goTo:(x,y)=>goTo(x,y),enterGallery,enterPolice,enterStudio,rankFlow,caseFlow,runwayFlow,partyFlow,enterFlower,enterPost,enterGift,enterBooks,enterClinic,enterTownhall,openMailbox,quizWrite,quizShelf,giftFlow,clinicFlow,callTram,rideTram,treeLighting,enterTheater,enterCarousel,enterCafe,enterDiner,openBoardUI,openVote,enterVillage,openCafeMenu,openDinerMenu,buyDrink,orderFood,crackCookie,showOpening,showInvite,showCreate,showTicket,showGuide,playCut,arrive,get SC(){return SC},sitDown,leaveSeat,wTake,startHang,hangTap,completeDay};
 boot();
 })();
 
