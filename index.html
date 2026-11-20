@@ -1043,6 +1043,9 @@ const FURN={
  x_tree:['크리스마스 트리',0,'1210',64,1.371,'floor',28],x_fire:['벽난로 (X-mas)',0,'1210',80,.979,'floor',36],x_gifts:['선물 더미',0,'1210',54,.914,'floor',24],x_window:['눈 오는 창문',0,'1210',60,.927,'wall'],x_lights:['전구 가랜드',0,'1210',100,.347,'wall'],x_wreath:['리스',0,'1210',40,1.036,'wall'],x_chair:['체크 안락의자',0,'1210',56,.943,'floor',34],x_ginger:['진저브레드 하우스',0,'1210',40,1.15,'floor',20],x_nut:['호두까기 인형',0,'1210',24,2.319,'floor',12],x_globe:['스노우볼',0,'1210',32,1.252,'floor',14],x_mistle:['겨우살이',0,'1210',34,1.182,'wall'],x_rug:['눈꽃 러그',0,'1210',110,.574,'flat']};
 const WALLS={stripe:'줄무늬',flower:'꽃무늬',brick:'벽돌',xred:'홀리 레드',xstripe:'진저 스트라이프'},FLOORS={wood:'원목',checker:'체크 타일',xplaid:'타탄 카펫',xparquet:'스노우 파케이'};
 const XWF={xred:1,xstripe:1,xplaid:1,xparquet:1};const XUNLOCK='1210';
+// 크리스마스 한정: 날짜를 적으면 그날부터 방 단장하기에 보임 (안 적으면 XUNLOCK부터)
+const XOPEN={};
+function xShown(k){return todayKey()>=(XOPEN[k]||XUNLOCK);}
 
 // ================= STATE =================
 const NS='v6_';const ADMINS=new Set(['u_vRuzy06Xt2ds2Ma6lxU3hw']);const ADMIN_KEY='ehyun-b7702125';function adminKeyOk(){try{const q=new URLSearchParams(location.search).get('admin');if(q){localStorage.setItem('pv6_admin',q);}return localStorage.getItem('pv6_admin')===ADMIN_KEY;}catch(e){return false;}}const _AK=adminKeyOk();function isAdmin(){return S.solo||ADMINS.has(S.uid)||_AK;}function adminHidden(){return isAdmin()&&isTest();}const S={uid:null,db:null,room:null,solo:false,me:null,profiles:{},peers:[],testDay:null,scene:'loading',arg:null,editRoom:false,sel:null,seat:null,drink:null,lvl:0,pubTables:{},chat:[]};
@@ -2048,11 +2051,11 @@ function editPanel(items,redraw,owner){let tab=editPanel.tab||'furn';
   wrap.appendChild(tabs);
   const room=Object.assign({},S.me.room||{});
   if(tab==='wall'||tab==='floor'){const opts=tab==='wall'?WALLS:FLOORS;const g=h('div',{style:{display:'flex',gap:'10px',flexWrap:'wrap'}});
-    for(const k in opts){const xl=XWF[k]&&todayKey()<XUNLOCK;g.appendChild(h('button',{class:'btn-c'+(xl?' xlock':''),disabled:xl,style:{display:'flex',flexDirection:'column',alignItems:'center',gap:'4px',padding:'6px',borderRadius:'12px',outline:(room[tab]||(tab==='wall'?'stripe':'wood'))===k?'3px solid #D9483B':'none'},onclick:()=>{room[tab]=k;room.items=items.map(x=>Object.assign({},x));S.me.room=room;saveMe({room});S.editRoom=true;enterRoom(owner);}},
+    for(const k in opts){if(XWF[k]&&!xShown(k))continue;const xl=XWF[k]&&todayKey()<XUNLOCK;g.appendChild(h('button',{class:'btn-c'+(xl?' xlock':''),disabled:xl,style:{display:'flex',flexDirection:'column',alignItems:'center',gap:'4px',padding:'6px',borderRadius:'12px',outline:(room[tab]||(tab==='wall'?'stripe':'wood'))===k?'3px solid #D9483B':'none'},onclick:()=>{room[tab]=k;room.items=items.map(x=>Object.assign({},x));S.me.room=room;saveMe({room});S.editRoom=true;enterRoom(owner);}},
       h('div',{class:'xsw',style:{width:'60px',height:'44px',borderRadius:'8px',border:'2px solid #5A3A22',backgroundImage:'url('+IMG('t_'+k)+')',backgroundSize:'60px'}}),h('span',{style:{fontSize:'11px'},text:xl?'🎄 '+fmt(XUNLOCK)+' 공개':(XWF[k]?'🎄 ':'')+opts[k]})));}
     wrap.appendChild(g);}
   else{const shop=h('div',{class:'shop'});
-    const _reg=Object.keys(FURN).filter(k=>!FURN[k][2]);for(const k in FURN){const f=FURN[k];const [n,price,unlock]=f;const preL=!unlock&&todayKey()<'1119'&&_reg.indexOf(k)%2===1;if(preL){shop.appendChild(h('button',{disabled:true},h('span',{class:'badge',text:'11.19 입고'}),h('img',{class:'it xsil',src:IMG('f_'+k),alt:''}),h('span',{text:n}),h('span',{class:'small',style:{fontSize:'9px'},text:'정식 오픈 때 입고'})));continue;}const locked=unlock&&todayKey()<unlock;
+    const _reg=Object.keys(FURN).filter(k=>!FURN[k][2]);for(const k in FURN){const f=FURN[k];const [n,price,unlock]=f;const preL=!unlock&&todayKey()<'1119'&&_reg.indexOf(k)%2===1;if(preL){shop.appendChild(h('button',{disabled:true},h('span',{class:'badge',text:'11.19 입고'}),h('img',{class:'it xsil',src:IMG('f_'+k),alt:''}),h('span',{text:n}),h('span',{class:'small',style:{fontSize:'9px'},text:'정식 오픈 때 입고'})));continue;}if(unlock&&!xShown(k))continue;const locked=unlock&&todayKey()<unlock;
       shop.appendChild(h('button',{disabled:locked||(!unlock&&(S.me.coins||0)<price),onclick:()=>{if(items.length>=24){toast('가구는 24개까지!');return;}
         const wall=f[5]==='wall';items.push({k,x:Math.round(80+Math.random()*360),y:wall?100:Math.round(ROOM.wallH+60+Math.random()*180)});S.sel=items.length-1;track('furn');
         S.me.room=Object.assign({},S.me.room||{},{items:items.map(x=>Object.assign({},x))});saveMe({room:S.me.room,coins:(S.me.coins||0)-(unlock?0:price)}).then(()=>missionEvent('furn'));redraw();refreshCoins();wrap.replaceWith(editPanel(items,redraw,owner));}},
@@ -2833,14 +2836,19 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   try{localStorage.setItem('pv6_daily_read',p.k);}catch(e){}}
 async function publishPaper(k,patch){const cur=await paperDoc(k)||{};const d=Object.assign({},cur,patch,{ts:Date.now()});Object.keys(d).forEach(x=>{if(d[x]==null)delete d[x];});
   if(S.db&&!S.solo){await S.db.doc(NS+'meta/daily_'+k).set(d);if(patch.pub&&k<=realKey()&&S.room)S.room.emit('notice',{t:'📰',daily:k,scene:'*'}).catch(()=>{});}else{S._paperLocal=S._paperLocal||{};S._paperLocal[k]=d;}}
+const PAPER_PRICE=1,PAPER_PAID_FROM='1120';
+function paperOwned(k){return isAdmin()||k<PAPER_PAID_FROM||(S.me&&(S.me.papers||[]).includes(k));}
+function readPaper(k){if(paperOwned(k)){openPaper(k);return;}const c=S.me.coins||0;
+  modal([h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:'44px'},text:'📰'}),h('h2',{text:'빌리지 데일리 No.'+dailyNo(k)}),h('p',{class:'small',text:fmt(k)+' 신문 · 한 번 사면 계속 볼 수 있어'})),
+    h('button',{class:'btn-g',disabled:c<PAPER_PRICE,style:{width:'100%',height:'50px',fontSize:'16px'},onclick:async()=>{if((S.me.coins||0)<PAPER_PRICE){toast('눈송이가 모자라… 알바하고 와! 🥲');return;}const ps=(S.me.papers||[]).concat([k]).slice(-40);const ok=await saveMe({coins:(S.me.coins||0)-PAPER_PRICE,papers:ps});if(!ok)return;refreshCoins&&refreshCoins();sfx('paper');closeModal();openPaper(k);},text:c<PAPER_PRICE?'눈송이가 모자라 🥲':'❄ '+PAPER_PRICE+' 내고 사기'})]);}
 async function openStand(){const k=todayKey();const pub=k>=DAILY_START&&k<=realKey();const btn=(t,f,c)=>h('button',{class:c||'btn-c',style:{width:'100%',height:'48px',marginTop:'8px',fontSize:'15px'},onclick:f,text:t});const items=[];
   items.push(h('div',{style:{textAlign:'center'}},h('img',{src:IMG('v_newsstand'),alt:'',style:{width:'110px'}}),h('h2',{text:'📰 빌리지 데일리 가판대'}),h('p',{class:'small',text:k<DAILY_START?'창간호는 11.18에 나와요!':pub?'오늘 신문 나왔어요! 따끈따끈 🔥':'오늘 신문은 아직 인쇄 중… 🖨️'})));
-  if(pub)items.push(btn('📰 오늘 신문 보기 (No.'+dailyNo(k)+')',()=>openPaper(k),'btn-g'));
+  if(pub)items.push(btn('📰 오늘 신문 '+(paperOwned(k)?'보기':'사기 · ❄'+PAPER_PRICE)+' (No.'+dailyNo(k)+')',()=>readPaper(k),'btn-g'));
   items.push(btn('🗂️ 지난 신문',openArchive));
   items.push(btn('📮 익명 제보하기',openTip));
   modal(items);}
 async function openArchive(){const out=[];for(let k=todayKey();k>=DAILY_START;k=prevDay(k)){if(k===todayKey())continue;out.push(k);if(out.length>30)break;}
-  modal([h('h2',{style:{textAlign:'center'},text:'🗂️ 지난 신문'}),out.length?h('div',{class:'mb-list'},out.map(k=>h('button',{class:'mb-it',style:{width:'100%'},onclick:()=>openPaper(k)},h('b',{text:'📰 No.'+dailyNo(k)}),h('span',{text:' '+kDate(k)})))):h('p',{class:'small',style:{textAlign:'center',padding:'14px 0'},text:'아직 지난 신문이 없어요'})]);}
+  modal([h('h2',{style:{textAlign:'center'},text:'🗂️ 지난 신문'}),out.length?h('div',{class:'mb-list'},out.map(k=>h('button',{class:'mb-it',style:{width:'100%'},onclick:()=>readPaper(k)},h('b',{text:'📰 No.'+dailyNo(k)}),h('span',{text:' '+kDate(k)})))):h('p',{class:'small',style:{textAlign:'center',padding:'14px 0'},text:'아직 지난 신문이 없어요'})]);}
 function openTip(){const fi=h('input',{type:'file',accept:'image/*',style:{display:'none'}});let img=null;const pv=h('div',{class:'tip-pv',text:'📷 사진은 선택이야'});
   fi.onchange=async()=>{const f=fi.files&&fi.files[0];if(!f)return;try{img=await shrinkPhoto(f,360);pv.replaceChildren(h('img',{src:img,alt:''}));}catch(e){toast('사진을 못 읽었어');}};
   const ta=h('textarea',{class:'txt',rows:'3',maxlength:'100',placeholder:'예: 오늘 펍에서 누가 혼자 짠 하는 걸 봤다는 제보가…',style:{resize:'none'}});
@@ -2858,7 +2866,7 @@ async function openTipBox(_re){if(!isAdmin())return;if(!_re)modal([h('div',{clas
       list.map(t=>h('div',{class:'tipbox-it'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:t.t||''}),h('small',{text:hm(t.ts)})))))):h('p',{class:'small',style:{textAlign:'center',padding:'16px 0'},text:'아직 들어온 제보가 없어'})]);
   if(!_re&&out.some(([d,l])=>l.some(t=>t.img&&String(t.img).startsWith('blob:')===false&&String(t.img).length<200)))setTimeout(()=>{if(app.querySelector('.tipbox'))openTipBox(1);},1800);}
 async function dailyCheck(){const k=todayKey();if(k<DAILY_START||!S.me||!S.me.name)return;let read=null;try{read=localStorage.getItem('pv6_daily_read');}catch(e){}if(read===k||S._dailyNoted===k||k>realKey())return;S._dailyNoted=k;dailyAlert(k);}
-function dailyAlert(k){const e=h('div',{class:'joinalert daily',role:'status'},h('span',{text:'📰 빌리지 데일리 No.'+dailyNo(k)+' 발행!'}),h('button',{class:'chip on',onclick:ev=>{ev.stopPropagation();e.remove();const go=()=>{const b=B.find(x=>x.id==='daily');goTo(b.cx,b.base+26,()=>openPaper(k));};if(S.scene!=='village')enterVillage(null,go);else go();},text:'가판대로 가기'}));joinStack().appendChild(e);sfx('ding');setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),600);},15000);}
+function dailyAlert(k){const e=h('div',{class:'joinalert daily',role:'status'},h('span',{text:'📰 빌리지 데일리 No.'+dailyNo(k)+' 발행!'}),h('button',{class:'chip on',onclick:ev=>{ev.stopPropagation();e.remove();const go=()=>{const b=B.find(x=>x.id==='daily');goTo(b.cx,b.base+26,()=>readPaper(k));};if(S.scene!=='village')enterVillage(null,go);else go();},text:'가판대로 가기'}));joinStack().appendChild(e);sfx('ding');setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),600);},15000);}
 
 // ================= ONLINE BAR + JOIN ALERTS =================
 const SCENE_NM={village:'🏘️ 마을',pub:'🍻 펍',writers:'✍️ 회의실',cafe:'☕ 카페',diner:'🍲 식당',flower:'💐 꽃집',post:'📮 우체국',gift:'🎁 선물가게',books:'📚 서점',clinic:'🏥 병원',townhall:'🏛️ 시청',theater:'🎤 공연장',studio:'🕺 연습실',police:'🚨 경찰서',gallery:'🖼️ 미술관',create:'🎨 캐릭터 꾸미는 중',opening:'💌 초대장 읽는 중'};
@@ -2912,7 +2920,7 @@ boot();
 })();
 
 </script>
-<script>window.PV_BUILD='1795097184';(function(){var busy=false;function go(b){try{if(sessionStorage.getItem('pv_rl_'+b))return false;sessionStorage.setItem('pv_rl_'+b,'1');}catch(e){}var u=new URL(location.href);u.searchParams.set('_v',b);location.replace(u.toString());return true;}
+<script>window.PV_BUILD='1795136435';(function(){var busy=false;function go(b){try{if(sessionStorage.getItem('pv_rl_'+b))return false;sessionStorage.setItem('pv_rl_'+b,'1');}catch(e){}var u=new URL(location.href);u.searchParams.set('_v',b);location.replace(u.toString());return true;}
 function banner(b){if(document.getElementById('pvupd'))return;var d=document.createElement('button');d.id='pvupd';d.textContent='🆕 새 버전이 나왔어! 눌러서 새로고침';d.style.cssText='position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);transform:translateX(-50%);z-index:99999;background:#3E8E41;color:#fff;border:0;border-radius:20px;padding:9px 16px;font-weight:800;font-size:13px;box-shadow:0 3px 0 rgba(0,0,0,.3)';d.onclick=function(){try{sessionStorage.removeItem('pv_rl_'+b);}catch(e){}go(b);};document.body.appendChild(d);}
 function chk(auto){if(busy)return;busy=true;fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(v){busy=false;if(!v||!v.b||v.b===window.PV_BUILD)return;if(auto&&!document.querySelector('.veil')){if(go(v.b))return;}banner(v.b);}).catch(function(){busy=false;});}
 setTimeout(function(){chk(true);},2500);setInterval(function(){chk(false);},180000);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')chk(true);});})();</script></body>
