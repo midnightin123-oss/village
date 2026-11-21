@@ -2805,7 +2805,8 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
   }
   const mk=h('div',{class:'np-mkt'},h('div',{class:'np-mkt-h'},h('b',{text:'MARKETS'}),h('span',{text:'눈송이 시세 ❄'})),
     p.rich.slice(0,6).map((r,i)=>h('div',{class:'np-mkt-r'},h('span',{text:(i+1)+'. '+nm(r)}),h('b',{text:'❄ '+(r[1].coins||0)}),h('i',{class:i<3?'up':'',text:i<3?'▲':'–'}))));
-  pages.push([run(2),flag('Metro & Business','사건 · 경제'),mk,h('div',{class:'np-cols'},c3)]);
+  const ex=p.doc.extra&&p.doc.extra.head?p.doc.extra:null;const exEl=ex?h('div',{class:'np-feat'},h('div',{class:'np-feat-k',text:'BUSINESS · '+(ex.kicker||'경제')}),h('h2',{class:'np-feat-h',text:ex.head}),String(ex.body||'').split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean).map((s,n)=>h('p',{class:'np-body'+(n===0?' dc':'')},rich(s)))):null;
+  pages.push([run(2),flag('Metro & Business','사건 · 경제'),exEl,mk,h('div',{class:'np-cols'},c3)]);
   // ── A4 OPINION & LIFE
   const q=p.quote?h('blockquote',{class:'np-quote'},h('span',{text:'“'+p.quote.t+'”'}),h('small',{text:'— '+(p.quote.name||'익명')+(p.quote.ctx?', '+p.quote.ctx:', 수다방에서')})):h('p',{class:'np-body dim',text:'어제 수다방은 조용했다. 오늘의 명대사를 기다린다.'});
   const usedTs=new Set(((sc&&sc.pics)||[]).map(x=>x.ts));const lt=p.tips.filter(t=>!usedTs.has(t.ts));const tips=lt.length?lt.slice(0,4).map(t=>h('div',{class:'np-tip'},t.img?h('img',{src:t.img,alt:'제보 사진'}):null,h('p',{text:'"'+t.t+'"'}),h('small',{text:'— 익명의 제보자'}))):[h('p',{class:'np-body dim',text:(sc?'오늘의 제보는 1면 특종으로 실렸다. ':'')+'가판대에서 익명 제보를 받고 있다. 사진도 환영. 제보는 다음 날 신문에 실린다.'})];
@@ -2834,8 +2835,10 @@ async function openPaper(k,opt){opt=opt||{};npFonts();const loading=h('div',{cla
     const ord=(s0.pics||[]).map(x=>x.ts);const rk=t=>{const i=ord.indexOf(t.ts);return i<0?99:i;};const picRows=p.tips.filter(t=>t.img).sort((a,b)=>rk(a)-rk(b)).map(t=>{const cb=h('input',{type:'checkbox'});cb.checked=t.ts in pm;const ci=h('input',{class:'txt',value:pm[t.ts]||'',placeholder:'사진 설명'});return {t,cb,ci,el:h('div',{class:'np-ed-pic'},h('img',{src:t.img,alt:''}),h('div',{},h('label',{},cb,document.createTextNode(' 1면에 싣기')),h('small',{text:(t.t||'').slice(0,40)}),ci))};});
     const ed=h('div',{class:'np-ed'},h('label',{class:'np-ed-on'},son,document.createTextNode(' 🗞️ 1면을 특종 기사로 쓰기')),ki,bi,picRows.length?h('small',{text:'제보 사진 (최대 2장 · 고른 순서대로 증거 A, B)'}):h('small',{text:'사진 있는 제보가 없어'}),picRows.map(r=>r.el));
     const q0=p.doc.quote||{};const qt=h('input',{class:'txt',value:q0.t||'',placeholder:'명대사 직접 고르기 (비우면 자동)'});const qn=h('input',{class:'txt',value:q0.name||'',placeholder:'누가 했는지'});const qc=h('input',{class:'txt',value:q0.ctx||'',placeholder:'상황 (예: 화분 3개 산 이유를 묻자)'});
+    const x0=p.doc.extra||{};const xh=h('input',{class:'txt',value:x0.head||'',placeholder:'3면 경제 기사 제목 (비우면 안 실림)'});const xb=h('textarea',{class:'txt',rows:'5',placeholder:'3면 기사 본문 · 문단 사이 한 줄 띄우기 · **굵게**',style:{resize:'vertical',fontSize:'14px'}});xb.value=x0.body||'';
+    ed.appendChild(h('small',{text:'📈 3면 경제 기사 (추가)'}));ed.appendChild(xh);ed.appendChild(xb);
     ed.appendChild(h('small',{text:'💬 어제의 명대사 (4면)'}));ed.appendChild(qt);ed.appendChild(qn);ed.appendChild(qc);
-    const collect=()=>({quote:qt.value.trim()?{t:qt.value.trim(),name:qn.value.trim(),ctx:qc.value.trim()}:null,head:hi.value.trim()||null,sub:si.value.trim()||null,scoop:{on:son.checked,kicker:ki.value.trim()||'단독',body:bi.value,pics:picRows.filter(r=>r.cb.checked).slice(0,2).map(r=>({ts:r.t.ts,cap:r.ci.value.trim()}))}});
+    const collect=()=>({extra:xh.value.trim()?{head:xh.value.trim(),body:xb.value}:null,quote:qt.value.trim()?{t:qt.value.trim(),name:qn.value.trim(),ctx:qc.value.trim()}:null,head:hi.value.trim()||null,sub:si.value.trim()||null,scoop:{on:son.checked,kicker:ki.value.trim()||'단독',body:bi.value,pics:picRows.filter(r=>r.cb.checked).slice(0,2).map(r=>({ts:r.t.ts,cap:r.ci.value.trim()}))}});
     const future=p.k>realKey();
     foot.push(h('div',{class:'np-admin'},h('b',{text:'🛠️ 관리자 · '+fmt(p.k)+' 신문 · '+(p.doc.pub?'발행 확정 ✅':future?'미확정 · 0시에 자동 발행돼':'자동 발행됨 ✅')}),hi,si,ed,
       h('button',{class:'btn-c',style:{height:'42px'},onclick:async()=>{await publishPaper(p.k,Object.assign(collect(),{pub:!!p.doc.pub}));toast('💾 저장했어! 다시 보여줄게');openPaper(p.k,{preview:true});},text:'💾 저장하고 다시 보기 (발행 안 함)'}),
@@ -2928,7 +2931,7 @@ boot();
 })();
 
 </script>
-<script>window.PV_BUILD='1795168532';(function(){var busy=false;function go(b){try{if(sessionStorage.getItem('pv_rl_'+b))return false;sessionStorage.setItem('pv_rl_'+b,'1');}catch(e){}var u=new URL(location.href);u.searchParams.set('_v',b);location.replace(u.toString());return true;}
+<script>window.PV_BUILD='1795270764';(function(){var busy=false;function go(b){try{if(sessionStorage.getItem('pv_rl_'+b))return false;sessionStorage.setItem('pv_rl_'+b,'1');}catch(e){}var u=new URL(location.href);u.searchParams.set('_v',b);location.replace(u.toString());return true;}
 function banner(b){if(document.getElementById('pvupd'))return;var d=document.createElement('button');d.id='pvupd';d.textContent='🆕 새 버전이 나왔어! 눌러서 새로고침';d.style.cssText='position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);transform:translateX(-50%);z-index:99999;background:#3E8E41;color:#fff;border:0;border-radius:20px;padding:9px 16px;font-weight:800;font-size:13px;box-shadow:0 3px 0 rgba(0,0,0,.3)';d.onclick=function(){try{sessionStorage.removeItem('pv_rl_'+b);}catch(e){}go(b);};document.body.appendChild(d);}
 function chk(auto){if(busy)return;busy=true;fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(v){busy=false;if(!v||!v.b||v.b===window.PV_BUILD)return;if(auto&&!document.querySelector('.veil')){if(go(v.b))return;}banner(v.b);}).catch(function(){busy=false;});}
 setTimeout(function(){chk(true);},2500);setInterval(function(){chk(false);},180000);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')chk(true);});})();</script></body>
